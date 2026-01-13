@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { refreshTokens } from "../../../../AI-Image-Caption-Generator/Backend/src/controllers/user.controller.js";
 import { Address } from "../models/address.model.js";
 import { User } from "../models/user.model.js";
@@ -5,6 +6,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { uploadToCloudinary } from "../utils/cloudinary.js";
+import { InvoiceNum } from "../models/invoiceNum.model.js";
 
 // Utility Functions
 const generateAccessAndRefreshToken = async (userOrId) => {
@@ -61,43 +63,64 @@ export const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "All fields are required");
 
   const existingUser = await User.findOne({
-    $or: [{ userName:userName?.trim().tolowerCase() }, { email:email?.trim().tolowerCase() }],
+    $or: [
+      { userName: userName?.trim().tolowerCase() },
+      { email: email?.trim().tolowerCase() },
+    ],
   });
   if (existingUser) throw new ApiError(400, "User Already Exists");
 
-  let address = await Address.findOne({
-    landmark,
-    street,
-    area,
-    city,
-    country,
-  });
-  if (!address) {
-    address = await Address.create({
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    let address = await Address.findOne({
       landmark,
       street,
       area,
       city,
       country,
     });
+    if (!address) {
+      address = await Address.create({
+        landmark,
+        street,
+        area,
+        city,
+        country,
+      });
+    }
+    const newUser = await User.create({
+      userName,
+      businessName,
+      email,
+      password,
+      address: address._id,
+    });
+    if (!newUser) throw new ApiError(500, "User Registration Failed");
+
+    const invNum = await InvoiceNum.create({
+      key: "Invoice",
+      inv_num: 0,
+    });
+    if (!invNum) throw new ApiError(500, "Unable to create Invoice Number");
+
+    const user = await User.findById(newUser?._id).select(
+      "-password -refreshToken"
+    );
+    if (!user) throw new ApiError(500, "User Registration Failed");
+
+    await session.commitTransaction();
+    session.endSession();
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, "User Registered Successfully", user));
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    throw error;
   }
-  const newUser = await User.create({
-    userName,
-    businessName,
-    email,
-    password,
-    address: address._id,
-  });
-  if (!newUser) throw new ApiError(500, "User Registration Failed");
-
-  const user = await User.findById(newUser?._id).select(
-    "-password -refreshToken"
-  );
-  if (!user) throw new ApiError(500, "User Registration Failed");
-
-  return res
-    .status(200)
-    .json(new ApiResponse(200, "User Registered Successfully", user));
 });
 
 export const login = asyncHandler(async (req, res) => {
