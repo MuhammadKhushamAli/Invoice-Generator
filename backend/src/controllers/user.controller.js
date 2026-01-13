@@ -4,8 +4,12 @@ import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { uploadToCloudinary } from "../utils/cloudinary.js";
+import {
+  uploadToCloudinary,
+  deleteFromCloudinary,
+} from "../utils/cloudinary.js";
 import { InvoiceNum } from "../models/invoiceNum.model.js";
+import jwt from "jsonwebtoken";
 
 // Utility Functions
 const generateAccessAndRefreshToken = async (userOrId) => {
@@ -208,7 +212,7 @@ export const refreshTokens = asyncHandler(async (req, res) => {
   const token = req?.cookies?.refreshToken || req?.body?.refreshToken;
   if (!token) throw new ApiError(404, "Token Not Found");
 
-  const decodeToken = await jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
+  const decodeToken = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
   if (!decodeToken) throw new ApiError(500, "Invalid Token");
 
   const user = await User.findById(decodeToken?._id);
@@ -217,7 +221,8 @@ export const refreshTokens = asyncHandler(async (req, res) => {
   if (user?.refreshToken !== token)
     throw new ApiError(401, "Unauthorized Access");
 
-  const { refreshToken, accessToken } = generateAccessAndRefreshToken(user);
+  const { refreshToken, accessToken } =
+    await generateAccessAndRefreshToken(user);
 
   const options = {
     httpOnly: true,
@@ -274,44 +279,59 @@ export const setInvoiceLogoStampAndSign = asyncHandler(async (req, res) => {
   const stamp = req?.files["stamp"]?.[0]?.path;
   const sign = req?.files["sign"]?.[0]?.path;
 
-  if (!header || !footer) throw new ApiError(400, "All Fields Are Required");
+  if (!(logo && stamp && sign))
+    throw new ApiError(400, "All Fields Are Required");
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  let logoUrl = null;
+  let stampUrl = null;
+  let signUrl = null;
+  try {
+    logoUrl = await uploadToCloudinary(logo, {
+      transformation: [{ effect: "background_removal" }],
+      resource_type: "auto",
+    });
+    if (!logoUrl) throw new ApiError(500, "Error in Uploading Logo");
 
-  const logoUrl = await uploadToCloudinary(logo, {
-    background_removal: "cloudinary",
-    formate: "png",
-    resource_type: "auto",
-  });
-  if (!logoUrl) throw new ApiError(500, "Error in Uploading Logo");
-  const stampUrl = await uploadToCloudinary(stamp, {
-    background_removal: "cloudinary",
-    formate: "png",
-    resource_type: "auto",
-  });
-  if (!stampUrl) throw new ApiError(500, "Error in Uploading Stamp");
+    stampUrl = await uploadToCloudinary(stamp, {
+      transformation: [{ effect: "background_removal" }],
+      resource_type: "auto",
+    });
+    if (!stampUrl) throw new ApiError(500, "Error in Uploading Stamp");
 
-  const signUrl = await uploadToCloudinary(sign, {
-    background_removal: "cloudinary",
-    formate: "png",
-    resource_type: "auto",
-  });
-  if (!signUrl) throw new ApiError(500, "Error in Uploading Sign");
+    signUrl = await uploadToCloudinary(sign, {
+      transformation: [{ effect: "background_removal" }],
+      resource_type: "auto",
+    });
+    if (!signUrl) throw new ApiError(500, "Error in Uploading Sign");
 
-  await findByIdAndUpdate(req?.user?._id, {
-    $set: {
-      invoiceLogo: logoUrl?.url,
-      invoiceStamp: stampUrl?.url,
-      invoiceSign: signUrl?.url,
-    },
-  });
+    await User.findByIdAndUpdate(req?.user?._id, {
+      $set: {
+        invoiceLogo: logoUrl?.url,
+        invoiceStamp: stampUrl?.url,
+        invoiceSign: signUrl?.url,
+      },
+    });
 
-  return res
-    .status(200)
-    .json(
-      new ApiResponse(
-        200,
-        "Invoice's Logo, Stamp and Sign Successfully Updated"
-      )
-    );
+    await session.commitTransaction();
+    session.endSession();
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          "Invoice's Logo, Stamp and Sign Successfully Updated"
+        )
+      );
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    if (logoUrl) await deleteFromCloudinary(logoUrl?.url);
+    if (stampUrl) await deleteFromCloudinary(stampUrl?.url);
+    if (signUrl) await deleteFromCloudinary(signUrl?.url);
+    throw error;
+  }
 });
 
 export const getInvoices = asyncHandler(async (req, res) => {
@@ -319,7 +339,7 @@ export const getInvoices = asyncHandler(async (req, res) => {
   userId = userId?.trim();
   page = parseInt(page);
 
-  if (userId) throw new ApiError(400, "User ID must be required");
+  if (!userId) throw new ApiError(400, "User ID must be required");
   if (!isValidObjectId(userId)) throw new ApiError(400, "Invalid Object Id");
   if (page < 1) page = 1;
 

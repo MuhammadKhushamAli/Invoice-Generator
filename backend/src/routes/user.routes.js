@@ -19,7 +19,7 @@ router.route("/register-user").post(registerUser);
 router.route("/login").patch(login);
 
 router.route("/current-user").get(authentication, getCurrentUser);
-router.route("/set-invoice-header-and-footer").post(
+router.route("/set-invoice-credentials").patch(
     authentication,
     upload.fields([
         {

@@ -3,7 +3,8 @@ import { Item } from "../models/item.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { uploadToCloudinary } from "../utils/cloudinary.js";
+import { uploadToCloudinary, deleteFromCloudinary } from "../utils/cloudinary.js";
+import mongoose from "mongoose";
 
 export const addItem = asyncHandler(async (req, res) => {
   let { name, price, quantity } = req?.body;
@@ -25,25 +26,40 @@ export const addItem = asyncHandler(async (req, res) => {
   const item = await Item.findOne({ name });
   if (item) throw new ApiError(400, "Item already exists");
 
-  const imageUrl = await uploadToCloudinary(image);
-  if (!imageUrl)
-    throw new ApiError(500, "Unable to upload Image on Cloudinary");
+  let imageUrl = null;
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    imageUrl = await uploadToCloudinary(image);
+    if (!imageUrl)
+      throw new ApiError(500, "Unable to upload Image on Cloudinary");
+  
+    const newItem = await Item.create({
+      name,
+      price,
+      quantity,
+      image: imageUrl?.url,
+      owner: req?.user?._id,
+    });
+    if (!newItem) throw new ApiError(500, "Unable to Create Item");
+  
+    await session.commitTransaction();
+    session.endSession();
+  
 
-  const newItem = await Item.create({
-    name,
-    price,
-    image: imageUrl?.url,
-    owner: req?.user?._id,
-  });
-  if (!newItem) throw new ApiError(500, "Unable to Create Item");
-
-  return res
-    .status(200)
-    .json(new ApiResponse(200, "Item Successfully Created", newitem));
+    return res
+      .status(200)
+      .json(new ApiResponse(200, "Item Successfully Created", newItem));
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    if (imageUrl) await deleteFromCloudinary(imageUrl?.url);
+    throw error;
+  }
 });
 
 export const updateQuantity = asyncHandler(async (req, res) => {
-  let { itemId, quantity } = req?.body;
+  let { itemId, quantity } = req?.query;
   itemId = itemId?.trim();
 
   if (!isValidObjectId(itemId)) throw new ApiError(400, "Invalid Item Id");

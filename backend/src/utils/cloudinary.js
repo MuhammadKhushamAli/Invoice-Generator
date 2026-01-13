@@ -23,7 +23,7 @@ export async function uploadToCloudinary(filePath, specs = {resource_type: "auto
     return response;
   } catch (error) {
     fs.unlinkSync(filePath);
-    throw "Error in Uploading to CLoudinary";
+    throw `Error in Uploading to CLoudinary: ${error.message}`;
   }
 }
 
@@ -44,7 +44,7 @@ export const deleteFromCloudinary = async (URL) => {
     const result = await cloudinary.uploader.destroy(public_key_img);
 
     if (result.result !== "ok") return false;
-
+    console.log("File Deleted From Cloudinary");
     return true;
   } catch (error) {
     console.log(`Cloudinary Deletion Error ${error}`);
