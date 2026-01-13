@@ -38,6 +38,7 @@ export const registerUser = asyncHandler(async (req, res) => {
     userName,
     businessName,
     email,
+    phone_no,
     password,
     landmark,
     street,
@@ -51,6 +52,7 @@ export const registerUser = asyncHandler(async (req, res) => {
       userName,
       businessName,
       email,
+      phone_no,
       password,
       landmark,
       street,
@@ -60,6 +62,22 @@ export const registerUser = asyncHandler(async (req, res) => {
     ].some((field) => !field || field?.trim() === "")
   )
     throw new ApiError(400, "All fields are required");
+
+  if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email))
+    throw new ApiError(422, "Invalid Email Formate");
+
+  if (
+    !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(
+      password
+    )
+  )
+    throw new ApiError(
+      422,
+      "Invalid Password Formate. Password Must be at least 8 characters long and have at least one lowercase character, one uppercase character and one special character"
+    );
+
+  if (!/^\+?[1-9]\d{1,14}$/.test(phone_no))
+    throw new ApiError(422, "Invalid Phone No. Formate");
 
   const existingUser = await User.findOne({
     $or: [
@@ -93,6 +111,7 @@ export const registerUser = asyncHandler(async (req, res) => {
       userName,
       businessName,
       email,
+      phone_no,
       password,
       address: address._id,
     });
@@ -129,6 +148,19 @@ export const login = asyncHandler(async (req, res) => {
 
   if (!((email || userName) && password))
     throw new ApiError(400, "All fields are required");
+
+  if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email))
+    throw new ApiError(422, "Invalid Email Formate");
+  
+  if (
+    !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(
+      password
+    )
+  )
+    throw new ApiError(
+      422,
+      "Invalid Password Formate. Password Must be at least 8 characters long and have at least one lowercase character, one uppercase character and one special character"
+    );
 
   const user = await User.findOne({
     $or: [{ userName }, { email }],
@@ -274,7 +306,10 @@ export const setInvoiceLogoStampAndSign = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(
-      new ApiResponse(200, "Invoice's Logo, Stamp and Sign Successfully Updated")
+      new ApiResponse(
+        200,
+        "Invoice's Logo, Stamp and Sign Successfully Updated"
+      )
     );
 });
 

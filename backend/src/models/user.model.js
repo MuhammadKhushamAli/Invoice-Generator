@@ -30,6 +30,11 @@ const userSchema = new mongoose.Schema(
       trim: true,
       lowercase: true,
     },
+    phone_no: {
+        type: String,
+        required: [true, "Phone No. is required"],
+        unique:  true,
+    },
     address: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Address",
