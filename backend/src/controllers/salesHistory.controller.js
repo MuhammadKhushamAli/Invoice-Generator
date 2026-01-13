@@ -70,7 +70,7 @@ export const addSale = asyncHandler(async (req, res) => {
     if (!sale) throw new ApiError(500, "Sale Creation Failed");
 
     const itemsSoldDocs = await ItemsSold.insertMany(
-        // Item Info has _id, quantity, price which is of one piece entered by user
+      // Item Info has _id, quantity, price which is of one piece entered by user
       itemInfo?.map((item_) => ({
         item: item_?._id,
         quantity: item_?.quantity,
@@ -154,11 +154,14 @@ export const removeSale = asyncHandler(async (req, res) => {
   if (!sale?.isAuthorized(req?.user?._id))
     throw new ApiError(401, "Unauthorized Access");
 
+  let deletedCloudinaryInv = null;
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-    const itemsSold = await ItemsSold.deleteMany({ sale: saleId }, { session });
+    const itemsSold = (
+      await ItemsSold.deleteMany({ sale: saleId }, { session })
+    )[0];
     if (!itemsSold) throw new ApiError(500, "Itmes Record Cannot be Deleted");
 
     const deletedInv = Invoice.findOneAndDelete({ sale: saleId }, { session });
@@ -183,8 +186,13 @@ export const removeSale = asyncHandler(async (req, res) => {
     );
     if (!updatedUser) throw new ApiError(500, "User Update Failed");
 
+    
     await session.commitTransaction();
     session.endSession();
+    
+    deletedCloudinaryInv = await deleteFromCloudinary(deletedInv?.url);
+    if (!deletedCloudinaryInv)
+      throw new ApiError(500, "Unable to Delete Invoice from Cloudinary");
 
     return res
       .status(200)
