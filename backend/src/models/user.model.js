@@ -53,11 +53,15 @@ const userSchema = new mongoose.Schema(
         ref: "Sales",
       },
     ],
-    invoiceHeader: {
+    invoiceLogo: {
       type: String,
       trim: true,
     },
-    invoiceFooter: {
+    invoiceStamp: {
+      type: String,
+      trim: true,
+    },
+    invoiceSign: {
       type: String,
       trim: true,
     },

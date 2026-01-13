@@ -236,36 +236,45 @@ export const logout = asyncHandler(async (req, res) => {
 //   res.status(200).json(new ApiResponse(200, "Password Successfully Changed"));
 // });
 
-export const setInvoiceHeaderAndFooter = asyncHandler(async (req, res) => {
-  const header = req?.files["header"]?.[0]?.path;
-  const footer = req?.files["footer"]?.[0]?.path;
+export const setInvoiceLogoStampAndSign = asyncHandler(async (req, res) => {
+  const logo = req?.files["logo"]?.[0]?.path;
+  const stamp = req?.files["Stamp"]?.[0]?.path;
+  const sign = req?.files["Sign"]?.[0]?.path;
 
   if (!header || !footer) throw new ApiError(400, "All Fields Are Required");
 
-  const headerUrl = await uploadToCloudinary(header, {
+  const logoUrl = await uploadToCloudinary(logo, {
     background_removal: "cloudinary",
     formate: "png",
     resource_type: "auto",
   });
-  if (!headerUrl) throw new ApiError(500, "Error in Uploading Header");
-  const footerUrl = await uploadToCloudinary(footer, {
+  if (!logoUrl) throw new ApiError(500, "Error in Uploading Logo");
+  const stampUrl = await uploadToCloudinary(stamp, {
     background_removal: "cloudinary",
     formate: "png",
     resource_type: "auto",
   });
-  if (!footerUrl) throw new ApiError(500, "Error in Uploading Footer");
+  if (!stampUrl) throw new ApiError(500, "Error in Uploading Stamp");
+
+  const signUrl = await uploadToCloudinary(sign, {
+    background_removal: "cloudinary",
+    formate: "png",
+    resource_type: "auto",
+  });
+  if (!signUrl) throw new ApiError(500, "Error in Uploading Sign");
 
   await findByIdAndUpdate(req?.user?._id, {
     $set: {
-      invoiceHeader: headerUrl?.url,
-      invoiceFooter: footerUrl?.url,
+      invoiceLogo: logoUrl?.url,
+      invoiceStamp: stampUrl?.url,
+      invoiceSign: signUrl?.url,
     },
   });
 
   return res
     .status(200)
     .json(
-      new ApiResponse(200, "Invoice Header and Footer Successfully Updated")
+      new ApiResponse(200, "Invoice's Logo, Stamp and Sign Successfully Updated")
     );
 });
 
