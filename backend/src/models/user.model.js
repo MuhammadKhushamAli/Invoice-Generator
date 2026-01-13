@@ -18,6 +18,10 @@ const userSchema = new mongoose.Schema(
       required: [true, "Business Name is required"],
       trim: true,
     },
+    slogan: {
+      type: String,
+      trim: true,
+    },
     password: {
       type: String,
       required: [true, "Password is required"],
@@ -31,9 +35,9 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
     },
     phone_no: {
-        type: String,
-        required: [true, "Phone No. is required"],
-        unique:  true,
+      type: String,
+      required: [true, "Phone No. is required"],
+      unique: true,
     },
     address: {
       type: mongoose.Schema.Types.ObjectId,
@@ -75,14 +79,14 @@ const userSchema = new mongoose.Schema(
       default: null,
     },
     gst_no: {
-        type: String,
-        trim: true,
-        required: [true, "GST No. is required"],
+      type: String,
+      trim: true,
+      required: [true, "GST No. is required"],
     },
     ntn_no: {
-        type: String,
-        trim: true,
-        required: [true, "NTN No. is required"],
+      type: String,
+      trim: true,
+      required: [true, "NTN No. is required"],
     },
   },
   {

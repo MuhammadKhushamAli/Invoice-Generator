@@ -41,6 +41,7 @@ export const registerUser = asyncHandler(async (req, res) => {
   const {
     userName,
     businessName,
+    slogan,
     email,
     phone_no,
     password,
@@ -57,6 +58,7 @@ export const registerUser = asyncHandler(async (req, res) => {
     [
       userName,
       businessName,
+      slogan,
       email,
       phone_no,
       password,
@@ -130,6 +132,7 @@ export const registerUser = asyncHandler(async (req, res) => {
           {
             userName,
             businessName,
+            slogan,
             email,
             phone_no,
             password,
