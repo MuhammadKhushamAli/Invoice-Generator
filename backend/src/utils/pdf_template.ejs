@@ -196,12 +196,12 @@
                 <% items.forEach((item, index) => { %>
                 <tr>
                     <td><%= index + 1 %></td>
-                    <td><%= item.description %></td>
+                    <td><%= item.name %></td>
                     <td><%= item.range %></td>
                     <td><%= item.design %></td>
-                    <td><%= item.qty %></td>
-                    <td><%= item.rate %></td>
-                    <td><%= item.amount %></td>
+                    <td><%= item.quantity %></td>
+                    <td><%= item.price %></td>
+                    <td><%= (item.quantity * item.price).toFixed(2) %></td>
                 </tr>
                 <% }); %>
                 <tr><td colspan="7" style="height: 50px;"></td></tr>
@@ -215,15 +215,15 @@
                     <td><%= taxable_value %></td>
                 </tr>
                 <tr>
-                    <td class="label">Sales Tax @ <%= sales_tax_rate %></td>
+                    <td class="label">Sales Tax @ <%= sales_tax_rate %>%</td>
                     <td><%= sales_tax %></td>
                 </tr>
                 <tr>
-                    <td class="label">Special Excise Duty @ <%= special_excise_rate %></td>
+                    <td class="label">Special Excise Duty @ <%= special_excise_rate %>%</td>
                     <td><%= special_excise_tax %></td>
                 </tr>
                 <tr>
-                    <td class="label">Further Sales Tax @ <%= further_sales_tax_rate %></td>
+                    <td class="label">Further Sales Tax @ <%= further_sales_tax_rate %>%</td>
                     <td><%= further_sales_tax %></td>
                 </tr>
                 <tr>
@@ -237,9 +237,9 @@
             </table>
         </div>
 
-        <div style="margin-top: 10px;">
+        <!-- <div style="margin-top: 10px;">
             <strong>Amount in Words:</strong> <span><%= amount_in_words %></span>
-        </div>
+        </div> -->
 
         <div class="footer">
             <div class="terms">
