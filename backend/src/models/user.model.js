@@ -74,6 +74,16 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    gst_no: {
+        type: String,
+        trim: true,
+        required: [true, "GST No. is required"],
+    },
+    ntn_no: {
+        type: String,
+        trim: true,
+        required: [true, "NTN No. is required"],
+    },
   },
   {
     timestamps: true,
