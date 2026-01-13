@@ -74,7 +74,7 @@ export const updateQuantity = asyncHandler(async (req, res) => {
       new: true,
     }
   );
-  if(!updatedItem) throw new ApiError(500, "Unable to Update the Quantity");
+  if (!updatedItem) throw new ApiError(500, "Unable to Update the Quantity");
 
   return res
     .status(200)
@@ -82,23 +82,20 @@ export const updateQuantity = asyncHandler(async (req, res) => {
 });
 
 export const currentItem = asyncHandler(async (req, res) => {
-    let {itemId} = req?.body;
+  let { itemId } = req?.body;
 
-    itemId = itemId?.trim();
-    if(itemId) throw new ApiError(400, "Item Id Required");
+  itemId = itemId?.trim();
+  if (itemId) throw new ApiError(400, "Item Id Required");
 
-    if(isValidObjectId(itemId)) throw new ApiError(400, "Invlaid Item ID");
+  if (isValidObjectId(itemId)) throw new ApiError(400, "Invlaid Item ID");
 
-    const item = await Item.findOne({_id:itemId, owner:req?.user?_id}).select("-owner")
-    if(!itemId) throw new ApiError(500, "Unable to Fetch the Item");
+  const item = await Item.findOne({
+    _id: itemId,
+    owner: req?.user?._id,
+  }).select("-owner");
+  if (!item) throw new ApiError(500, "Unable to Fetch the Item");
 
-    return res.status(200)
-    .json(
-        new ApiResponse(
-            200,
-            "Current Quantity Successfully Fetched",
-            item
-        )
-    )
-
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Current Quantity Successfully Fetched", item));
 });
