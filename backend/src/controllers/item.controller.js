@@ -1,0 +1,104 @@
+import { isValidObjectId } from "mongoose";
+import { Item } from "../models/item.model";
+import { ApiError } from "../utils/ApiError";
+import { ApiResponse } from "../utils/ApiResponse";
+import { asyncHandler } from "../utils/asyncHandler";
+import { uploadToCloudinary } from "../utils/cloudinary";
+
+export const addItem = asyncHandler(async (req, res) => {
+  let { name, price, quantity } = req?.body;
+  const image = req?.file?.path;
+  if (
+    [name, price, quantity, image].some(
+      (field) => !field || field?.trim() === ""
+    )
+  )
+    throw new ApiError(400, "All Fields are required");
+
+  name = name?.trim();
+  price = parseInt(price);
+  quantity = parseInt(quantity);
+
+  if (price <= 0 || quantity <= 0)
+    throw new ApiError(400, "Price and Quantity Must be Greater than Zero");
+
+  const item = await Item.findOne({ name });
+  if (item) throw new ApiError(400, "Item already exists");
+
+  const imageUrl = await uploadToCloudinary(image);
+  if (!imageUrl)
+    throw new ApiError(500, "Unable to upload Image on Cloudinary");
+
+  const newItem = await Item.create({
+    name,
+    price,
+    image: imageUrl?.url,
+    owner: req?.user?._id,
+  });
+  if (!newItem) throw new ApiError(500, "Unable to Create Item");
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Item Successfully Created", newitem));
+});
+
+export const updateQuantity = asyncHandler(async (req, res) => {
+  let { itemId, quantity } = req?.body;
+  itemId = itemId?.trim();
+
+  if (!isValidObjectId(itemId)) throw new ApiError(400, "Invalid Item Id");
+
+  if (!(itemId && quantity)) throw new ApiError(400, "All fields Required");
+
+  quantity = parseInt(quantity);
+  if (quantity <= 0)
+    throw new ApiError(400, "Quantity cannot be less than or equal to zero");
+
+  const item = await Item.findById(itemId);
+  if (!item) throw new ApiError(404, "Item not Found");
+
+  if (!item?.isValidQuantity(quantity))
+    throw new ApiError(
+      400,
+      "Desired quantity must be less than available quantity"
+    );
+
+  const updatedItem = await Item.findByIdAndUpdate(
+    itemId,
+    {
+      $inc: {
+        quantity: -quantity,
+      },
+    },
+    {
+      new: true,
+    }
+  );
+  if(!updatedItem) throw new ApiError(500, "Unable to Update the Quantity");
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Quantity Successfully Updated"));
+});
+
+export const currentItem = asyncHandler(async (req, res) => {
+    let {itemId} = req?.body;
+
+    itemId = itemId?.trim();
+    if(itemId) throw new ApiError(400, "Item Id Required");
+
+    if(isValidObjectId(itemId)) throw new ApiError(400, "Invlaid Item ID");
+
+    const item = await Item.findOne({_id:itemId, owner:req?.user?_id}).select("-owner")
+    if(!itemId) throw new ApiError(500, "Unable to Fetch the Item");
+
+    return res.status(200)
+    .json(
+        new ApiResponse(
+            200,
+            "Current Quantity Successfully Fetched",
+            item
+        )
+    )
+
+});

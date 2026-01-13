@@ -60,11 +60,8 @@ export const registerUser = asyncHandler(async (req, res) => {
   )
     throw new ApiError(400, "All fields are required");
 
-  userName = userName?.trim().tolowerCase();
-  email = email?.trim().tolowerCase();
-
   const existingUser = await User.findOne({
-    $or: [{ userName }, { email }],
+    $or: [{ userName:userName?.trim().tolowerCase() }, { email:email?.trim().tolowerCase() }],
   });
   if (existingUser) throw new ApiError(400, "User Already Exists");
 
@@ -104,7 +101,7 @@ export const registerUser = asyncHandler(async (req, res) => {
 });
 
 export const login = asyncHandler(async (req, res) => {
-  const { email, password, userName } = req?.body;
+  let { email, password, userName } = req?.body;
   email = email?.trim().tolowerCase();
   userName = userName?.trim().tolowerCase();
 
@@ -225,8 +222,8 @@ export const setInvoiceHeaderAndFooter = asyncHandler(async (req, res) => {
 
   await findByIdAndUpdate(req?.user?._id, {
     $set: {
-      invoiceHeader: headerUrl,
-      invoiceFooter: footerUrl,
+      invoiceHeader: headerUrl?.url,
+      invoiceFooter: footerUrl?.url,
     },
   });
 

@@ -91,7 +91,7 @@ export const addSale = asyncHandler(async (req, res) => {
 });
 
 export const removeSale = asyncHandler(async (req, res) => {
-  const { saleId } = req?.body;
+  let { saleId } = req?.body;
   saleId = saleId?.trim();
   if (!saleId) throw new ApiError(400, "All fields are required");
   if (!isValidObjectId(saleId)) throw new ApiError(400, "Invalid Sale Id");
@@ -142,7 +142,7 @@ export const removeSale = asyncHandler(async (req, res) => {
 });
 
 export const viewSale = asyncHandler(async (req, res) => {
-  const { saleId } = req?.body;
+  let { saleId } = req?.body;
   saleId = saleId?.trim();
   if (!saleId) throw new ApiError(400, "All fields are required");
   if (!isValidObjectId(saleId)) throw new ApiError(400, "Invalid Sale Id");

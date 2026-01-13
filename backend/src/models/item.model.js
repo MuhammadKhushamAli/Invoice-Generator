@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { ApiError } from "../utils/ApiError";
 
 const itemSchema = new mongoose.Schema({
   name: {
