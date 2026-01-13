@@ -70,6 +70,7 @@ export const addSale = asyncHandler(async (req, res) => {
     if (!sale) throw new ApiError(500, "Sale Creation Failed");
 
     const itemsSoldDocs = await ItemsSold.insertMany(
+        // Item Info has _id, quantity, price which is of one piece entered by user
       itemInfo?.map((item_) => ({
         item: item_?._id,
         quantity: item_?.quantity,
