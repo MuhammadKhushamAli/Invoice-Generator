@@ -81,8 +81,8 @@ export const updateQuantity = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, "Quantity Successfully Updated"));
 });
 
-export const currentItem = asyncHandler(async (req, res) => {
-  let { itemId } = req?.body;
+export const viewItem = asyncHandler(async (req, res) => {
+  let { itemId } = req?.params;
 
   itemId = itemId?.trim();
   if (itemId) throw new ApiError(400, "Item Id Required");

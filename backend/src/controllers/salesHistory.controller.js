@@ -1,23 +1,21 @@
 import mongoose, { isValidObjectId } from "mongoose";
 import { Invoice } from "../models/invoice.model.js";
 import { Item } from "../models/item.model.js";
-import { Sales } from "../models/sales.model.js";
+import { Sale } from "../models/sales.model.js";
 import { User } from "../models/user.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ItemsSold } from "../models/itemsSold.model.js";
 import { ApiError } from "../utils/ApiError.js";
-import { deleteFromCloudinary } from "../../../../AI-Image-Caption-Generator/Backend/src/utils/cloudinary.js";
+import { deleteFromCloudinary } from "../utils/cloudinary.js";
 
 export const addSale = asyncHandler(async (req, res) => {
-  const { itemInfo, invoiceId } = req?.body;
+  const { itemInfo } = req?.body;
   const invFile = req?.file?.path;
 
   if (invFile) throw new ApiError(500, "File is not Uploaded Locally");
-  if (!(Array.isArray(itemInfo) && itemInfo?.length && invoiceId))
+  if (!(Array.isArray(itemInfo) && itemInfo?.length))
     throw new ApiError(400, "All fields are required");
-  if (!isValidObjectId(invoiceId))
-    throw new ApiError(400, "Invalid Invoice Id");
 
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -49,9 +47,9 @@ export const addSale = asyncHandler(async (req, res) => {
     );
     if (!invoice) throw new ApiError(500, "Unable to Create Invoice");
 
-    const sale = await Sales.create(
+    const sale = await Sale.create(
       {
-        invoice: invoiceId,
+        invoice: invoice?._id,
         owner: req?.user?._id,
       },
       { session }
@@ -71,7 +69,7 @@ export const addSale = asyncHandler(async (req, res) => {
 
     const itemsSoldIds = itemsSoldDocs?.map((item_) => item_?._id);
 
-    const updatedSale = await Sales.findByIdAndUpdate(
+    const updatedSale = await Sale.findByIdAndUpdate(
       sale?._id,
       {
         $push: {
@@ -121,12 +119,12 @@ export const addSale = asyncHandler(async (req, res) => {
 });
 
 export const removeSale = asyncHandler(async (req, res) => {
-  let { saleId } = req?.body;
+  let { saleId } = req?.params;
   saleId = saleId?.trim();
   if (!saleId) throw new ApiError(400, "All fields are required");
   if (!isValidObjectId(saleId)) throw new ApiError(400, "Invalid Sale Id");
 
-  const sale = await Sales.findById(saleId);
+  const sale = await Sale.findById(saleId);
   if (!sale) throw new ApiError(404, "Sale Not Found");
 
   if (!sale?.isAuthorized(req?.user?._id))
@@ -142,7 +140,7 @@ export const removeSale = asyncHandler(async (req, res) => {
     const deletedInv = Invoice.findOneAndDelete({ sale: saleId }, { session });
     if (!deletedInv) throw new ApiError(500, "Unable to delete Invoice");
 
-    const deletedSale = await Sales.findByIdAndDelete(saleId, { session });
+    const deletedSale = await Sale.findByIdAndDelete(saleId, { session });
     if (!deletedSale) throw new ApiError(500, "Sales Deletion Failed");
 
     const updatedUser = await User.findByIdAndUpdate(
@@ -175,12 +173,12 @@ export const removeSale = asyncHandler(async (req, res) => {
 });
 
 export const viewSale = asyncHandler(async (req, res) => {
-  let { saleId } = req?.body;
+  let { saleId } = req?.params;
   saleId = saleId?.trim();
   if (!saleId) throw new ApiError(400, "All fields are required");
   if (!isValidObjectId(saleId)) throw new ApiError(400, "Invalid Sale Id");
 
-  const sale = await Sales.aggregate([
+  const sale = await Sale.aggregate([
     {
       $match: {
         _id: new mongoose.Types.ObjectId(saleId),

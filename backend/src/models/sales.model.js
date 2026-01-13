@@ -31,4 +31,4 @@ salesSchema.methods.isAuthorized = function (ownerId) {
   return this.owner?.equals(ownerId);
 };
 
-export const Sales = mongoose.model("Sales", salesSchema);
+export const Sale = mongoose.model("Sale", salesSchema);
