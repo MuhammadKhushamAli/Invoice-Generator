@@ -29,11 +29,11 @@ export async function uploadToCloudinary(filePath) {
   }
 }
 
-export const deleteFromCloudinary = async (localURL) => {
+export const deleteFromCloudinary = async (URL) => {
   try {
-    if (!localURL) return false;
+    if (!URL) return false;
 
-    const splitedArray = localURL.split("/");
+    const splitedArray = URL.split("/");
     const startIndex = splitedArray.indexOf("upload");
 
     if (startIndex === -1) return false;

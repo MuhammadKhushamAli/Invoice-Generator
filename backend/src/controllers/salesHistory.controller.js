@@ -7,9 +7,13 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ItemsSold } from "../models/itemsSold.model.js";
 import { ApiError } from "../utils/ApiError.js";
+import { deleteFromCloudinary } from "../../../../AI-Image-Caption-Generator/Backend/src/utils/cloudinary.js";
 
 export const addSale = asyncHandler(async (req, res) => {
   const { itemInfo, invoiceId } = req?.body;
+  const invFile = req?.file?.path;
+
+  if (invFile) throw new ApiError(500, "File is not Uploaded Locally");
   if (!(Array.isArray(itemInfo) && itemInfo?.length && invoiceId))
     throw new ApiError(400, "All fields are required");
   if (!isValidObjectId(invoiceId))
@@ -31,8 +35,20 @@ export const addSale = asyncHandler(async (req, res) => {
           throw new ApiError(400, "Invalid Quantity");
       })
     );
-    const invoice = await Invoice.findById(invoiceId);
-    if (!invoice) throw new ApiError(404, "Invoice Not Found");
+
+    const fileUrl = await uploadToCloudinary(invFile);
+    if (!fileUrl) throw new ApiError(500, "Unable to Upload on Cloudinary");
+
+    const invoice = await Invoice.create(
+      {
+        name: file?.filename,
+        url: fileUrl?.url,
+        owner: req?.user?._id,
+      },
+      { session }
+    );
+    if (!invoice) throw new ApiError(500, "Unable to Create Invoice");
+
     const sale = await Sales.create(
       {
         invoice: invoiceId,
@@ -67,6 +83,19 @@ export const addSale = asyncHandler(async (req, res) => {
       { session }
     );
     if (!updatedSale) throw new ApiError(500, "Unable to Created Updated Sale");
+    const updateInv = await Invoice.findByIdAndUpdate(
+      invoice?._id,
+      {
+        $set: {
+          sale: sale?._id,
+        },
+      },
+      {
+        new: true,
+      }
+    );
+    if (!updateInv) throw new ApiError(500, "Invoice Not Updated");
+
     const user = await User.findByIdAndUpdate(
       req?.user?._id,
       {
@@ -86,6 +115,7 @@ export const addSale = asyncHandler(async (req, res) => {
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
+    if (fileUrl) await deleteFromCloudinary(fileUrl?.url);
     throw error;
   }
 });
@@ -108,6 +138,9 @@ export const removeSale = asyncHandler(async (req, res) => {
   try {
     const itemsSold = await ItemsSold.deleteMany({ sale: saleId }, { session });
     if (!itemsSold) throw new ApiError(500, "Itmes Record Cannot be Deleted");
+
+    const deletedInv = Invoice.findOneAndDelete({ sale: saleId }, { session });
+    if (!deletedInv) throw new ApiError(500, "Unable to delete Invoice");
 
     const deletedSale = await Sales.findByIdAndDelete(saleId, { session });
     if (!deletedSale) throw new ApiError(500, "Sales Deletion Failed");
