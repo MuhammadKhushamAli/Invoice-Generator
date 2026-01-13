@@ -31,10 +31,24 @@ import userRoute from "./routes/user.routes.js";
 import itemRoute from "./routes/item.routes.js";
 import salesRoute from "./routes/sales.routes.js";
 import invoiceNumRoute from "./routes/invoiceNum.routes.js";
+import { ApiError } from "./utils/ApiError.js";
 
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/item", itemRoute);
 app.use("/api/v1/sales", salesRoute);
 app.use("/api/v1/invoice-num", invoiceNumRoute);
+
+app.use((err, req, res, next) => {
+  res
+    .status(err.statusCode || 500)
+    .json(
+      new ApiError(
+        err.statusCode || 500,
+        err.message || "Internal Server Error",
+        err.errors || [],
+        err.stack || ""
+      )
+    );
+});
 
 export default app;
