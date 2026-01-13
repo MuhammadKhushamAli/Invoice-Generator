@@ -101,29 +101,44 @@ export const removeSale = asyncHandler(async (req, res) => {
 
   if (!sale?.isAuthorized(req?.user?._id))
     throw new ApiError(401, "Unauthorized Access");
-  sale?.items?.map(async (id) => {
-    const deletedItem = await ItemsSold.findByIdAndDelete(id);
-    if (!deletedItem) throw new ApiError(500, "Unable to Delete Item Record");
-  });
-  const deletedSale = await Sales.findByIdAndDelete(saleId);
-  if (!deletedSale) throw new ApiError(500, "Sales Deletion Failed");
 
-  const updatedUser = await User.findByIdAndUpdate(
-    req?.user?._id,
-    {
-      $pull: {
-        salesHistory: saleId,
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const itemsSold = await ItemsSold.deleteMany({ sale: saleId }, { session });
+    if (!itemsSold) throw new ApiError(500, "Itmes Record Cannot be Deleted");
+
+    const deletedSale = await Sales.findByIdAndDelete(saleId, { session });
+    if (!deletedSale) throw new ApiError(500, "Sales Deletion Failed");
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req?.user?._id,
+      {
+        $pull: {
+          salesHistory: saleId,
+        },
       },
-    },
-    {
-      new: true,
-    }
-  );
-  if (!updatedUser) throw new ApiError(500, "User Update Failed");
+      {
+        session,
+      },
+      {
+        new: true,
+      }
+    );
+    if (!updatedUser) throw new ApiError(500, "User Update Failed");
 
-  return res
-    .status(200)
-    .json(new ApiResponse(200, "Sales Successfully Deleted"));
+    await session.commitTransaction();
+    session.endSession();
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, "Sales Successfully Deleted"));
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    throw error;
+  }
 });
 
 export const viewSale = asyncHandler(async (req, res) => {
@@ -186,4 +201,9 @@ export const viewSale = asyncHandler(async (req, res) => {
       },
     },
   ]);
+  if (!sale) throw new ApiError(500, "Sale Aggregation Failed");
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Sales Fetched Successfully", sale));
 });
