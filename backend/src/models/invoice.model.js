@@ -1,4 +1,6 @@
 import mongoose from "mongoose";
+import { InvoiceNum } from "./invoiceNum.model.js";
+import { ApiError } from "../utils/ApiError";
 
 const invoicesSchema = new mongoose.Schema(
   {
@@ -22,5 +24,24 @@ const invoicesSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+invoicesSchema.pre("save", async function (next) {
+  if (this.isModified("name")) return next();
+  const invNum = await InvoiceNum.findOne({ key: "Invoice" });
+  if (!invNum) throw new ApiError(500, "Unable to et Invoice Num");
+  this.name = invNum.inv_num;
+  const updateInvNum = await InvoiceNum.findByIdAndUpdate(
+    invNum?._id,
+    {
+      $inc: {
+        inv_num: 1,
+      },
+    },
+    {
+      new: true,
+    }
+  );
+  if (!updateInvNum) throw new ApiError(500, "Unable to Updae invoice Number");
+});
 
 export const Invoice = mongoose.model("Invoice", invoicesSchema);
