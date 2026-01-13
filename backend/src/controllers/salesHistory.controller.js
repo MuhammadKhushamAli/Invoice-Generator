@@ -7,16 +7,22 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ItemsSold } from "../models/itemsSold.model.js";
 import { ApiError } from "../utils/ApiError.js";
-import { deleteFromCloudinary } from "../utils/cloudinary.js";
+import {
+  uploadToCloudinary,
+  deleteFromCloudinary,
+} from "../utils/cloudinary.js";
 
 export const addSale = asyncHandler(async (req, res) => {
-  const { itemInfo } = req?.body;
+  let { itemInfo } = req?.body;
   const invFile = req?.file?.path;
 
-  if (invFile) throw new ApiError(500, "File is not Uploaded Locally");
+  itemInfo = JSON.parse(itemInfo);
+
+  if (!invFile) throw new ApiError(500, "File is not Uploaded Locally");
   if (!(Array.isArray(itemInfo) && itemInfo?.length))
     throw new ApiError(400, "All fields are required");
 
+  let fileUrl = null;
   const session = await mongoose.startSession();
   session.startTransaction();
 
@@ -25,40 +31,47 @@ export const addSale = asyncHandler(async (req, res) => {
       itemInfo?.map(async (item) => {
         if (item.quantity <= 0 || item.price <= 0)
           throw new ApiError(400, "Invalid Quantity or Price");
-        if (!isValidObjectId(item.itemId))
+        if (!isValidObjectId(item._id))
           throw new ApiError(400, "Invalid Item Id");
-        const itemFound = await Item.findById(item.itemId);
+        const itemFound = await Item.findById(item?._id);
         if (!itemFound) throw new ApiError(404, "Item Not Found");
         if (!itemFound?.isQuantityValid(item.quantity))
           throw new ApiError(400, "Invalid Quantity");
       })
     );
 
-    const fileUrl = await uploadToCloudinary(invFile);
+    fileUrl = await uploadToCloudinary(invFile);
     if (!fileUrl) throw new ApiError(500, "Unable to Upload on Cloudinary");
 
-    const invoice = await Invoice.create(
-      {
-        name: file?.filename,
-        url: fileUrl?.url,
-        owner: req?.user?._id,
-      },
-      { session }
-    );
+    const invoice = (
+      await Invoice.create(
+        [
+          {
+            url: fileUrl?.url,
+            owner: req?.user?._id,
+          },
+        ],
+        { session }
+      )
+    )[0];
     if (!invoice) throw new ApiError(500, "Unable to Create Invoice");
 
-    const sale = await Sale.create(
-      {
-        invoice: invoice?._id,
-        owner: req?.user?._id,
-      },
-      { session }
-    );
+    const sale = (
+      await Sale.create(
+        [
+          {
+            invoice: invoice?._id,
+            owner: req?.user?._id,
+          },
+        ],
+        { session }
+      )
+    )[0];
     if (!sale) throw new ApiError(500, "Sale Creation Failed");
 
     const itemsSoldDocs = await ItemsSold.insertMany(
       itemInfo?.map((item_) => ({
-        item: item_?.itemId,
+        item: item_?._id,
         quantity: item_?.quantity,
         price: item_?.price,
         sale: sale?._id,
@@ -78,9 +91,13 @@ export const addSale = asyncHandler(async (req, res) => {
           },
         },
       },
-      { session }
+      { session },
+      {
+        new: true,
+      }
     );
     if (!updatedSale) throw new ApiError(500, "Unable to Created Updated Sale");
+
     const updateInv = await Invoice.findByIdAndUpdate(
       invoice?._id,
       {
@@ -88,6 +105,7 @@ export const addSale = asyncHandler(async (req, res) => {
           sale: sale?._id,
         },
       },
+      { session },
       {
         new: true,
       }
@@ -99,14 +117,19 @@ export const addSale = asyncHandler(async (req, res) => {
       {
         $push: {
           salesHistory: sale?._id,
+          invoices: invoice?._id,
         },
       },
-      { session }
+      { session },
+      {
+        new: true,
+      }
     );
     if (!user) throw new ApiError(500, "Unable to update the user");
 
     await session.commitTransaction();
     session.endSession();
+
     return res
       .status(200)
       .json(new ApiResponse(200, "Sale Created Successfully", sale));

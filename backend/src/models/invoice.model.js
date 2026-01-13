@@ -6,7 +6,6 @@ const invoicesSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, "Invoice Name is required"],
       trim: true,
     },
     url: {
@@ -31,8 +30,8 @@ const invoicesSchema = new mongoose.Schema(
 
 invoicesSchema.pre("save", async function (next) {
   if (this.isModified("name")) return next();
-  const invNum = await InvoiceNum.findOne({ key: "Invoice", owner: this?._id });
-  if (!invNum) throw new ApiError(500, "Unable to et Invoice Num");
+  const invNum = await InvoiceNum.findOne({ key: "Invoice", owner: this?.owner });
+  if (!invNum) throw new ApiError(500, "Unable to find Invoice Num");
   this.name = invNum.inv_num;
   const updateInvNum = await InvoiceNum.findByIdAndUpdate(
     invNum?._id,
@@ -45,7 +44,7 @@ invoicesSchema.pre("save", async function (next) {
       new: true,
     }
   );
-  if (!updateInvNum) throw new ApiError(500, "Unable to Updae invoice Number");
+  if (!updateInvNum) throw new ApiError(500, "Unable to Updated invoice Number");
 });
 
 export const Invoice = mongoose.model("Invoice", invoicesSchema);

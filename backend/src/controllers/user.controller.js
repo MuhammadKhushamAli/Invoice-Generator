@@ -103,35 +103,58 @@ export const registerUser = asyncHandler(async (req, res) => {
       country,
     });
     if (!address) {
-      address = await Address.create({
-        landmark,
-        street,
-        area,
-        city,
-        country,
-      });
+      address = (
+        await Address.create(
+          [
+            {
+              landmark,
+              street,
+              area,
+              city,
+              country,
+            },
+          ],
+          { session }
+        )
+      )[0];
     }
-    const newUser = await User.create({
-      userName,
-      businessName,
-      email,
-      phone_no,
-      password,
-      address: address._id,
-    });
+    if (!address) throw new ApiError(500, "Address Creation Failed");
+
+    const newUser = (
+      await User.create(
+        [
+          {
+            userName,
+            businessName,
+            email,
+            phone_no,
+            password,
+            address: address._id,
+          },
+        ],
+        { session }
+      )
+    )[0];
     if (!newUser) throw new ApiError(500, "User Registration Failed");
 
-    const invNum = await InvoiceNum.create({
-      key: "Invoice",
-      inv_num: 0,
-      owner: newUser?._id,
-    });
+    const invNum = (
+      await InvoiceNum.create(
+        [
+          {
+            key: "Invoice",
+            inv_num: 0,
+            owner: newUser?._id,
+          },
+        ],
+        { session }
+      )
+    )[0];
     if (!invNum) throw new ApiError(500, "Unable to create Invoice Number");
 
-    const user = await User.findById(newUser?._id).select(
-      "-password -refreshToken"
-    );
-    if (!user) throw new ApiError(500, "User Registration Failed");
+    const user = await User.findById(newUser?._id)
+      .session(session)
+      .select("-password -refreshToken");
+    if (!user) throw new ApiError(500, "User Registration Fetching Failed");
 
     await session.commitTransaction();
     session.endSession();
@@ -195,7 +218,7 @@ export const login = asyncHandler(async (req, res) => {
     .cookie("refreshToken", refreshToken, options)
     .json(
       new ApiResponse(200, "User Logged In Successfully", {
-        user,
+        newUser,
         accessToken,
         refreshToken,
       })
@@ -281,8 +304,7 @@ export const setInvoiceLogoStampAndSign = asyncHandler(async (req, res) => {
 
   if (!(logo && stamp && sign))
     throw new ApiError(400, "All Fields Are Required");
-  const session = await mongoose.startSession();
-  session.startTransaction();
+
   let logoUrl = null;
   let stampUrl = null;
   let signUrl = null;
@@ -313,9 +335,6 @@ export const setInvoiceLogoStampAndSign = asyncHandler(async (req, res) => {
       },
     });
 
-    await session.commitTransaction();
-    session.endSession();
-
     return res
       .status(200)
       .json(
@@ -325,8 +344,6 @@ export const setInvoiceLogoStampAndSign = asyncHandler(async (req, res) => {
         )
       );
   } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
     if (logoUrl) await deleteFromCloudinary(logoUrl?.url);
     if (stampUrl) await deleteFromCloudinary(stampUrl?.url);
     if (signUrl) await deleteFromCloudinary(signUrl?.url);

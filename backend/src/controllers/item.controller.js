@@ -7,7 +7,9 @@ import {
   uploadToCloudinary,
   deleteFromCloudinary,
 } from "../utils/cloudinary.js";
+import { User } from "../models/user.model.js";
 import mongoose from "mongoose";
+
 
 export const addItem = asyncHandler(async (req, res) => {
   let { name, price, quantity } = req?.body;
@@ -30,21 +32,46 @@ export const addItem = asyncHandler(async (req, res) => {
   if (item) throw new ApiError(400, "Item already exists");
 
   let imageUrl = null;
+
   const session = await mongoose.startSession();
   session.startTransaction();
+
   try {
     imageUrl = await uploadToCloudinary(image);
     if (!imageUrl)
       throw new ApiError(500, "Unable to upload Image on Cloudinary");
 
-    const newItem = await Item.create({
-      name,
-      price,
-      quantity,
-      image: imageUrl?.url,
-      owner: req?.user?._id,
-    });
+    const newItem = (
+      await Item.create(
+        [
+          {
+            name,
+            price,
+            quantity,
+            image: imageUrl?.url,
+            owner: req?.user?._id,
+          },
+        ],
+        { session }
+      )
+    )[0];
     if (!newItem) throw new ApiError(500, "Unable to Create Item");
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req?.user?._id,
+      {
+        $push: {
+          items: newItem?._id,
+        },
+      },
+      {
+        session,
+      },
+      {
+        new: true,
+      }
+    );
+    if (!updatedUser) throw new ApiError(500, "User Update Failed");
 
     await session.commitTransaction();
     session.endSession();
