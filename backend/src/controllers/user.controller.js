@@ -1,5 +1,4 @@
 import mongoose, { isValidObjectId } from "mongoose";
-import { refreshTokens } from "../../../../AI-Image-Caption-Generator/Backend/src/controllers/user.controller.js";
 import { Address } from "../models/address.model.js";
 import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
@@ -64,8 +63,8 @@ export const registerUser = asyncHandler(async (req, res) => {
 
   const existingUser = await User.findOne({
     $or: [
-      { userName: userName?.trim().tolowerCase() },
-      { email: email?.trim().tolowerCase() },
+      { userName: userName?.trim().toLowerCase() },
+      { email: email?.trim().toLowerCase() },
     ],
   });
   if (existingUser) throw new ApiError(400, "User Already Exists");
@@ -125,15 +124,15 @@ export const registerUser = asyncHandler(async (req, res) => {
 
 export const login = asyncHandler(async (req, res) => {
   let { email, password, userName } = req?.body;
-  email = email?.trim().tolowerCase();
-  userName = userName?.trim().tolowerCase();
+  email = email?.trim().toLowerCase();
+  userName = userName?.trim().toLowerCase();
 
   if (!((email || userName) && password))
     throw new ApiError(400, "All fields are required");
 
   const user = await User.findOne({
     $or: [{ userName }, { email }],
-  }).select("-refreshToken", "-password");
+  });
   if (!user) throw new ApiError(404, "User not found");
 
   if (!(await user.isPasswordValid(password)))
@@ -141,6 +140,11 @@ export const login = asyncHandler(async (req, res) => {
 
   const { refreshToken, accessToken } =
     await generateAccessAndRefreshToken(user);
+
+  const newUser = await User.findById(user?._id).select(
+    "-password -refreshToken"
+  );
+  if (!newUser) throw new ApiError(500, "User Login Failed");
 
   const options = {
     httpOnly: true,
@@ -238,9 +242,17 @@ export const setInvoiceHeaderAndFooter = asyncHandler(async (req, res) => {
 
   if (!header || !footer) throw new ApiError(400, "All Fields Are Required");
 
-  const headerUrl = await uploadToCloudinary(header);
+  const headerUrl = await uploadToCloudinary(header, {
+    background_removal: "cloudinary",
+    formate: "png",
+    resource_type: "auto",
+  });
   if (!headerUrl) throw new ApiError(500, "Error in Uploading Header");
-  const footerUrl = await uploadToCloudinary(footer);
+  const footerUrl = await uploadToCloudinary(footer, {
+    background_removal: "cloudinary",
+    formate: "png",
+    resource_type: "auto",
+  });
   if (!footerUrl) throw new ApiError(500, "Error in Uploading Footer");
 
   await findByIdAndUpdate(req?.user?._id, {

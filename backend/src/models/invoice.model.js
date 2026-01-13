@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { InvoiceNum } from "./invoiceNum.model.js";
-import { ApiError } from "../utils/ApiError";
+import { ApiError } from "../utils/ApiError.js";
 
 const invoicesSchema = new mongoose.Schema(
   {

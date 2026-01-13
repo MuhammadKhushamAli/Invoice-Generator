@@ -6,15 +6,15 @@ import jwt from "jsonwebtoken";
 export const authentication = asyncHandler(async (req, _, next) => {
   const token =
     req?.cookies?.accessToken ||
-    req?.headers("Authorization")?.replace("Bearer ", "");
+    req?.headers["Authorization"]?.replace("Bearer ", "");
 
-  if (!token) return ApiError(401, "Authentication Token is not Found");
+  if (!token) throw new ApiError(401, "Authentication Token is not Found");
   const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-  if (!decodedToken) return ApiError(401, "Invalid Authentication Token");
+  if (!decodedToken) throw new ApiError(401, "Invalid Authentication Token");
   const user = await User.findById(decodedToken?._id).select(
     "-password -refreshToken"
   );
-  if (!user) return ApiError(401, "Invalid Authentication Token");
+  if (!user) throw new ApiError(401, "Invalid Authentication Token");
   req.user = user;
   next();
 });

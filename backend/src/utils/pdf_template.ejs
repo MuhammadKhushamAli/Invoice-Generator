@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= business_name %> Invoice</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+            font-size: 12px;
+        }
+        .invoice-box {
+            max-width: 800px;
+            margin: auto;
+            padding: 30px;
+            border: 1px solid #eee;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+        }
+        /* Header Section */
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo {
+            /* Adjusted to accept an image file */
+            width: 120px; 
+            height: auto;
+            display: block;
+            margin: 0 auto 10px auto;
+        }
+        .company-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #000;
+            text-transform: uppercase;
+            margin: 0;
+        }
+        .tagline {
+            font-size: 14px;
+            font-style: italic;
+            margin-top: 5px;
+        }
+        
+        /* Top Info Grid */
+        .top-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            border-top: 2px solid #000;
+            border-bottom: 2px solid #000;
+            padding: 10px 0;
+        }
+        .info-column {
+            width: 48%;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        .info-label {
+            font-weight: bold;
+        }
+
+        /* Customer Section */
+        .customer-section {
+            margin-bottom: 20px;
+            border: 1px solid #000;
+            padding: 10px;
+        }
+        
+        /* Main Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: center;
+            vertical-align: top;
+        }
+        th {
+            background-color: #f9f9f9;
+        }
+        
+        /* Totals Section */
+        .totals-container {
+            display: flex;
+            justify-content: flex-end;
+        }
+        .totals-table {
+            width: 50%;
+            border-collapse: collapse;
+        }
+        .totals-table td {
+            text-align: right;
+            border: 1px solid #000;
+        }
+        .totals-table .label {
+            font-weight: bold;
+            text-align: left;
+        }
+
+        /* Footer Section */
+        .footer {
+            margin-top: 30px;
+            font-size: 10px;
+        }
+        .terms {
+            margin-bottom: 20px;
+        }
+        .signature-section {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+        }
+        .signature-box {
+            text-align: center;
+            width: 200px;
+            border-top: 1px solid #000;
+            padding-top: 5px;
+            /* Added relative positioning to handle images better if needed */
+            position: relative; 
+        }
+        /* ADDED STYLES FOR STAMP AND SIGNATURE */
+        .signature-box img {
+            display: block;
+            margin: 5px auto; /* Centers the images and adds spacing */
+            max-width: 100px; /* Restricts width so it fits in the box */
+            height: auto;     /* Maintains aspect ratio */
+            object-fit: contain;
+        }
+        
+        .bottom-address {
+            text-align: center;
+            margin-top: 20px;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="invoice-box">
+        <div class="header">
+            <img src="<%= logo_url %>" alt="<%= business_name %> Logo" class="logo">
+            
+            <h1 class="company-name"><%= business_name %></h1>
+            <div class="tagline"><%= slogan %></div>
+        </div>
+
+        <h2 style="text-align: center; text-decoration: underline; margin: 10px 0;">Sales Tax Invoice</h2>
+
+        <div class="top-info">
+            <div class="info-column">
+                <div class="info-row"><span class="info-label">Tele. No.:</span> <span><%= tele_no %></span></div>
+                <div class="info-row"><span class="info-label">GST No.:</span> <span><%= your_GST %></span></div>
+                <div class="info-row"><span class="info-label">NTN:</span> <span><%= your_NTN %></span></div>
+            </div>
+            <div class="info-column">
+                <div class="info-row"><span class="info-label">Invoice #:</span> <span><%= invoice_no %></span></div>
+                <div class="info-row"><span class="info-label">Date:</span> <span><%= date %></span></div>
+                <div class="info-row"><span class="info-label">HS Code:</span> <span><%= hs_code %></span></div>
+            </div>
+        </div>
+
+        <div class="customer-section">
+            <div class="info-row"><span class="info-label">Attn To:</span> <span><%= Attn_to %></span></div>
+            <div class="info-row">
+                <span class="info-label">Customer:</span> 
+                <span><%= customer_name %><br><%= customer_landmark %>, <%= customer_street %>, <%= customer_area %>, <%= customer_city %>, <%= customer_country %></span>
+            </div>
+            <div class="info-row"><span class="info-label">GST No.:</span> <span><%= customer_GST %></span></div>
+            <div class="info-row"><span class="info-label">NTN:</span> <span><%= customer_NTN %></span></div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Sr #</th>
+                    <th>Description</th>
+                    <th>Range</th>
+                    <th>Design</th>
+                    <th>Qty</th>
+                    <th>Rate</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% items.forEach((item, index) => { %>
+                <tr>
+                    <td><%= index + 1 %></td>
+                    <td><%= item.description %></td>
+                    <td><%= item.range %></td>
+                    <td><%= item.design %></td>
+                    <td><%= item.qty %></td>
+                    <td><%= item.rate %></td>
+                    <td><%= item.amount %></td>
+                </tr>
+                <% }); %>
+                <tr><td colspan="7" style="height: 50px;"></td></tr>
+            </tbody>
+        </table>
+
+        <div class="totals-container">
+            <table class="totals-table">
+                <tr>
+                    <td class="label">Taxable Value</td>
+                    <td><%= taxable_value %></td>
+                </tr>
+                <tr>
+                    <td class="label">Sales Tax @ <%= sales_tax_rate %></td>
+                    <td><%= sales_tax %></td>
+                </tr>
+                <tr>
+                    <td class="label">Special Excise Duty @ <%= special_excise_rate %></td>
+                    <td><%= special_excise_tax %></td>
+                </tr>
+                <tr>
+                    <td class="label">Further Sales Tax @ <%= further_sales_tax_rate %></td>
+                    <td><%= further_sales_tax %></td>
+                </tr>
+                <tr>
+                    <td class="label">Add: Freight/Other Charges</td>
+                    <td><%= freight_other_charges %></td>
+                </tr>
+                <tr>
+                    <td class="label" style="font-size: 14px;">Value Including Sales Tax</td>
+                    <td style="font-weight: bold; font-size: 14px;"><%= value_including_sales_tax %></td>
+                </tr>
+            </table>
+        </div>
+
+        <div style="margin-top: 10px;">
+            <strong>Amount in Words:</strong> <span><%= amount_in_words %></span>
+        </div>
+
+        <div class="footer">
+            <div class="terms">
+                <strong>Terms & Conditions:</strong>
+                <ul>
+                    <li>Goods once delivered shall not be taken back.</li>
+                    <li>Company will not be responsible for goods damage after Delivery.</li>
+                    <li>Without prejudice to the recovery measures, surcharge @ 1% per week shall be levied.</li>
+                </ul>
+            </div>
+
+            <div class="signature-section">
+                <div class="signature-box">
+                    <img src="<%= stamp_url %>" alt="<%= business_name %> stamp"/>
+                    <img src="<%= signature_url %>" alt="<%= business_name %> signature"/>
+                    For <%= business_name %>
+                </div>
+            </div>
+
+            <div class="bottom-address">
+                <p><%= landmark %>, <%= street %>, <%= area %>, <%= city %>, <%= country %>. <%= tele_no %></p>
+                <p><%= email %></p>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

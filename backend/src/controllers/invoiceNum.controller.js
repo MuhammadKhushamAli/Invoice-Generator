@@ -1,6 +1,6 @@
-import { InvoiceNum } from "../models/invoiceNum.model";
-import { ApiResponse } from "../utils/ApiResponse";
-import { asyncHandler } from "../utils/asyncHandler";
+import { InvoiceNum } from "../models/invoiceNum.model.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
 export const getInvoiceNumber = asyncHandler(async (_, res) => {
   const invNum = await InvoiceNum.findOne({ key: "Invoice" });

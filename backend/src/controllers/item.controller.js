@@ -1,9 +1,9 @@
 import { isValidObjectId } from "mongoose";
-import { Item } from "../models/item.model";
-import { ApiError } from "../utils/ApiError";
-import { ApiResponse } from "../utils/ApiResponse";
-import { asyncHandler } from "../utils/asyncHandler";
-import { uploadToCloudinary } from "../utils/cloudinary";
+import { Item } from "../models/item.model.js";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { uploadToCloudinary } from "../utils/cloudinary.js";
 
 export const addItem = asyncHandler(async (req, res) => {
   let { name, price, quantity } = req?.body;
