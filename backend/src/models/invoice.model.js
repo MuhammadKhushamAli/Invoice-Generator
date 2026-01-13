@@ -17,7 +17,7 @@ const invoicesSchema = new mongoose.Schema(
     sale:{
         type: mongoose.Schema.Types.ObjectId,
         ref: "Sales"
-    }
+    },
     owner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
