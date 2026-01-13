@@ -120,6 +120,7 @@ export const registerUser = asyncHandler(async (req, res) => {
     const invNum = await InvoiceNum.create({
       key: "Invoice",
       inv_num: 0,
+      owner: newUser?._id,
     });
     if (!invNum) throw new ApiError(500, "Unable to create Invoice Number");
 

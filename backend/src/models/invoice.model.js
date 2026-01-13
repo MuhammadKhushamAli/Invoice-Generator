@@ -14,9 +14,9 @@ const invoicesSchema = new mongoose.Schema(
       required: [true, "Invoice URL is required"],
       trim: true,
     },
-    sale:{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Sales"
+    sale: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Sales",
     },
     owner: {
       type: mongoose.Schema.Types.ObjectId,
@@ -31,7 +31,7 @@ const invoicesSchema = new mongoose.Schema(
 
 invoicesSchema.pre("save", async function (next) {
   if (this.isModified("name")) return next();
-  const invNum = await InvoiceNum.findOne({ key: "Invoice" });
+  const invNum = await InvoiceNum.findOne({ key: "Invoice", owner: this?._id });
   if (!invNum) throw new ApiError(500, "Unable to et Invoice Num");
   this.name = invNum.inv_num;
   const updateInvNum = await InvoiceNum.findByIdAndUpdate(
