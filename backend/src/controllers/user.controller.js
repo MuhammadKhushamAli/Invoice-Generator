@@ -151,7 +151,7 @@ export const login = asyncHandler(async (req, res) => {
 
   if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email))
     throw new ApiError(422, "Invalid Email Formate");
-  
+
   if (
     !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(
       password
@@ -270,8 +270,8 @@ export const logout = asyncHandler(async (req, res) => {
 
 export const setInvoiceLogoStampAndSign = asyncHandler(async (req, res) => {
   const logo = req?.files["logo"]?.[0]?.path;
-  const stamp = req?.files["Stamp"]?.[0]?.path;
-  const sign = req?.files["Sign"]?.[0]?.path;
+  const stamp = req?.files["stamp"]?.[0]?.path;
+  const sign = req?.files["sign"]?.[0]?.path;
 
   if (!header || !footer) throw new ApiError(400, "All Fields Are Required");
 

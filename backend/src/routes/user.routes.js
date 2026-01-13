@@ -8,7 +8,7 @@ import {
   logout,
   refreshTokens,
   registerUser,
-  setInvoiceHeaderAndFooter,
+  setInvoiceLogoStampAndSign,
 } from "../controllers/user.controller.js";
 import { authentication } from "../middlewares/auth.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
@@ -23,15 +23,19 @@ router.route("/set-invoice-header-and-footer").post(
     authentication,
     upload.fields([
         {
-            name: "header",
+            name: "logo",
             maxCount: 1,
         },
         {
-            name: "footer",
+            name: "stamp",
+            maxCount: 1,
+        },
+        {
+            name: "sign",
             maxCount: 1,
         },
     ]),
-    setInvoiceHeaderAndFooter
+    setInvoiceLogoStampAndSign
 );
 router.route("/logout").get(authentication, logout);
 router.route("/refresh-tokens").get(authentication, refreshTokens);
