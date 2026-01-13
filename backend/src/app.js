@@ -38,7 +38,7 @@ app.use("/api/v1/item", itemRoute);
 app.use("/api/v1/sales", salesRoute);
 app.use("/api/v1/invoice-num", invoiceNumRoute);
 
-app.use((err, req, res, next) => {
+app.use((err, _, res, __) => {
   res
     .status(err.statusCode || 500)
     .json(
