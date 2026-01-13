@@ -73,6 +73,9 @@ export const updateQuantity = asyncHandler(async (req, res) => {
   const item = await Item.findById(itemId);
   if (!item) throw new ApiError(404, "Item not Found");
 
+  if (!item?.isAuthorizedToChange(req?.user?._id))
+    throw new ApiError(401, "Unauthorized Access");
+
   if (!item?.isValidQuantity(quantity))
     throw new ApiError(
       400,

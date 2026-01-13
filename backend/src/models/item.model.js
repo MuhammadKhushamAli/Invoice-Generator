@@ -31,4 +31,9 @@ itemSchema.methods.isQuantityValid = function (quantity)
     return this.quantity >= quantity;
 }
 
+itemSchema.methods.isAuthorizedToChange = function (ownerId) {
+  return this.owner?.equals(ownerId);
+};
+
+
 export const Item = mongoose.model("Item", itemSchema);
