@@ -3,7 +3,10 @@ import { Item } from "../models/item.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { uploadToCloudinary, deleteFromCloudinary } from "../utils/cloudinary.js";
+import {
+  uploadToCloudinary,
+  deleteFromCloudinary,
+} from "../utils/cloudinary.js";
 import mongoose from "mongoose";
 
 export const addItem = asyncHandler(async (req, res) => {
@@ -33,7 +36,7 @@ export const addItem = asyncHandler(async (req, res) => {
     imageUrl = await uploadToCloudinary(image);
     if (!imageUrl)
       throw new ApiError(500, "Unable to upload Image on Cloudinary");
-  
+
     const newItem = await Item.create({
       name,
       price,
@@ -42,10 +45,9 @@ export const addItem = asyncHandler(async (req, res) => {
       owner: req?.user?._id,
     });
     if (!newItem) throw new ApiError(500, "Unable to Create Item");
-  
+
     await session.commitTransaction();
     session.endSession();
-  
 
     return res
       .status(200)
@@ -76,7 +78,7 @@ export const updateQuantity = asyncHandler(async (req, res) => {
   if (!item?.isAuthorizedToChange(req?.user?._id))
     throw new ApiError(401, "Unauthorized Access");
 
-  if (!item?.isValidQuantity(quantity))
+  if (!item?.isQuantityValid(quantity))
     throw new ApiError(
       400,
       "Desired quantity must be less than available quantity"
@@ -85,8 +87,8 @@ export const updateQuantity = asyncHandler(async (req, res) => {
   const updatedItem = await Item.findByIdAndUpdate(
     itemId,
     {
-      $inc: {
-        quantity: -quantity,
+      $set: {
+        quantity,
       },
     },
     {
@@ -97,16 +99,16 @@ export const updateQuantity = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, "Quantity Successfully Updated"));
+    .json(new ApiResponse(200, "Quantity Successfully Updated", updatedItem));
 });
 
 export const viewItem = asyncHandler(async (req, res) => {
   let { itemId } = req?.params;
 
   itemId = itemId?.trim();
-  if (itemId) throw new ApiError(400, "Item Id Required");
+  if (!itemId) throw new ApiError(400, "Item Id Required");
 
-  if (isValidObjectId(itemId)) throw new ApiError(400, "Invlaid Item ID");
+  if (!isValidObjectId(itemId)) throw new ApiError(400, "Invlaid Item ID");
 
   const item = await Item.findOne({
     _id: itemId,
