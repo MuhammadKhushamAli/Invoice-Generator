@@ -17,7 +17,6 @@ const { toWords } = pkg;
 export const addSale = asyncHandler(async (req, res) => {
   let {
     itemsInfo,
-    invoiceNum,
     hsCode,
     AttnTo,
     customerName,
@@ -34,7 +33,6 @@ export const addSale = asyncHandler(async (req, res) => {
     freightOtherCharges,
   } = req?.body;
 
-  invoiceNum = invoiceNum?.trim();
   hsCode = hsCode?.trim();
   AttnTo = AttnTo?.trim();
   customerName = customerName?.trim();
@@ -67,7 +65,6 @@ export const addSale = asyncHandler(async (req, res) => {
       Array.isArray(itemsInfo) &&
       itemsInfo?.length &&
       ![
-        invoiceNum,
         hsCode,
         AttnTo,
         customerName,
@@ -89,7 +86,7 @@ export const addSale = asyncHandler(async (req, res) => {
   try {
     let totalPayableWithoutTaxes = 0;
     await Promise.all(
-      itemInfo?.map(async (item) => {
+      itemsInfo?.map(async (item) => {
         if (item.quantity <= 0 || item.price <= 0)
           throw new ApiError(400, "Invalid Quantity or Price");
         if (!isValidObjectId(item._id))
@@ -188,7 +185,7 @@ export const addSale = asyncHandler(async (req, res) => {
 
     const itemsSoldDocs = await ItemsSold.insertMany(
       // Item Info has _id, quantity, price which is of one piece entered by user
-      itemInfo?.map((item_) => ({
+      itemsInfo?.map((item_) => ({
         item: item_?._id,
         quantity: item_?.quantity,
         price: item_?.price,
