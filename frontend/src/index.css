@@ -6,3 +6,8 @@
   90% { transform: translate(-50%, 20px); }
   100% { transform: translate(-50%, -100%); }
 }
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
