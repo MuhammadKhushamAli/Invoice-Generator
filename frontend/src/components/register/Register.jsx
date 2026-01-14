@@ -68,7 +68,7 @@ export function Register() {
           );
           if (logInResponse.status === 200) {
             dispatch(login({ userData: logInResponse.data.user }));
-            navigate("/");
+            navigate("/create-credentials");
           } else {
             setAlert(logInResponse.response.message);
           }
