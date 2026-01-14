@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { Loading } from "../Loading.jsx";
+import { set } from "mongoose";
 
 export function InvoiceCredentials() {
   const [alert, setAlert] = useState("");
@@ -29,10 +30,12 @@ export function InvoiceCredentials() {
   const navigate = useNavigate();
   // just for Login Check
   useEffect(() => {
+    setIsLoading(true);
     if (!isLoggedIn) {
       navigate("/login");
     }
-  });
+    setIsLoading(false);
+  }, [isLoggedIn]);
 
   const onDrop = useCallback(
     (type) => (file) => {
