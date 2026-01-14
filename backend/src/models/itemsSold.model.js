@@ -22,7 +22,8 @@ const itemsSoldSchema = new mongoose.Schema({
 });
 
 itemsSoldSchema.pre("save", async function () {
-  this?.price = this?.quantity * this?.price;
+  const p = this?.quantity * this?.price;
+  console.log(p);
 });
 
 export const ItemsSold = mongoose.model("ItemsSold", itemsSoldSchema);

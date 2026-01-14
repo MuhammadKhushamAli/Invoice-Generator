@@ -133,7 +133,7 @@ export const addSale = asyncHandler(async (req, res) => {
 
     return res
       .status(200)
-      .json(new ApiResponse(200, "Sale Created Successfully", sale));
+      .json(new ApiResponse(200, "Sale Created Successfully", updatedSale));
   } catch (error) {
     await session.abortTransaction();
     session.endSession();

@@ -19,6 +19,7 @@
             border: 1px solid #eee;
             background-color: #fff;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+            position: relative;
         }
         /* Header Section */
         .header {
@@ -26,7 +27,6 @@
             margin-bottom: 20px;
         }
         .logo {
-            /* Adjusted to accept an image file */
             width: 120px; 
             height: auto;
             display: block;
@@ -88,14 +88,37 @@
         th {
             background-color: #f9f9f9;
         }
-        
-        /* Totals Section */
-        .totals-container {
+
+        /* --- LAYOUT WRAPPER --- */
+        .bottom-wrapper {
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-top: 10px;
+            page-break-inside: avoid; 
         }
-        .totals-table {
+
+        .left-section {
+            width: 45%;
+            font-size: 11px;
+        }
+
+        .right-section {
             width: 50%;
+        }
+
+        /* Terms Styling */
+        .terms ul {
+            padding-left: 20px;
+            margin: 5px 0;
+        }
+        .terms li {
+            margin-bottom: 5px;
+        }
+        
+        /* Totals Styling */
+        .totals-table {
+            width: 100%; 
             border-collapse: collapse;
         }
         .totals-table td {
@@ -112,31 +135,48 @@
             margin-top: 30px;
             font-size: 10px;
         }
-        .terms {
-            margin-bottom: 20px;
-        }
+
         .signature-section {
             display: flex;
-            justify-content: space-between;
-            margin-top: 40px;
+            /* Changed to center or start since it is now in a smaller column */
+            justify-content: flex-start; 
+            margin-top: 20px; /* Reduced margin slightly to fit better under terms */
+            page-break-inside: avoid;
         }
+        
+        /* --- SIGNATURE STYLING --- */
         .signature-box {
             text-align: center;
             width: 200px;
-            border-top: 1px solid #000;
-            padding-top: 5px;
-            /* Added relative positioning to handle images better if needed */
-            position: relative; 
-        }
-        /* ADDED STYLES FOR STAMP AND SIGNATURE */
-        .signature-box img {
-            display: block;
-            margin: 5px auto; /* Centers the images and adds spacing */
-            max-width: 100px; /* Restricts width so it fits in the box */
-            height: auto;     /* Maintains aspect ratio */
-            object-fit: contain;
+            border-top: none; 
+            padding-top: 10px;
+            position: relative;
         }
         
+        .signature-box img {
+            display: block;
+            margin: 0 auto;
+            object-fit: contain;
+        }
+
+        /* The Stamp */
+        .signature-box img:nth-of-type(1) {
+            width: 90px;
+            margin-bottom: -50px; 
+            position: relative;
+            z-index: 1; 
+            opacity: 0.9;
+        }
+
+        /* The Signature */
+        .signature-box img:nth-of-type(2) {
+            width: 110px;
+            position: relative;
+            z-index: 2; 
+            margin-bottom: 5px; 
+        }
+        /* --- END SIGNATURE STYLING --- */
+
         .bottom-address {
             text-align: center;
             margin-top: 20px;
@@ -208,57 +248,62 @@
             </tbody>
         </table>
 
-        <div class="totals-container">
-            <table class="totals-table">
-                <tr>
-                    <td class="label">Taxable Value</td>
-                    <td><%= taxable_value %></td>
-                </tr>
-                <tr>
-                    <td class="label">Sales Tax @ <%= sales_tax_rate %>%</td>
-                    <td><%= sales_tax %></td>
-                </tr>
-                <tr>
-                    <td class="label">Special Excise Duty @ <%= special_excise_rate %>%</td>
-                    <td><%= special_excise_tax %></td>
-                </tr>
-                <tr>
-                    <td class="label">Further Sales Tax @ <%= further_sales_tax_rate %>%</td>
-                    <td><%= further_sales_tax %></td>
-                </tr>
-                <tr>
-                    <td class="label">Add: Freight/Other Charges</td>
-                    <td><%= freight_other_charges %></td>
-                </tr>
-                <tr>
-                    <td class="label" style="font-size: 14px;">Value Including Sales Tax</td>
-                    <td style="font-weight: bold; font-size: 14px;"><%= value_including_sales_tax %></td>
-                </tr>
-            </table>
-        </div>
+        <div class="bottom-wrapper">
+            
+            <div class="left-section">
+                <div class="terms">
+                    <strong>Terms & Conditions:</strong>
+                    <ul>
+                        <li>Goods once delivered shall not be taken back.</li>
+                        <li>Company will not be responsible for goods damage after Delivery.</li>
+                        <li>Without prejudice to the recovery measures, surcharge @ 1% per week shall be levied.</li>
+                    </ul>
+                </div>
 
-        <!-- <div style="margin-top: 10px;">
-            <strong>Amount in Words:</strong> <span><%= amount_in_words %></span>
-        </div> -->
-
-        <div class="footer">
-            <div class="terms">
-                <strong>Terms & Conditions:</strong>
-                <ul>
-                    <li>Goods once delivered shall not be taken back.</li>
-                    <li>Company will not be responsible for goods damage after Delivery.</li>
-                    <li>Without prejudice to the recovery measures, surcharge @ 1% per week shall be levied.</li>
-                </ul>
-            </div>
-
-            <div class="signature-section">
-                <div class="signature-box">
-                    <img src="<%= stamp_url %>" alt="<%= business_name %> stamp"/>
-                    <img src="<%= signature_url %>" alt="<%= business_name %> signature"/>
-                    For <%= business_name %>
+                <div class="signature-section">
+                    <div class="signature-box">
+                        <img src="<%= stamp_url %>" alt="<%= business_name %> stamp"/>
+                        <img src="<%= signature_url %>" alt="<%= business_name %> signature"/>
+                        For <%= business_name %>
+                    </div>
                 </div>
             </div>
 
+            <div class="right-section">
+                <table class="totals-table">
+                    <tr>
+                        <td class="label">Taxable Value</td>
+                        <td><%= taxable_value %></td>
+                    </tr>
+                    <tr>
+                        <td class="label">Sales Tax @ <%= sales_tax_rate %>%</td>
+                        <td><%= sales_tax %></td>
+                    </tr>
+                    <tr>
+                        <td class="label">Special Excise Duty @ <%= special_excise_rate %>%</td>
+                        <td><%= special_excise_tax %></td>
+                    </tr>
+                    <tr>
+                        <td class="label">Further Sales Tax @ <%= further_sales_tax_rate %>%</td>
+                        <td><%= further_sales_tax %></td>
+                    </tr>
+                    <tr>
+                        <td class="label">Add: Freight/Other Charges</td>
+                        <td><%= freight_other_charges %></td>
+                    </tr>
+                    <tr>
+                        <td class="label" style="font-size: 14px;">Value Including Sales Tax</td>
+                        <td style="font-weight: bold; font-size: 14px;"><%= value_including_sales_tax %></td>
+                    </tr>
+                </table>
+
+                <div style="margin-top: 10px;">
+                    <strong>Amount in Words:</strong> <span><%= amount_in_words %></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
             <div class="bottom-address">
                 <p><%= landmark %>, <%= street %>, <%= area %>, <%= city %>, <%= country %>. <%= tele_no %></p>
                 <p><%= email %></p>

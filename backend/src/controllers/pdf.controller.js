@@ -3,8 +3,14 @@ import puppeteer from "puppeteer";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import path from "path";
-import { Address } from "../models/address.model";
-import { uploadToCloudinary } from "../utils/cloudinary";
+import { Address } from "../models/address.model.js";
+import { uploadToCloudinary } from "../utils/cloudinary.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
+import { Item } from "../models/item.model.js";
+import { isValidObjectId } from "mongoose";
+import pkg from "number-to-words";
+
+const { toWords } = pkg;
 
 export const generatePdf = asyncHandler(async (req, res) => {
   let {
@@ -26,7 +32,6 @@ export const generatePdf = asyncHandler(async (req, res) => {
     freightOtherCharges,
   } = req?.body;
 
-  itemsInfo = itemsInfo?.trim();
   invoiceNum = invoiceNum?.trim();
   hsCode = hsCode?.trim();
   AttnTo = AttnTo?.trim();
@@ -56,7 +61,8 @@ export const generatePdf = asyncHandler(async (req, res) => {
   )
     throw new ApiError(400, "All Taxes fields are required");
 
-  itemsInfo = JSON.parse(itemsInfo);
+  // console.log(itemsInfo);
+  // itemsInfo = JSON.parse(itemsInfo);
 
   if (
     !(
@@ -154,10 +160,11 @@ export const generatePdf = asyncHandler(async (req, res) => {
     further_sales_tax: totalFurtherSaleTax,
     freight_other_charges: freightOtherCharges,
     value_including_sales_tax: totalPayableWithTaxes,
+    amount_in_words: toWords(totalPayableWithTaxes),
   };
 
   ejs.renderFile(templatePath, inputObj, {}, async (err, html) => {
-    if (err) throw new ApiError(500, "Error in Rendering Template");
+    if (err) throw new ApiError(500, `Error in Rendering Template: ${err}`);
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: "networkidle0" });
@@ -168,13 +175,14 @@ export const generatePdf = asyncHandler(async (req, res) => {
     });
     console.log("PDF Generated");
     await browser.close();
-  });
 
-  const pdfUrl = await uploadToCloudinary(pdfPath);
-  if (!pdfUrl) throw new ApiError(500, "Error in Uploading PDF");
-  return res.status(200).json(
-    new ApiError(200, "PDF Generated", {
-      pdfUrl: pdfUrl?.url,
-    })
-  );
+    const pdfUrl = await uploadToCloudinary(pdfPath);
+    if (!pdfUrl) throw new ApiError(500, "Error in Uploading PDF");
+
+    return res.status(200).json(
+      new ApiResponse(200, "PDF Generated", {
+        pdfUrl: pdfUrl?.url,
+      })
+    );
+  });
 });

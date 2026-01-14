@@ -21,6 +21,7 @@ const userSchema = new mongoose.Schema(
     slogan: {
       type: String,
       trim: true,
+      required: [true, "Slogan is required"],
     },
     password: {
       type: String,

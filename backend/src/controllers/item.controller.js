@@ -13,6 +13,7 @@ import mongoose from "mongoose";
 export const addItem = asyncHandler(async (req, res) => {
   let { name, price, quantity, range, design } = req?.body;
   const image = req?.file?.path;
+
   if (
     [name, price, quantity, image, range, design].some(
       (field) => !field || field?.trim() === ""
