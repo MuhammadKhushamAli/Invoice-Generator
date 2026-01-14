@@ -1,0 +1,40 @@
+import ejs from "ejs";
+import puppeteer from "puppeteer";
+import { ApiError } from "../../utils/ApiError.js";
+import path from "path";
+import { uploadToCloudinary } from "../../utils/cloudinary.js";
+import { getInvoiceNumber } from "./invoiceNum.util.js";
+
+export const generatePdf = async (inputObj, userId) => {
+  try {
+    const invoiceNum = await getInvoiceNumber(userId);
+    const pdfPath = `./public/temp/${invoiceNum}.pdf`;
+    const templatePath = path.join(
+      process.cwd(),
+      "src",
+      "utils",
+      "pdf_template.ejs"
+    );
+
+    ejs.renderFile(templatePath, inputObj, {}, async (err, html) => {
+      if (err) throw new ApiError(500, `Error in Rendering Template: ${err}`);
+      const browser = await puppeteer.launch();
+      const page = await browser.newPage();
+      await page.setContent(html, { waitUntil: "networkidle0" });
+      await page.pdf({
+        path: pdfPath,
+        format: "A4",
+        printBackground: true,
+      });
+      console.log("PDF Generated");
+      await browser.close();
+
+      const pdfUrl = await uploadToCloudinary(pdfPath);
+      if (!pdfUrl) throw new ApiError(500, "Error in Uploading PDF");
+
+      return pdfUrl?.url;
+    });
+  } catch (error) {
+    throw error;
+  }
+};

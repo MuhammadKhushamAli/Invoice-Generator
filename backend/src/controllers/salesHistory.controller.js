@@ -3,23 +3,83 @@ import { Invoice } from "../models/invoice.model.js";
 import { Item } from "../models/item.model.js";
 import { Sale } from "../models/sales.model.js";
 import { User } from "../models/user.model.js";
+import { Address } from "../models/address.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ItemsSold } from "../models/itemsSold.model.js";
 import { ApiError } from "../utils/ApiError.js";
-import {
-  uploadToCloudinary,
-  deleteFromCloudinary,
-} from "../utils/cloudinary.js";
+import { deleteFromCloudinary } from "../utils/cloudinary.js";
+import pkg from "number-to-words";
+import { generatePdf } from "./utils/pdf.util.js";
+
+const { toWords } = pkg;
 
 export const addSale = asyncHandler(async (req, res) => {
-  let { itemInfo } = req?.body;
-  const invFile = req?.file?.path;
+  let {
+    itemsInfo,
+    invoiceNum,
+    hsCode,
+    AttnTo,
+    customerName,
+    customerLandmark,
+    customerStreet,
+    customerArea,
+    customerCity,
+    customerCountry,
+    customerGST,
+    customerNTN,
+    salesTaxRate,
+    specialExciseRate,
+    furtherSalesTaxRate,
+    freightOtherCharges,
+  } = req?.body;
 
-  itemInfo = JSON.parse(itemInfo);
+  invoiceNum = invoiceNum?.trim();
+  hsCode = hsCode?.trim();
+  AttnTo = AttnTo?.trim();
+  customerName = customerName?.trim();
+  customerLandmark = customerLandmark?.trim();
+  customerStreet = customerStreet?.trim();
+  customerArea = customerArea?.trim();
+  customerCity = customerCity?.trim();
+  customerCountry = customerCountry?.trim();
+  customerGST = customerGST?.trim();
+  customerNTN = customerNTN?.trim();
+  salesTaxRate = salesTaxRate?.trim();
+  specialExciseRate = specialExciseRate?.trim();
+  furtherSalesTaxRate = furtherSalesTaxRate?.trim();
+  freightOtherCharges = freightOtherCharges?.trim();
 
-  if (!invFile) throw new ApiError(500, "File is not Uploaded Locally");
-  if (!(Array.isArray(itemInfo) && itemInfo?.length))
+  salesTaxRate = parseFloat(salesTaxRate);
+  specialExciseRate = parseFloat(specialExciseRate);
+  furtherSalesTaxRate = parseFloat(furtherSalesTaxRate);
+  freightOtherCharges = parseFloat(freightOtherCharges);
+
+  if (
+    salesTaxRate < 0 ||
+    specialExciseRate < 0 ||
+    furtherSalesTaxRate < 0 ||
+    freightOtherCharges < 0
+  )
+    throw new ApiError(400, "All Taxes fields are required");
+  if (
+    !(
+      Array.isArray(itemsInfo) &&
+      itemsInfo?.length &&
+      ![
+        invoiceNum,
+        hsCode,
+        AttnTo,
+        customerName,
+        customerStreet,
+        customerArea,
+        customerCity,
+        customerCountry,
+        customerGST,
+        customerNTN,
+      ].some((field) => !field || field?.trim() === "")
+    )
+  )
     throw new ApiError(400, "All fields are required");
 
   let fileUrl = null;
@@ -27,6 +87,7 @@ export const addSale = asyncHandler(async (req, res) => {
   session.startTransaction();
 
   try {
+    let totalPayableWithoutTaxes = 0;
     await Promise.all(
       itemInfo?.map(async (item) => {
         if (item.quantity <= 0 || item.price <= 0)
@@ -37,17 +98,73 @@ export const addSale = asyncHandler(async (req, res) => {
         if (!itemFound) throw new ApiError(404, "Item Not Found");
         if (!itemFound?.isQuantityValid(item.quantity))
           throw new ApiError(400, "Invalid Quantity");
+        totalPayableWithoutTaxes += item?.price * item?.quantity;
       })
     );
 
-    fileUrl = await uploadToCloudinary(invFile);
-    if (!fileUrl) throw new ApiError(500, "Unable to Upload on Cloudinary");
+    const totalSaleTax = (salesTaxRate / 100) * totalPayableWithoutTaxes;
+    const totalExciseTax = (specialExciseRate / 100) * totalPayableWithoutTaxes;
+    const totalFurtherSaleTax =
+      (furtherSalesTaxRate / 100) * totalPayableWithoutTaxes;
+    const totalPayableWithTaxes =
+      totalPayableWithoutTaxes +
+      totalSaleTax +
+      totalExciseTax +
+      totalFurtherSaleTax +
+      freightOtherCharges;
+
+    const user = req?.user;
+    const address = await Address.findById(user?.address);
+    if (!address) throw new ApiError(500, "Address Not Found");
+
+    const inputObj = {
+      business_name: user?.businessName,
+      email: user?.email,
+      slogan: user?.slogan,
+      stamp_url: user?.invoiceStamp,
+      logo_url: user?.invoiceLogo,
+      signature_url: user?.invoiceSign,
+      landmark: address?.landmark,
+      street: address?.street,
+      area: address?.area,
+      city: address?.city,
+      country: address?.country,
+      tele_no: user?.phone_no,
+      your_GST: user?.gst_no,
+      your_NTN: user?.ntn_no,
+      invoice_no: invoiceNum,
+      date: new Date().toLocaleDateString("en-us"),
+      hs_code: hsCode,
+      Attn_to: AttnTo,
+      customer_name: customerName,
+      customer_landmark: customerLandmark,
+      customer_street: customerStreet,
+      customer_area: customerArea,
+      customer_city: customerCity,
+      customer_country: customerCountry,
+      customer_GST: customerGST,
+      customer_NTN: customerNTN,
+      items: itemsInfo,
+      taxable_value: totalPayableWithoutTaxes,
+      sales_tax_rate: salesTaxRate,
+      sales_tax: totalSaleTax,
+      special_excise_rate: specialExciseRate,
+      special_excise_tax: totalExciseTax,
+      further_sales_tax_rate: furtherSalesTaxRate,
+      further_sales_tax: totalFurtherSaleTax,
+      freight_other_charges: freightOtherCharges,
+      value_including_sales_tax: totalPayableWithTaxes,
+      amount_in_words: toWords(totalPayableWithTaxes),
+    };
+
+    fileUrl = await generatePdf(inputObj, user?._id);
+    if (!fileUrl) throw new ApiError(500, "Unable to Generate PDF");
 
     const invoice = (
       await Invoice.create(
         [
           {
-            url: fileUrl?.url,
+            url: fileUrl,
             owner: req?.user?._id,
           },
         ],
@@ -113,7 +230,7 @@ export const addSale = asyncHandler(async (req, res) => {
     );
     if (!updateInv) throw new ApiError(500, "Invoice Not Updated");
 
-    const user = await User.findByIdAndUpdate(
+    const updatedUser = await User.findByIdAndUpdate(
       req?.user?._id,
       {
         $push: {
@@ -126,7 +243,7 @@ export const addSale = asyncHandler(async (req, res) => {
         new: true,
       }
     );
-    if (!user) throw new ApiError(500, "Unable to update the user");
+    if (!updatedUser) throw new ApiError(500, "Unable to update the user");
 
     await session.commitTransaction();
     session.endSession();
@@ -186,10 +303,9 @@ export const removeSale = asyncHandler(async (req, res) => {
     );
     if (!updatedUser) throw new ApiError(500, "User Update Failed");
 
-    
     await session.commitTransaction();
     session.endSession();
-    
+
     deletedCloudinaryInv = await deleteFromCloudinary(deletedInv?.url);
     if (!deletedCloudinaryInv)
       throw new ApiError(500, "Unable to Delete Invoice from Cloudinary");
