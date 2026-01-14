@@ -59,10 +59,13 @@ export function Register() {
           data
         );
         if (response.status === 200) {
-          const logInResponse = await axiosInstance.post("/api/v1/user/login", {
-            email: data.email,
-            password: data.password,
-          });
+          const logInResponse = await axiosInstance.patch(
+            "/api/v1/user/login",
+            {
+              email: data.email,
+              password: data.password,
+            }
+          );
           if (logInResponse.status === 200) {
             dispatch(login({ userData: logInResponse.data.user }));
             navigate("/");
@@ -236,8 +239,8 @@ export function Register() {
 
         {/* SUBMIT */}
         <div className="flex justify-end">
-          <Button type="submit" Icon={Save}>
-            Submit
+          <Button type="submit" Icon={Save} disabled={isLoading}>
+            Register
           </Button>
         </div>
       </form>
