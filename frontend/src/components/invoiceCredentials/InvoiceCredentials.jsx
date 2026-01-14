@@ -13,9 +13,12 @@ import {
   CheckCircle,
   X,
 } from "lucide-react";
+import { useState } from "react";
+import { Loading } from "../Loading.jsx";
 
 export function InvoiceCredentials() {
   const [alert, setAlert] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
   const [logo, setLogo] = useState(null);
   const [stamp, setStamp] = useState(null);
   const [sign, setSign] = useState(null);
@@ -49,6 +52,8 @@ export function InvoiceCredentials() {
   );
 
   const onSubmit = async () => {
+    setAlert("");
+    setIsLoading(true);
     try {
       if (logo !== null || stamp !== null || sign !== null) {
         const logoFormData = new FormData();
@@ -74,6 +79,8 @@ export function InvoiceCredentials() {
       }
     } catch (error) {
       setAlert(error?.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -81,7 +88,9 @@ export function InvoiceCredentials() {
   const stampDropzone = useDropzone({ onDrop: onDrop("stamp") });
   const signDropzone = useDropzone({ onDrop: onDrop("sign") });
 
-  return (
+  return isLoading ? (
+    <Loading />
+  ) : (
     <div className="mx-auto w-full max-w-5xl rounded-xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/50 md:p-10">
       {/* Error Component */}
       {alert && <Error message={alert} />}
