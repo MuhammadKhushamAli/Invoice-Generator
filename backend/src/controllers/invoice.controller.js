@@ -11,7 +11,7 @@ export const invoiceView = asyncHandler(async (req, res) => {
   if (!invoiceId) throw new ApiError(400, "Invoice ID Required");
   if (isValidObjectId(invoiceId)) throw new ApiError(400, "Invalid Invoice ID");
 
-  const invoice = await Invoice.findOnes({
+  const invoice = await Invoice.findOne({
     $and: [{ _id: invoiceId }, { owner: req?.user?._id }],
   }).select("-owner -sale");
   if (!invoice) throw new ApiError(404, "Invoice not Found");
