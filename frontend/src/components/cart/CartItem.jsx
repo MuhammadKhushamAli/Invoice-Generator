@@ -22,7 +22,7 @@ export function CartItem({ item, onDelete }) {
           </h3>
           <div className="mt-1 flex items-center gap-3 text-sm text-slate-500">
             <h5 className="font-medium text-slate-700">
-              ${item?.price}{" "}
+              ${item?.price}{" / Item "}
               {/* Added $ for formatting, remove if handled in data */}
             </h5>
             <span className="h-1 w-1 rounded-full bg-slate-300"></span>{" "}

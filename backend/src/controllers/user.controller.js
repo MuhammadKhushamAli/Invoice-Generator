@@ -368,6 +368,7 @@ export const getInvoices = asyncHandler(async (req, res) => {
   userId = userId?.trim();
   page = parseInt(page);
 
+
   if (!userId) throw new ApiError(400, "User ID must be required");
   if (!isValidObjectId(userId)) throw new ApiError(400, "Invalid Object Id");
   if (page < 1) page = 1;
@@ -425,14 +426,14 @@ export const getItems = asyncHandler(async (req, res) => {
   userId = userId?.trim();
   page = parseInt(page);
 
-  if (userId) throw new ApiError(400, "User ID Must be Required");
+  if (!userId) throw new ApiError(400, "User ID Must be Required");
   if (!isValidObjectId(userId)) throw new ApiError(400, "Invalid User ID");
   if (page < 1) page = 1;
 
   const items = User.aggregate([
     {
       $match: {
-        _id: userId,
+        _id: new mongoose.Types.ObjectId(userId),
       },
     },
     {
@@ -440,10 +441,11 @@ export const getItems = asyncHandler(async (req, res) => {
         from: "items",
         localField: "items",
         foreignField: "_id",
-        as: "Items",
+        as: "items",
         pipeline: [
           {
             $project: {
+              _id: 1,
               name: 1,
               price: 1,
               quantity: 1,
@@ -455,7 +457,7 @@ export const getItems = asyncHandler(async (req, res) => {
     },
     {
       $project: {
-        Items: 1,
+        items: 1,
       },
     },
   ]);

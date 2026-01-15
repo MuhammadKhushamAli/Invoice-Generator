@@ -18,10 +18,9 @@ export function InvoicePage() {
     const controller = new AbortController();
     const fetchInvoices = async () => {
       try {
-        if (!isLoggedIn) {
+        if (isLoggedIn) {
           setAlert("");
           setIsLoading(true);
-
           const invoicesResponse = await axiosInstance.get(
             "/api/v1/user/get-invoices",
             {

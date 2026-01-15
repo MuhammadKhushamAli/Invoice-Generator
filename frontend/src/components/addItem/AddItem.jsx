@@ -45,7 +45,7 @@ export function AddItem({ onClick = null }) {
   }, [isLoggedIn]);
 
   const dataURLtoBlob = useCallback((dataURL) => {
-    const arr = dataUrl.split(",");
+    const arr = dataURL.split(",");
     const mime = arr[0].match(/:(.*?);/)[1];
     const bstr = atob(arr[1]);
     let n = bstr.length;

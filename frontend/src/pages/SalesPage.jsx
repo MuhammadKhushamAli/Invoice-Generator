@@ -18,7 +18,7 @@ export function SalesPage() {
     const controller = new AbortController();
     const fetchSales = async () => {
       try {
-        if (!isLoggedIn) {
+        if (isLoggedIn) {
           setAlert("");
           setIsLoading(true);
 

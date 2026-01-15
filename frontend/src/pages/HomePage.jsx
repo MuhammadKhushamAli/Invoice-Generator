@@ -3,7 +3,6 @@ import { Container } from "../components";
 
 export function HomePage() {
   const userData = useSelector((state) => state?.auth?.userData);
-  console.log(userData);
 
   return (
     <Container className="flex min-h-[60vh] flex-col items-center justify-center py-12">

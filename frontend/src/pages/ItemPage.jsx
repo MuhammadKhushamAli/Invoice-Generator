@@ -17,8 +17,8 @@ export function ItemPage() {
   useEffect(() => {
     const controller = new AbortController();
     const fetchItems = async () => {
-    try {
-      if (!isLoggedIn) {
+      try {
+        if (!isLoggedIn) navigate("/login");
         setAlert("");
         setIsLoading(true);
 
@@ -30,19 +30,17 @@ export function ItemPage() {
           }
         );
         if (itemsResponse?.status === 200) {
-          const newItems = itemsResponse?.data?.docs?.[0] || [];
+          const newItems = itemsResponse?.data?.docs?.[0].items || [];
           setItems((prev) => [...prev, ...newItems]);
           isNextPage.current = itemsResponse?.data?.hasNextPage;
         }
-      } else {
-        navigate("/login");
+      } catch (error) {
+        if (error.name !== "CanceledError" || error.code !== "ERR_CANCELED")
+          setAlert(error.message);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      setAlert(error.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    };
     fetchItems();
     return () => controller.abort();
   }, [currentPage, isLoggedIn]);
