@@ -9,7 +9,6 @@ import { Error } from "../Error.jsx";
 import { Input } from "../Input.jsx";
 import { Button } from "../Button.jsx";
 import { Mail, Lock, LogIn } from "lucide-react";
-
 export function Login() {
   const [alert, setAlert] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -44,12 +43,12 @@ export function Login() {
 
   return (
     <div className="flex min-h-[80vh] items-center justify-center p-4">
-      {/* Error Component (Logically same place) */}
+      {/* Error Component */}
       {alert && <Error message={alert} />}
 
       {/* Card Container */}
       <div className="w-full max-w-md space-y-8 rounded-2xl bg-white p-8 shadow-xl shadow-slate-200/50 ring-1 ring-slate-900/5">
-        {/* Header Text (Visual enhancement) */}
+        {/* Header Text */}
         <div className="text-center">
           <h2 className="text-3xl font-bold tracking-tight text-slate-900">
             Welcome Back
@@ -64,10 +63,10 @@ export function Login() {
           <div className="space-y-5">
             <Input
               type="text"
-              label="Email Address" // Updated text for formality
+              label="Email Address"
               placeholder="name@company.com"
               disabled={isLoading}
-              Icon={Mail} // Using the Mail icon
+              Icon={Mail}
               {...register("email", { required: true })}
             />
             <Input
@@ -75,7 +74,7 @@ export function Login() {
               label="Password"
               placeholder="••••••••"
               disabled={isLoading}
-              Icon={Lock} // Using the Lock icon
+              Icon={Lock}
               {...register("password", { required: true })}
             />
           </div>
@@ -83,7 +82,7 @@ export function Login() {
           <Button
             type="submit"
             disabled={isLoading}
-            className="w-full py-2.5 shadow-indigo-500/20" // Full width button
+            className="w-full py-2.5 shadow-lg shadow-indigo-500/20"
             Icon={LogIn}
           >
             Sign In
