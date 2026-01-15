@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { axiosInstance } from "../axios/axios.js";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
-import { Container, Error, InvoiceCard, Loading, SaleLog } from "../components";
+import { Container, Error, Loading, SaleLog } from "../components";
 
 export function InvoicePage() {
   const isLoggedIn = useSelector((state) => state?.auth?.loginStatus);
@@ -65,6 +65,7 @@ export function InvoicePage() {
   ) : (
     <Container className="max-w-7xl!">
       {" "}
+      {alert && <Error message={alert} />}
       {/* Expand container width for grid layout */}
       {/* Page Header */}
       <div className="mb-8 flex flex-col gap-2 border-b border-slate-200 pb-6 md:flex-row md:items-center md:justify-between">
