@@ -63,7 +63,7 @@ export function InvoicePage() {
   return isLoading ? (
     <Loading />
   ) : (
-    <Container className="!max-w-7xl">
+    <Container className="max-w-7xl!">
       {" "}
       {/* Expand container width for grid layout */}
       {/* Page Header */}
