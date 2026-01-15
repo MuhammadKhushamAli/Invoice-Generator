@@ -5,7 +5,6 @@ import { InvoiceCard } from "./invoicesCard/InvoiceCard.jsx";
 import { InvoiceView } from "./invoiceView/InvoiceView.jsx";
 import { ItemCard } from "./itemCard/ItemCard.jsx";
 import { SaleLog } from "./salesLog/SaleLog.jsx";
-import { SaleForm } from "./saleForm/SaleForm.jsx";
 import { Register } from "./register/Register.jsx";
 import { Login } from "./login/Login.jsx";
 
@@ -17,7 +16,6 @@ InvoiceCard,
 InvoiceView,
 ItemCard,
 SaleLog,
-SaleForm,
 Register,
 Login
 };
