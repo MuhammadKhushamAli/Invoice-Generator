@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "User Name is required"],
       index: true,
-      unique: true,
+      unique: [true, "User Name Must be Unique"],
       trim: true,
       lowercase: true,
     },
@@ -31,14 +31,14 @@ const userSchema = new mongoose.Schema(
     email: {
       type: String,
       required: [true, "Email is required"],
-      unique: true,
+      unique: [true, "Email Must be Unique"],
       trim: true,
-      lowercase: true,
+      lowercase: [true, "Email Must be Lowercase"],
     },
     phone_no: {
       type: String,
       required: [true, "Phone No. is required"],
-      unique: true,
+      unique: [true, "Phone No. Must be Unique"],
     },
     address: {
       type: mongoose.Schema.Types.ObjectId,

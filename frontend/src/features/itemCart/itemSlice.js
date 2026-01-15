@@ -16,12 +16,12 @@ const itemSlice = createSlice({
                 state?.cart?.push(itemToBeAdded);
             }
             else{
-                state?.cart[index]?.quantity += itemToBeAdded?.quantity
+                state.cart[index].quantity += itemToBeAdded?.quantity
             }
         },
         removeItem: (state, action) => {
             const itemToBeAdded = action?.payload?.item;
-            state?.cart = state?.cart?.filter(item => item?._id !== itemToBeAdded?._id);
+            state.cart = state?.cart?.filter(item => item?._id !== itemToBeAdded?._id);
         },
         clearCart: (state) => {
             state.cart = [];

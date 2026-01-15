@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { axiosInstance } from "../axios/axios.js";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
@@ -14,33 +14,36 @@ export function InvoicePage() {
   const isNextPage = useRef(false);
   const navigate = useNavigate();
 
-  useEffect(async () => {
+  useEffect(() => {
     const controller = new AbortController();
-    try {
-      if (!isLoggedIn) {
-        setAlert("");
-        setIsLoading(true);
+    const fetchInvoices = async () => {
+      try {
+        if (!isLoggedIn) {
+          setAlert("");
+          setIsLoading(true);
 
-        const invoicesResponse = await axiosInstance.get(
-          "/api/v1/user/get-invoices",
-          {
-            params: { userId: userData?._id, page: currentPage },
-            signal: controller.signal,
+          const invoicesResponse = await axiosInstance.get(
+            "/api/v1/user/get-invoices",
+            {
+              params: { userId: userData?._id, page: currentPage },
+              signal: controller.signal,
+            }
+          );
+          if (invoicesResponse?.status === 200) {
+            const newInvoices = invoicesResponse?.data?.docs?.[0] || [];
+            setInvoices((prev) => [...prev, ...newInvoices]);
+            isNextPage.current = invoicesResponse?.data?.hasNextPage;
           }
-        );
-        if (invoicesResponse?.status === 200) {
-          const newInvoices = invoicesResponse?.data?.docs?.[0] || [];
-          setInvoices((prev) => [...prev, ...newInvoices]);
-          isNextPage.current = invoicesResponse?.data?.hasNextPage;
+        } else {
+          navigate("/login");
         }
-      } else {
-        navigate("/login");
+      } catch (error) {
+        setAlert(error.message);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      setAlert(error.message);
-    } finally {
-      setIsLoading(false);
-    }
+    };
+    fetchInvoices();
     return () => controller.abort();
   }, [currentPage, isLoggedIn]);
 

@@ -1,10 +1,10 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { axiosInstance } from "../axios/axios.js";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import { Container, Error, Loading, SaleLog } from "../components";
 
-export function InvoicePage() {
+export function SalesPage() {
   const isLoggedIn = useSelector((state) => state?.auth?.loginStatus);
   const userData = useSelector((state) => state?.auth?.userData);
   const [currentPage, setCurrentPage] = useState(1);
@@ -14,33 +14,36 @@ export function InvoicePage() {
   const isNextPage = useRef(false);
   const navigate = useNavigate();
 
-  useEffect(async () => {
+  useEffect(() => {
     const controller = new AbortController();
-    try {
-      if (!isLoggedIn) {
-        setAlert("");
-        setIsLoading(true);
+    const fetchSales = async () => {
+      try {
+        if (!isLoggedIn) {
+          setAlert("");
+          setIsLoading(true);
 
-        const salesResponse = await axiosInstance.get(
-          "/api/v1/user/get-sales",
-          {
-            params: { userId: userData?._id, page: currentPage },
-            signal: controller.signal,
+          const salesResponse = await axiosInstance.get(
+            "/api/v1/user/get-sales",
+            {
+              params: { userId: userData?._id, page: currentPage },
+              signal: controller.signal,
+            }
+          );
+          if (salesResponse?.status === 200) {
+            const newSales = salesResponse?.data?.docs?.[0] || [];
+            setSales((prev) => [...prev, ...newSales]);
+            isNextPage.current = salesResponse?.data?.hasNextPage;
           }
-        );
-        if (salesResponse?.status === 200) {
-          const newSales = salesResponse?.data?.docs?.[0] || [];
-          setSales((prev) => [...prev, ...newSales]);
-          isNextPage.current = salesResponse?.data?.hasNextPage;
+        } else {
+          navigate("/login");
         }
-      } else {
-        navigate("/login");
+      } catch (error) {
+        setAlert(error.message);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      setAlert(error.message);
-    } finally {
-      setIsLoading(false);
-    }
+    };
+    fetchSales();
     return () => controller.abort();
   }, [currentPage, isLoggedIn]);
 

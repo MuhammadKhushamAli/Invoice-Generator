@@ -17,6 +17,7 @@ import {
   Truck,
   CheckCircle,
 } from "lucide-react";
+import { Error } from "../Error.jsx";
 
 export function SaleForm() {
   const isLoggedIn = useSelector((state) => state?.auth?.loginStatus);
@@ -63,6 +64,7 @@ export function SaleForm() {
     <Loading />
   ) : (
     <div className="mx-auto w-full max-w-5xl rounded-xl border border-slate-200 bg-white p-8 shadow-xl shadow-slate-200/50">
+      {alert && <Error message={alert} />}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
         {/* ---------------- FORM HEADER ---------------- */}
         <div className="border-b border-slate-200 pb-6">

@@ -1,10 +1,10 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { axiosInstance } from "../axios/axios.js";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import { Container, Error, ItemCard, Loading } from "../components/index.js";
 
-export function InvoicePage() {
+export function ItemPage() {
   const isLoggedIn = useSelector((state) => state?.auth?.loginStatus);
   const userData = useSelector((state) => state?.auth?.userData);
   const [currentPage, setCurrentPage] = useState(1);
@@ -14,8 +14,9 @@ export function InvoicePage() {
   const isNextPage = useRef(false);
   const navigate = useNavigate();
 
-  useEffect(async () => {
+  useEffect(() => {
     const controller = new AbortController();
+    const fetchItems = async () => {
     try {
       if (!isLoggedIn) {
         setAlert("");
@@ -41,6 +42,8 @@ export function InvoicePage() {
     } finally {
       setIsLoading(false);
     }
+  };
+    fetchItems();
     return () => controller.abort();
   }, [currentPage, isLoggedIn]);
 

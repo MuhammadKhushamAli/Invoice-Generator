@@ -5,11 +5,11 @@ import { Loading } from "../Loading.jsx";
 import { CartItem } from "./CartItem.jsx";
 import { Error } from "../Error.jsx";
 import { Button } from "../Button.jsx";
-import { ShoppingCart, ArrowRight, PackageX } from "lucide-react";
+import { ShoppingCart, ArrowRight, PackageX, X } from "lucide-react";
 import { removeItem } from "../../features/itemCart/itemSlice.js";
 import { SaleForm } from "../saleForm/SaleForm.jsx";
 
-export function Cart() {
+export function Cart({ onClick }) {
   const isLoggedIn = useSelector((state) => state?.auth?.loginStatus);
 
   const cart = useSelector((state) => state?.itemsCart?.cart);
@@ -54,8 +54,8 @@ export function Cart() {
       /* Main Overlay: Full screen, blurred background */
       <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/20 backdrop-blur-sm transition-all">
         {/* Drawer Container */}
-        {/* FIXED: Changed 'sm:w-100' to 'w-full sm:w-[450px]' for proper sizing */}
-        <div className="flex h-full w-full flex-col border-l border-slate-200 bg-white shadow-2xl sm:w-112.5 animate-[slideInRight_0.3s_ease-out]">
+        {/* Added 'relative' so the close button can be positioned absolutely inside */}
+        <div className="relative flex h-full w-full flex-col border-l border-slate-200 bg-white shadow-2xl sm:w-112.5 animate-[slideInRight_0.3s_ease-out]">
           {/* Header */}
           <div className="flex items-center justify-between border-b border-slate-100 p-6">
             <h2 className="flex items-center gap-2 text-xl font-bold text-slate-900">
@@ -63,6 +63,17 @@ export function Cart() {
               Your Cart
             </h2>
           </div>
+
+          {/* Close Button (Styled & Positioned Absolute) */}
+          {onClick && (
+            <div className="absolute right-4 top-4 md:right-8 md:top-8 z-10">
+              <Button
+                onClick={onClick}
+                Icon={X}
+                className="h-10 w-10 rounded-full! border border-slate-200! bg-white! p-0! text-slate-400! shadow-sm hover:bg-slate-50! hover:text-slate-700! [&_svg]:mr-0! [&_svg]:h-5! [&_svg]:w-5!"
+              />
+            </div>
+          )}
 
           {/* Error Toast (Inside drawer) */}
           {alert && <Error message={alert} />}

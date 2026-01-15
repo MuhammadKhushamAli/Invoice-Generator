@@ -4,13 +4,12 @@ const invoiceNumSchema = mongoose.Schema({
   key: {
     type: String,
     default: "Invoice",
-    unique: true,
   },
 
   inv_num: {
     type: Number,
     default: 0,
-    required: true,
+    required: [true, "Invoice Number is required"],
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,

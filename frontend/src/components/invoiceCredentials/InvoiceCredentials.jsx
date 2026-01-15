@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import { axiosInstance } from "../../axios/axios";
@@ -15,9 +15,8 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { Loading } from "../Loading.jsx";
-import { set } from "mongoose";
 
-export function InvoiceCredentials() {
+export function InvoiceCredentials({ onClick = null }) {
   const [alert, setAlert] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [logo, setLogo] = useState(null);
@@ -58,23 +57,15 @@ export function InvoiceCredentials() {
     setAlert("");
     setIsLoading(true);
     try {
-      if (logo !== null || stamp !== null || sign !== null) {
-        const logoFormData = new FormData();
-        logoFormData.append("logo", logo, "logo.jpeg");
-
-        const stampFormData = new FormData();
-        stampFormData.append("stamp", stamp, "stamp.jpeg");
-
-        const signFormData = new FormData();
-        signFormData.append("sign", sign, "sign.jpeg");
+      if (logo !== null && stamp !== null && sign !== null) {
+        const formData = new FormData();
+        formData.append("sign", sign, "sign.png");
+        formData.append("logo", logo, "logo.png");
+        formData.append("stamp", stamp, "stamp.png");
 
         const response = await axiosInstance.patch(
           "api/v1/user/set-invoice-credentials",
-          {
-            logo: logoFormData,
-            stamp: stampFormData,
-            sign: signFormData,
-          }
+          formData
         );
         if (response?.status === 200) navigate("/");
       } else {
@@ -94,7 +85,7 @@ export function InvoiceCredentials() {
   return isLoading ? (
     <Loading />
   ) : (
-    <div className="mx-auto w-full max-w-5xl rounded-xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/50 md:p-10">
+    <div className="relative mx-auto w-full max-w-5xl rounded-xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/50 md:p-10">
       {/* Error Component */}
       {alert && <Error message={alert} />}
 
@@ -107,6 +98,17 @@ export function InvoiceCredentials() {
           Upload or preview your business assets.
         </p>
       </div>
+
+      {/* Close Button (Styled as Icon) */}
+      {onClick && (
+        <div className="absolute right-4 top-4 md:right-8 md:top-8 z-10">
+          <Button
+            onClick={onClick}
+            Icon={X}
+            className="h-10 w-10 rounded-full! border border-slate-200! bg-white! p-0! text-slate-400! shadow-sm hover:bg-slate-50! hover:text-slate-700! [&_svg]:mr-0! [&_svg]:h-5! [&_svg]:w-5!"
+          />
+        </div>
+      )}
 
       {/* Grid Layout */}
       <div className="grid gap-6 md:grid-cols-3">
@@ -222,7 +224,7 @@ export function InvoiceCredentials() {
 
       {/* Footer Action */}
       <div className="mt-10 flex justify-end border-t border-slate-100 pt-6">
-        <Button onclick={onSubmit} Icon={CheckCircle} className="min-w-30">
+        <Button onClick={onSubmit} Icon={CheckCircle} className="min-w-30">
           Submit
         </Button>
       </div>

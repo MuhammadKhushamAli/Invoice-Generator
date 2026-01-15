@@ -27,7 +27,7 @@ export function Login() {
           data
         );
         if (loginResponse.status === 200) {
-          dispatch(login({ userData: loginResponse.data.user }));
+          dispatch(login({ userData: loginResponse.data.newUser }));
           navigate("/");
         } else {
           setAlert(loginResponse.message);

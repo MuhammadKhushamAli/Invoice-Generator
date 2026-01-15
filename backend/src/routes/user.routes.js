@@ -38,7 +38,7 @@ router.route("/set-invoice-credentials").patch(
     setInvoiceLogoStampAndSign
 );
 router.route("/logout").get(authentication, logout);
-router.route("/refresh-tokens").get(authentication, refreshTokens);
+router.route("/refresh-tokens").get(refreshTokens);
 router.route("/get-invoices").get(authentication, getInvoices);
 router.route("/get-items").get(authentication, getItems);
 router.route("/get-sale-history").get(authentication, getSaleHistory);

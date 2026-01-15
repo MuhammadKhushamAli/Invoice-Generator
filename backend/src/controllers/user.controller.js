@@ -77,16 +77,16 @@ export const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(422, "Invalid Email Formate");
 
   if (
-    !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(
+    !(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$.#^!%*?&])[A-Za-z\d@$!.^%*?&]{8,}$/.test(
       password
-    )
+    ))
   )
     throw new ApiError(
       422,
       "Invalid Password Formate. Password Must be at least 8 characters long and have at least one lowercase character, one uppercase character and one special character"
     );
 
-  if (!/^\+?[1-9]\d{1,14}$/.test(phone_no))
+  if (!/^03\d{2}-?\d{7}$/.test(phone_no))
     throw new ApiError(422, "Invalid Phone No. Formate");
 
   const existingUser = await User.findOne({
@@ -160,10 +160,12 @@ export const registerUser = asyncHandler(async (req, res) => {
     )[0];
     if (!invNum) throw new ApiError(500, "Unable to create Invoice Number");
 
+
     const user = await User.findById(newUser?._id)
       .session(session)
       .select("-password -refreshToken");
     if (!user) throw new ApiError(500, "User Registration Fetching Failed");
+
 
     await session.commitTransaction();
     session.endSession();
@@ -190,7 +192,7 @@ export const login = asyncHandler(async (req, res) => {
     throw new ApiError(422, "Invalid Email Formate");
 
   if (
-    !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(
+    !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*^.?&])[A-Za-z\d@$!^.%*?&]{8,}$/.test(
       password
     )
   )
@@ -310,6 +312,10 @@ export const setInvoiceLogoStampAndSign = asyncHandler(async (req, res) => {
   const logo = req?.files["logo"]?.[0]?.path;
   const stamp = req?.files["stamp"]?.[0]?.path;
   const sign = req?.files["sign"]?.[0]?.path;
+
+console.log(logo)
+console.log(stamp)
+console.log(sign)
 
   if (!(logo && stamp && sign))
     throw new ApiError(400, "All Fields Are Required");

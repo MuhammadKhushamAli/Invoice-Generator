@@ -27,8 +27,8 @@ export function ItemCard({item}){
         if(isLoggedIn && (data?.quantity <= item?.quantity))
         {
             const itemToBeAdded = {...item};
-            itemToBeAdded?.quantity = item?.quantity;
-            item?.quantity -= itemToBeAdded?.quantity;
+            itemToBeAdded.quantity = data?.quantity;
+            item.quantity -= itemToBeAdded?.quantity;
             dispatch(addItem({item: itemToBeAdded}));
         }
         else if (!isLoggedIn)
