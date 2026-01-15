@@ -1,10 +1,89 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.jsx'
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import "./index.css";
+import { Provider } from "react-redux";
+import { createBrowserRouter, RouterProvider } from "react-router";
+import { store } from "./app/store.js";
+import { AuthLayout } from "./components/AuthLayout.jsx";
+import {
+  HomePage,
+  InvoicePage,
+  LoginPage,
+  RegisterPage,
+  ItemPage,
+  SalesPage,
+  InvoiceViewPage,
+} from "./pages";
 
-createRoot(document.getElementById('root')).render(
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <App />,
+    children: [
+      {
+        index: true,
+        element: (
+          <AuthLayout isAuthRequired={false}>
+            <HomePage />
+          </AuthLayout>
+        ),
+      },
+      {
+        path: "/login",
+        element: (
+          <AuthLayout isAuthRequired={false}>
+            <LoginPage />
+          </AuthLayout>
+        ),
+      },
+      {
+        path: "/register",
+        element: (
+          <AuthLayout isAuthRequired={false}>
+            <RegisterPage />
+          </AuthLayout>
+        ),
+      },
+      {
+        path: "/invoices",
+        element: (
+          <AuthLayout isAuthRequired={true}>
+            <InvoicePage />
+          </AuthLayout>
+        ),
+      },
+      {
+        path: "/products",
+        element: (
+          <AuthLayout isAuthRequired={true}>
+            <ItemPage />
+          </AuthLayout>
+        ),
+      },
+      {
+        path: "/sales",
+        element: (
+          <AuthLayout isAuthRequired={true}>
+            <SalesPage />
+          </AuthLayout>
+        ),
+      },
+      {
+        path: "/invoice/:itemId",
+        element: (
+          <AuthLayout isAuthRequired={true}>
+            <InvoiceViewPage />
+          </AuthLayout>
+        ),
+      },
+    ],
+  },
+]);
+
+createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <App />
-  </StrictMode>,
-)
+    <Provider store={store}>
+      <RouterProvider router={router} />
+    </Provider>
+  </StrictMode>
+);
