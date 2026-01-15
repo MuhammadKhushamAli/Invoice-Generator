@@ -6,7 +6,7 @@ import { Document, Page } from "react-pdf";
 import { Button } from "../Button.jsx";
 import { Loading } from "../Loading.jsx";
 import { Error } from "../Error.jsx";
-import { Download, FileText } from "lucide-react";
+import { FileText, Download } from "lucide-react";
 
 export function InvoiceView() {
   const { invoiceId } = useParams();
@@ -43,12 +43,16 @@ export function InvoiceView() {
   return isLoading ? (
     <Loading />
   ) : (
-    <div className="mx-auto min-h-screen max-w-5xl px-4 py-8">
+    <div className="mx-auto w-full rounded-2xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/50 md:p-8">
       {/* Error Toast */}
-      {alert && <Error message={alert} />}
+      {alert && (
+        <div className="mb-6">
+          <Error message={alert} />
+        </div>
+      )}
 
       {/* Header Section */}
-      <div className="mb-6 flex flex-col items-start justify-between gap-4 border-b border-slate-200 pb-6 md:flex-row md:items-center">
+      <div className="mb-8 flex flex-col items-start justify-between gap-4 border-b border-slate-100 pb-6 md:flex-row md:items-center">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">
             Invoice Preview
@@ -56,24 +60,22 @@ export function InvoiceView() {
           <h4 className="mt-2 flex items-center gap-2 text-sm font-medium text-slate-500">
             <FileText className="h-4 w-4 text-indigo-500" />
             Reference No:
-            <span className="font-mono text-slate-700">
+            {/* Monospace font is standard for financial IDs */}
+            <span className="rounded-md bg-slate-100 px-2 py-0.5 font-mono text-slate-700">
               {(invoice?.name).replace(".pdf", "")}
             </span>
           </h4>
         </div>
 
-        {/* Download Button (Placed top right for better UX, but code structure kept linear) */}
-        <div className="hidden md:block">
-          {/* This is a duplicate placement for desktop layout visual, 
-             but I will keep your original button at the bottom as requested. */}
-        </div>
+        {/* Desktop Placeholder for alignment (Optional) */}
+        <div className="hidden md:block"></div>
       </div>
 
       {/* PDF Document Container */}
-      <div className="flex min-h-150 flex-col items-center justify-center rounded-xl bg-slate-100/80 p-6 shadow-inner ring-1 ring-slate-900/5 backdrop-blur-sm">
+      <div className="flex min-h-150 flex-col items-center justify-center rounded-xl bg-slate-100/50 p-8 shadow-inner ring-1 ring-slate-900/5 backdrop-blur-sm">
         <Document
           file={invoice?.url}
-          className="flex flex-col gap-8" // Adds space between multiple pages
+          className="flex flex-col gap-8"
           onLoadSuccess={({ numPages }) => {
             setPages(numPages);
             setIsLoading(false);
@@ -86,16 +88,17 @@ export function InvoiceView() {
           onLoadStart={() => setIsLoading(true)}
         >
           {Array.from({ length: pages }, (_, index) => (
-            /* Wrapper div to add shadow/rounded corners to the canvas Page */
+            /* Page Wrapper: Adds a realistic 'Paper' shadow and lift effect */
             <div
               key={index}
-              className="overflow-hidden rounded-lg shadow-lg shadow-slate-400/20 ring-1 ring-slate-900/5 transition-transform hover:scale-[1.005]"
+              className="overflow-hidden rounded-lg shadow-lg shadow-slate-400/20 ring-1 ring-slate-900/5 transition-transform duration-300 hover:scale-[1.005]"
             >
               <Page
                 pageNumber={index + 1}
                 renderTextLayer={false}
                 renderAnnotationLayer={false}
-                className="bg-white" // Ensures the page background is white
+                className="bg-white" // Ensures the page background is pure white
+                scale={1.0}
               />
             </div>
           ))}
@@ -103,7 +106,7 @@ export function InvoiceView() {
       </div>
 
       {/* Footer / Download Action */}
-      <div className="mt-6 flex justify-end">
+      <div className="mt-8 flex justify-end border-t border-slate-100 pt-6">
         <Button
           disabled={isLoading}
           Icon={Download}
@@ -113,8 +116,8 @@ export function InvoiceView() {
             href={invoice?.url}
             download={invoice?.name}
             target="_blank"
-            className="flex items-center gap-2 text-inherit no-underline"
             rel="noreferrer"
+            className="flex items-center gap-2 text-inherit no-underline"
           >
             Download Invoice
           </a>
