@@ -7,15 +7,19 @@ import { ItemCard } from "./itemCard/ItemCard.jsx";
 import { SaleLog } from "./salesLog/SaleLog.jsx";
 import { Register } from "./register/Register.jsx";
 import { Login } from "./login/Login.jsx";
+import { Loading } from "./Loading.jsx";
+import { Error } from "./Error.jsx";
 
 export {
-Container,
-NavBar,
-InvoiceCredentials,
-InvoiceCard,
-InvoiceView,
-ItemCard,
-SaleLog,
-Register,
-Login
+  Container,
+  NavBar,
+  InvoiceCredentials,
+  InvoiceCard,
+  InvoiceView,
+  ItemCard,
+  SaleLog,
+  Register,
+  Login,
+  Loading,
+  Error,
 };
