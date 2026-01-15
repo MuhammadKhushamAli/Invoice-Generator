@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { axiosInstance } from "../axios/axios.js";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
-import { Container, Error, ItemCard, Loading } from "../components";
+import { Container, Error, ItemCard, Loading } from "../components/index.js";
 
 export function InvoicePage() {
   const isLoggedIn = useSelector((state) => state?.auth?.loginStatus);
