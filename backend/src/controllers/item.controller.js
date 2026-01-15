@@ -101,17 +101,8 @@ export const updateQuantity = asyncHandler(async (req, res) => {
   if (quantity <= 0)
     throw new ApiError(400, "Quantity cannot be less than or equal to zero");
 
-  const item = await Item.findById(itemId);
+  const item = await Item.findOne({_id:itemId, owner: req?.user?._id});
   if (!item) throw new ApiError(404, "Item not Found");
-
-  if (!item?.isAuthorizedToChange(req?.user?._id))
-    throw new ApiError(401, "Unauthorized Access");
-
-  if (!item?.isQuantityValid(quantity))
-    throw new ApiError(
-      400,
-      "Desired quantity must be less than available quantity"
-    );
 
   const updatedItem = await Item.findByIdAndUpdate(
     itemId,

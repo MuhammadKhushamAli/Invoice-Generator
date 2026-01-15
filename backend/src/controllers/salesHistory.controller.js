@@ -91,10 +91,25 @@ export const addSale = asyncHandler(async (req, res) => {
           throw new ApiError(400, "Invalid Quantity or Price");
         if (!isValidObjectId(item._id))
           throw new ApiError(400, "Invalid Item Id");
-        const itemFound = await Item.findById(item?._id);
+        const itemFound = await Item.findOnes({
+          _id: item?._id,
+          owner: req?.user?._id,
+        });
         if (!itemFound) throw new ApiError(404, "Item Not Found");
-        if (!itemFound?.isQuantityValid(item.quantity))
+        if (!itemFound?.isQuantityValid(item?.quantity))
           throw new ApiError(400, "Invalid Quantity");
+        const updateItem = await Item.findByIdAndUpdate(
+          item?._id,
+          {
+            $inc: {
+              quantity: -item?.quantity,
+            },
+          },
+          {
+            session,
+          }
+        );
+        if (!updateItem) throw new ApiError(500, "Item Update Failed");
         totalPayableWithoutTaxes += item?.price * item?.quantity;
       })
     );
@@ -245,14 +260,12 @@ export const addSale = asyncHandler(async (req, res) => {
     await session.commitTransaction();
     session.endSession();
 
-    return res
-      .status(200)
-      .json(
-        new ApiResponse(200, "Sale Created Successfully", {
-          sale: updatedSale,
-          inv_url: fileUrl,
-        })
-      );
+    return res.status(200).json(
+      new ApiResponse(200, "Sale Created Successfully", {
+        sale: updatedSale,
+        inv_url: fileUrl,
+      })
+    );
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
