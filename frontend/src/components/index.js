@@ -7,7 +7,7 @@ import { ItemCard } from "./itemCard/ItemCard.jsx";
 import { SaleLog } from "./salesLog/SaleLog.jsx";
 import { SaleForm } from "./saleForm/SaleForm.jsx";
 import { Register } from "./register/Register.jsx";
-import { Login } from "./login/Login.jsx";"
+import { Login } from "./login/Login.jsx";
 
 export {
 Container,
@@ -20,5 +20,4 @@ SaleLog,
 SaleForm,
 Register,
 Login
-
 };
