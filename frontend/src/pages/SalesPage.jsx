@@ -23,14 +23,15 @@ export function SalesPage() {
           setIsLoading(true);
 
           const salesResponse = await axiosInstance.get(
-            "/api/v1/user/get-sales",
+            "/api/v1/user/get-sale-history",
             {
               params: { userId: userData?._id, page: currentPage },
               signal: controller.signal,
             }
           );
           if (salesResponse?.status === 200) {
-            const newSales = salesResponse?.data?.docs?.[0] || [];
+            console.log(salesResponse);
+            const newSales = salesResponse?.data?.docs?.[0].sales || [];
             setSales((prev) => [...prev, ...newSales]);
             isNextPage.current = salesResponse?.data?.hasNextPage;
           }
@@ -38,7 +39,8 @@ export function SalesPage() {
           navigate("/login");
         }
       } catch (error) {
-        setAlert(error.message);
+        if (error.name !== "CanceledError" || error.code !== "ERR_CANCELED")
+          setAlert(error.message);
       } finally {
         setIsLoading(false);
       }

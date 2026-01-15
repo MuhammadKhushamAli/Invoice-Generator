@@ -29,7 +29,8 @@ export function InvoicePage() {
             }
           );
           if (invoicesResponse?.status === 200) {
-            const newInvoices = invoicesResponse?.data?.docs?.[0] || [];
+            const newInvoices =
+              invoicesResponse?.data?.docs?.[0].invoices || [];
             setInvoices((prev) => [...prev, ...newInvoices]);
             isNextPage.current = invoicesResponse?.data?.hasNextPage;
           }
@@ -37,7 +38,8 @@ export function InvoicePage() {
           navigate("/login");
         }
       } catch (error) {
-        setAlert(error.message);
+        if (error.name !== "CanceledError" || error.code !== "ERR_CANCELED")
+          setAlert(error.message);
       } finally {
         setIsLoading(false);
       }

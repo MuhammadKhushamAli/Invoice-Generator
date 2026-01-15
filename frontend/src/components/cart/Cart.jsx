@@ -42,7 +42,7 @@ export function Cart({ onClick }) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-900/20 backdrop-blur-sm p-4 animate-[fadeIn_0.2s_ease-out]">
         <div className="w-full max-w-5xl">
-          <SaleForm />
+          <SaleForm onClick={() => setIsSaleForm(false)} />
         </div>
       </div>
     );
@@ -92,7 +92,7 @@ export function Cart({ onClick }) {
           {/* Footer / Submit Action */}
           <div className="border-t border-slate-100 bg-slate-50 p-6">
             <Button
-              onclick={() => setIsSaleForm(true)}
+              onClick={() => setIsSaleForm(true)}
               className="w-full justify-between group shadow-indigo-500/20"
               Icon={ArrowRight}
             >

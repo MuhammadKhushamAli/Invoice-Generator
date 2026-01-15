@@ -16,10 +16,10 @@ import {
   Percent,
   Truck,
   CheckCircle,
+  X,
 } from "lucide-react";
-import { Error } from "../Error.jsx";
 
-export function SaleForm() {
+export function SaleForm({ onClick }) {
   const isLoggedIn = useSelector((state) => state?.auth?.loginStatus);
   const cart = useSelector((state) => state?.itemsCart?.cart);
   const navigate = useNavigate();
@@ -63,12 +63,30 @@ export function SaleForm() {
   return isLoading ? (
     <Loading />
   ) : (
-    <div className="mx-auto w-full max-w-5xl rounded-xl border border-slate-200 bg-white p-8 shadow-xl shadow-slate-200/50">
-      {alert && <Error message={alert} />}
+    // CHANGED: 'mt-28' for Mobile (balanced), 'md:mt-40' for Desktop (spacious)
+    <div className="relative mx-auto w-full max-w-5xl rounded-xl border border-slate-200 bg-white p-4 shadow-xl shadow-slate-200/50 mt-28 md:mt-40 md:p-10 mb-20">
+      {/* Error Toast */}
+      {alert && (
+        <div className="mb-6">
+          <Error message={alert} />
+        </div>
+      )}
+
+      {/* Close Button */}
+      {onClick && (
+        <div className="absolute right-4 top-4 z-50 md:right-8 md:top-8">
+          <Button
+            onClick={onClick}
+            Icon={X}
+            className="flex items-center justify-center h-10 w-10 rounded-full! border border-slate-200! bg-white! p-0! text-slate-400! shadow-sm transition-colors hover:bg-slate-50! hover:text-slate-700! [&_svg]:mr-0! [&_svg]:h-5! [&_svg]:w-5!"
+          />
+        </div>
+      )}
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
         {/* ---------------- FORM HEADER ---------------- */}
-        <div className="border-b border-slate-200 pb-6">
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+        <div className="border-b border-slate-200 pb-6 pr-12">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">
             Sale Invoice Generation
           </h1>
           <p className="mt-2 text-sm text-slate-500">
@@ -89,9 +107,7 @@ export function SaleForm() {
               label="HS Code"
               placeholder="e.g. 123456"
               Icon={FileText}
-              {...register("hsCode", {
-                required: true,
-              })}
+              {...register("hsCode", { required: true })}
             />
           </div>
         </div>
@@ -109,9 +125,7 @@ export function SaleForm() {
               label="Attn. To"
               placeholder="XYZ Department"
               Icon={Building}
-              {...register("AttnTo", {
-                required: true,
-              })}
+              {...register("AttnTo", { required: true })}
             />
 
             <Input
@@ -119,9 +133,7 @@ export function SaleForm() {
               label="Customer Name"
               placeholder="Company Name"
               Icon={User}
-              {...register("customerName", {
-                required: true,
-              })}
+              {...register("customerName", { required: true })}
             />
 
             <Input
@@ -129,9 +141,7 @@ export function SaleForm() {
               label="Customer Landmark"
               placeholder="Suite / Unit"
               Icon={MapPin}
-              {...register("customerLandmark", {
-                required: true,
-              })}
+              {...register("customerLandmark", { required: true })}
             />
 
             <Input
@@ -159,9 +169,7 @@ export function SaleForm() {
               label="Customer Area"
               placeholder="XYZ Area"
               Icon={MapPin}
-              {...register("customerArea", {
-                required: true,
-              })}
+              {...register("customerArea", { required: true })}
             />
 
             <Input
@@ -169,9 +177,7 @@ export function SaleForm() {
               label="Customer City"
               placeholder="XYZ City"
               Icon={Building}
-              {...register("customerCity", {
-                required: true,
-              })}
+              {...register("customerCity", { required: true })}
             />
 
             <Input
@@ -179,9 +185,7 @@ export function SaleForm() {
               label="Customer Country"
               placeholder="XYZ Country"
               Icon={Globe}
-              {...register("customerCountry", {
-                required: true,
-              })}
+              {...register("customerCountry", { required: true })}
             />
 
             <Input
@@ -189,9 +193,7 @@ export function SaleForm() {
               label="Customer GST"
               placeholder="1234567"
               Icon={CreditCard}
-              {...register("customerGST", {
-                required: true,
-              })}
+              {...register("customerGST", { required: true })}
             />
 
             <Input
@@ -199,9 +201,7 @@ export function SaleForm() {
               label="Customer NTN"
               placeholder="1234567"
               Icon={CreditCard}
-              {...register("customerNTN", {
-                required: true,
-              })}
+              {...register("customerNTN", { required: true })}
             />
           </div>
         </div>
@@ -214,6 +214,7 @@ export function SaleForm() {
           </h3>
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {/* Sales Tax Rate */}
             <div className="relative">
               <Input
                 type="number"
@@ -226,11 +227,13 @@ export function SaleForm() {
                   min: 0,
                 })}
               />
-              <span className="absolute right-3 top-8.5 text-sm font-medium text-slate-400">
+              {/* Fixed: top-[38px] aligns perfect with input */}
+              <span className="pointer-events-none absolute right-3 top-9.5 flex h-5 items-center text-sm font-medium text-slate-400">
                 %
               </span>
             </div>
 
+            {/* Special Excise Rate */}
             <div className="relative">
               <Input
                 type="number"
@@ -243,49 +246,51 @@ export function SaleForm() {
                   min: 0,
                 })}
               />
-              <span className="absolute right-3 top-8.5 text-sm font-medium text-slate-400">
+              <span className="pointer-events-none absolute right-3 top-9.5 flex h-5 items-center text-sm font-medium text-slate-400">
                 %
               </span>
             </div>
 
+            {/* Further Sales Tax */}
             <div className="relative">
               <Input
                 type="number"
                 label="Further Sales Tax"
                 placeholder="0"
                 Icon={Percent}
-                {...register("furtherSalesTaxRate", {
+                {...register("freightOtherCharges", {
                   required: true,
                   validate: (value) => /^\d+$/.test(value) || "Must be Numbers",
                   min: 0,
                 })}
               />
-              <span className="absolute right-3 top-8.5 text-sm font-medium text-slate-400">
+              <span className="pointer-events-none absolute right-3 top-9.5 flex h-5 items-center text-sm font-medium text-slate-400">
                 %
               </span>
             </div>
 
+            {/* Freight Charges */}
             <Input
               type="number"
               label="Freight / Other Charges"
               placeholder="0"
               Icon={Truck}
               {...register("freightOtherCharges", {
-                // NOTE: I kept your logic/name, but in your code you had 'furtherSalesTaxRate' duplicated here. Please check your original logic if that was a mistake. I kept it as is but suspect you meant a different name. If you meant 'freight', use that. I mapped to what was logically implied by the label but please double check the register name in your code. *Wait, I must follow your rule strictly.*
-                // REVERTING TO YOUR EXACT NAME FROM PROMPT:
-                ...register("furtherSalesTaxRate", {
-                  required: true,
-                  validate: (value) => /^\d+$/.test(value) || "Must be Numbers",
-                  min: 0,
-                }),
+                required: true,
+                validate: (value) => /^\d+$/.test(value) || "Must be Numbers",
+                min: 0,
               })}
             />
           </div>
         </div>
 
         {/* ---------------- FOOTER ACTION ---------------- */}
-        <div className="flex justify-end border-t border-slate-100 pt-6">
-          <Button type="submit" className="min-w-50" Icon={CheckCircle}>
+        <div className="mt-8 flex justify-end border-t border-slate-100 pt-6">
+          <Button
+            type="submit"
+            className="w-full shadow-lg shadow-indigo-500/20 md:w-auto md:min-w-50"
+            Icon={CheckCircle}
+          >
             Generate Invoice
           </Button>
         </div>

@@ -77,9 +77,9 @@ export const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(422, "Invalid Email Formate");
 
   if (
-    !(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$.#^!%*?&])[A-Za-z\d@$!.^%*?&]{8,}$/.test(
+    !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$.#^!%*?&])[A-Za-z\d@$!.^%*?&]{8,}$/.test(
       password
-    ))
+    )
   )
     throw new ApiError(
       422,
@@ -160,12 +160,10 @@ export const registerUser = asyncHandler(async (req, res) => {
     )[0];
     if (!invNum) throw new ApiError(500, "Unable to create Invoice Number");
 
-
     const user = await User.findById(newUser?._id)
       .session(session)
       .select("-password -refreshToken");
     if (!user) throw new ApiError(500, "User Registration Fetching Failed");
-
 
     await session.commitTransaction();
     session.endSession();
@@ -313,7 +311,6 @@ export const setInvoiceLogoStampAndSign = asyncHandler(async (req, res) => {
   const stamp = req?.files["stamp"]?.[0]?.path;
   const sign = req?.files["sign"]?.[0]?.path;
 
-
   if (!(logo && stamp && sign))
     throw new ApiError(400, "All Fields Are Required");
 
@@ -368,7 +365,6 @@ export const getInvoices = asyncHandler(async (req, res) => {
   userId = userId?.trim();
   page = parseInt(page);
 
-
   if (!userId) throw new ApiError(400, "User ID must be required");
   if (!isValidObjectId(userId)) throw new ApiError(400, "Invalid Object Id");
   if (page < 1) page = 1;
@@ -376,7 +372,7 @@ export const getInvoices = asyncHandler(async (req, res) => {
   const invoices = User.aggregate([
     {
       $match: {
-        _id: userId?.trim(),
+        _id: new mongoose.Types.ObjectId(userId),
       },
     },
     {
@@ -384,7 +380,7 @@ export const getInvoices = asyncHandler(async (req, res) => {
         from: "invoices",
         localField: "invoices",
         foreignField: "_id",
-        as: "Invoices",
+        as: "invoices",
         pipeline: [
           {
             $project: {
@@ -398,7 +394,7 @@ export const getInvoices = asyncHandler(async (req, res) => {
     },
     {
       $project: {
-        Invoices: 1,
+        invoices: 1,
       },
     },
   ]);
@@ -481,14 +477,14 @@ export const getSaleHistory = asyncHandler(async (req, res) => {
   page = parseInt(page);
   userId = userId?.trim();
 
-  if (userId) throw new ApiError(400, "User ID Must Be Required");
-  if (isValidObjectId(userId)) throw new ApiError(400, "Invalid User ID");
+  if (!userId) throw new ApiError(400, "User ID Must Be Required");
+  if (!isValidObjectId(userId)) throw new ApiError(400, "Invalid User ID");
   if (page < 1) page = 1;
 
   const saleHistory = User.aggregate([
     {
       $match: {
-        _id: userId,
+        _id: new mongoose.Types.ObjectId(userId),
       },
     },
     {
@@ -496,14 +492,14 @@ export const getSaleHistory = asyncHandler(async (req, res) => {
         form: "sales",
         localField: "salesHistory",
         foreignField: "_id",
-        as: "Sales",
+        as: "sales",
         pipeline: [
           {
             $lookup: {
               form: "itemssolds",
               localField: "items",
               foreignField: "_id",
-              as: "Items",
+              as: "items",
               pipeline: [
                 {
                   $project: {
@@ -518,7 +514,7 @@ export const getSaleHistory = asyncHandler(async (req, res) => {
               from: "invoices",
               localField: "invoice",
               foreignField: "_id",
-              as: "Invoice",
+              as: "invoice",
               pipeline: [
                 {
                   $project: {
@@ -531,18 +527,18 @@ export const getSaleHistory = asyncHandler(async (req, res) => {
           },
           {
             $addFields: {
-              Invoice: {
-                $first: "$Invoice",
+              invoice: {
+                $first: "$invoice",
               },
-              Items: {
-                $size: "$Items",
+              items: {
+                $size: "$items",
               },
             },
           },
           {
             $project: {
-              Invoice: 1,
-              Items: 1,
+              invoice: 1,
+              items: 1,
             },
           },
         ],
@@ -550,7 +546,7 @@ export const getSaleHistory = asyncHandler(async (req, res) => {
     },
     {
       $project: {
-        Sales: 1,
+        sales: 1,
       },
     },
   ]);

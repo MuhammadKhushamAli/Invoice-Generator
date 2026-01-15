@@ -11,6 +11,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { deleteFromCloudinary } from "../utils/cloudinary.js";
 import pkg from "number-to-words";
 import { generatePdf } from "./utils/pdf.util.js";
+import { getInvoiceNumber } from "./utils/invoiceNum.util.js";
 
 const { toWords } = pkg;
 
@@ -91,7 +92,7 @@ export const addSale = asyncHandler(async (req, res) => {
           throw new ApiError(400, "Invalid Quantity or Price");
         if (!isValidObjectId(item._id))
           throw new ApiError(400, "Invalid Item Id");
-        const itemFound = await Item.findOnes({
+        const itemFound = await Item.findOne({
           _id: item?._id,
           owner: req?.user?._id,
         });
@@ -144,7 +145,7 @@ export const addSale = asyncHandler(async (req, res) => {
       tele_no: user?.phone_no,
       your_GST: user?.gst_no,
       your_NTN: user?.ntn_no,
-      invoice_no: invoiceNum,
+      invoice_no: await getInvoiceNumber(user?._id),
       date: new Date().toLocaleDateString("en-us"),
       hs_code: hsCode,
       Attn_to: AttnTo,
