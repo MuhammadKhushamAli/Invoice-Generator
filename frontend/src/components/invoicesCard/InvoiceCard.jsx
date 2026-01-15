@@ -3,9 +3,9 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import { FileText, Calendar } from "lucide-react";
 
-export function InvoiceCard(invoice) {
+export function InvoiceCard({invoice}) {
   const navigate = useNavigate();
-  const isLoggedIn = useSelector();
+  const isLoggedIn = useSelector(state => state?.auth?.loginStatus);
 
   useEffect(() => {
     if (!isLoggedIn) navigate("/login");

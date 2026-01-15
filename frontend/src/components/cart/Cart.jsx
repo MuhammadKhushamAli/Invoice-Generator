@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import { Loading } from "../Loading.jsx";
 import { CartItem } from "./CartItem.jsx";
@@ -7,11 +7,13 @@ import { useCallback } from "react";
 import { Error } from "../Error.jsx";
 import { Button } from "../Button.jsx";
 import { ShoppingCart, ArrowRight, PackageX } from "lucide-react";
+import { removeItem } from "../../features/itemCart/itemSlice.js";
 
 export function Cart() {
   const isLoggedIn = useSelector((state) => state?.auth?.loginStatus);
 
   const cart = useSelector((state) => state?.itemsCart?.cart);
+  const dispatch = useDispatch();
 
   const navigate = useNavigate();
 
@@ -27,6 +29,7 @@ export function Cart() {
   const onDelete = useCallback((item) => {
     try {
       cart.splice(cart.indexOf(item), 1);
+      dispatch(removeItem({ item }));
     } catch (error) {
       setAlert("Unable to Delete Cart Item");
     }

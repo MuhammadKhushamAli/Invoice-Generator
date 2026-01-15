@@ -9,16 +9,19 @@ const itemSlice = createSlice({
     initialState,
     reducers: {
         addItem: (state, action) => {
-            const index = state.cart.indexOf(action?.payload?.item);
-            if (index !== -1)
-                state.cart[index].quantity += action?.payload?.item?.quantity;
-            else
-                state.cart.push(action?.payload?.item);
+            const itemToBeAdded = action?.payload?.item;
+            const index = state?.cart?.findIndex(item => item?._id === itemToBeAdded?._id);
+            if(index === -1)
+            {
+                state?.cart?.push(itemToBeAdded);
+            }
+            else{
+                state?.cart[index]?.quantity += itemToBeAdded?.quantity
+            }
         },
         removeItem: (state, action) => {
-            const index = state.action.payload?.item;
-            if(index !== -1)
-                state.cart?.splice(index, 1);
+            const itemToBeAdded = action?.payload?.item;
+            state?.cart = state?.cart?.filter(item => item?._id !== itemToBeAdded?._id);
         },
         clearCart: (state) => {
             state.cart = [];
