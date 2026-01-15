@@ -9,7 +9,7 @@ import { Error } from "../Error.jsx";
 import { Download, FileText } from "lucide-react";
 
 export function InvoiceView() {
-  const { itemId } = useParams();
+  const { invoiceId } = useParams();
   const [alert, setAlert] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [pages, setPages] = useState(0);
@@ -26,7 +26,7 @@ export function InvoiceView() {
       setIsLoading(true);
       try {
         const invoiceResponse = await axiosInstance.get(
-          `/api/v1/item/view-item/${itemId}`
+          `/api/v1/invoice/invoice-item/${invoiceId}`
         );
 
         if (invoiceResponse?.status === 200) {
