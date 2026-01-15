@@ -85,162 +85,185 @@ export function Register() {
   );
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
+    /* Inside your component definition */
+    <div className="w-full">
+      {/* Error Toast */}
       {alert && <Error message={alert} />}
 
       <form onSubmit={handleSubmit(submitForm)} className="space-y-8">
-        <h1 className="text-2xl font-semibold text-gray-800">
-          Business Registration
-        </h1>
+        {/* Page Header */}
+        <div className="border-b border-slate-200 pb-4">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+            Business Registration
+          </h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Create your business profile to start generating invoices.
+          </p>
+        </div>
 
-        {/* GRID */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* ================= BUSINESS DETAILS ================= */}
-          <div className="bg-white p-6 rounded-xl shadow-sm border space-y-4">
-            <h2 className="text-lg font-medium flex items-center gap-2 text-gray-700">
-              <Building2 size={20} /> Business Details
+        {/* GRID LAYOUT */}
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+          {/* ================= BUSINESS DETAILS SECTION ================= */}
+          <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-6 shadow-sm">
+            <h2 className="mb-6 flex items-center gap-2 text-lg font-semibold text-slate-800">
+              <Building2 className="h-5 w-5 text-indigo-600" />
+              Business Details
             </h2>
 
-            <Input
-              type="text"
-              label="Business's Name:"
-              placeholder="XYZ Enterprise"
-              disabled={isLoading}
-              Icon={User}
-              {...register("businessName", { required: true })}
-            />
+            <div className="space-y-5">
+              <Input
+                type="text"
+                label="Business Name"
+                placeholder="XYZ Enterprise"
+                disabled={isLoading}
+                Icon={User}
+                {...register("businessName", { required: true })}
+              />
 
-            <Input
-              type="text"
-              label="Business's Slogan:"
-              placeholder="We deal in..."
-              disabled={isLoading}
-              {...register("slogan", { required: true })}
-            />
+              <Input
+                type="text"
+                label="Business Slogan"
+                placeholder="We deal in..."
+                disabled={isLoading}
+                {...register("slogan", { required: true })}
+              />
 
-            <Input
-              type="text"
-              label="User Name:"
-              disabled
-              Icon={User}
-              {...register("userName", { required: true })}
-            />
+              <Input
+                type="text"
+                label="Username"
+                disabled // Disabled inputs usually don't need placeholders
+                Icon={User}
+                className="bg-slate-100 text-slate-500" // Visual cue for disabled
+                {...register("userName", { required: true })}
+              />
 
-            <Input
-              type="email"
-              label="Email:"
-              placeholder="xyz@gmail.com"
-              disabled={isLoading}
-              Icon={Mail}
-              {...register("email", { required: true })}
-            />
+              <Input
+                type="email"
+                label="Email Address"
+                placeholder="xyz@gmail.com"
+                disabled={isLoading}
+                Icon={Mail}
+                {...register("email", { required: true })}
+              />
 
-            <Input
-              type="tel"
-              label="Phone Number:"
-              placeholder="0312-3456789"
-              disabled={isLoading}
-              Icon={Phone}
-              {...register("phone_no", { required: true })}
-            />
+              <Input
+                type="tel"
+                label="Phone Number"
+                placeholder="0312-3456789"
+                disabled={isLoading}
+                Icon={Phone}
+                {...register("phone_no", { required: true })}
+              />
 
-            <Input
-              type="text"
-              label="GST No.:"
-              placeholder="12345678"
-              disabled={isLoading}
-              Icon={Hash}
-              {...register("gst_no", { required: true })}
-            />
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  type="text"
+                  label="GST No."
+                  placeholder="12345678"
+                  disabled={isLoading}
+                  Icon={Hash}
+                  {...register("gst_no", { required: true })}
+                />
 
-            <Input
-              type="text"
-              label="NTN No.:"
-              placeholder="12345678"
-              disabled={isLoading}
-              Icon={Hash}
-              {...register("ntn_no", { required: true })}
-            />
+                <Input
+                  type="text"
+                  label="NTN No."
+                  placeholder="12345678"
+                  disabled={isLoading}
+                  Icon={Hash}
+                  {...register("ntn_no", { required: true })}
+                />
+              </div>
 
-            <Input
-              type="password"
-              label="Password:"
-              disabled={isLoading}
-              Icon={Lock}
-              {...register("password", { required: true })}
-            />
+              <Input
+                type="password"
+                label="Password"
+                placeholder="••••••••"
+                disabled={isLoading}
+                Icon={Lock}
+                {...register("password", { required: true })}
+              />
+            </div>
           </div>
 
-          {/* ================= ADDRESS DETAILS ================= */}
-          <div className="bg-white p-6 rounded-xl shadow-sm border space-y-4">
-            <h2 className="text-lg font-medium flex items-center gap-2 text-gray-700">
-              <MapPin size={20} /> Address Information
+          {/* ================= ADDRESS DETAILS SECTION ================= */}
+          <div className="flex flex-col rounded-xl border border-slate-200 bg-slate-50/50 p-6 shadow-sm">
+            <h2 className="mb-6 flex items-center gap-2 text-lg font-semibold text-slate-800">
+              <MapPin className="h-5 w-5 text-indigo-600" />
+              Address Information
             </h2>
 
-            <Input
-              type="text"
-              label="Landmark:"
-              placeholder="123-A"
-              disabled={isLoading}
-              Icon={Home}
-              {...register("landmark", { required: true })}
-            />
+            <div className="space-y-5">
+              <Input
+                type="text"
+                label="Landmark / Suite"
+                placeholder="123-A"
+                disabled={isLoading}
+                Icon={Home}
+                {...register("landmark", { required: true })}
+              />
 
-            <Input
-              type="text"
-              label="Street:"
-              placeholder="Street 1"
-              disabled={isLoading}
-              Icon={Landmark}
-              {...register("street", {
-                required: true,
-                validate: (value) =>
-                  value.startsWith("Street") || "Must have Prefix 'Street'",
-                onChange: (e) => {
-                  const PREFIX = "Street";
-                  let value = e.target.value;
+              <Input
+                type="text"
+                label="Street Address"
+                placeholder="Street 1"
+                disabled={isLoading}
+                Icon={MapPin}
+                {...register("street", {
+                  required: true,
+                  validate: (value) =>
+                    value.startsWith("Street") || "Must have Prefix 'Street'",
+                  onChange: (e) => {
+                    const PREFIX = "Street";
+                    let value = e.target.value;
 
-                  if (!value.startsWith(PREFIX)) {
-                    value = PREFIX + value.replace(/street/i, "");
-                    setValue("street", value);
-                  }
-                },
-              })}
-            />
+                    if (!value.startsWith(PREFIX)) {
+                      value = PREFIX + value.replace(/street/i, "");
+                      setValue("street", value);
+                    }
+                  },
+                })}
+              />
 
-            <Input
-              type="text"
-              label="Area:"
-              placeholder="XYZ-Town"
-              disabled={isLoading}
-              Icon={Landmark}
-              {...register("area", { required: true })}
-            />
+              <Input
+                type="text"
+                label="Area / Town"
+                placeholder="XYZ-Town"
+                disabled={isLoading}
+                Icon={Landmark}
+                {...register("area", { required: true })}
+              />
 
-            <Input
-              type="text"
-              label="City:"
-              placeholder="XYZ-City"
-              Icon={Globe}
-              disabled={isLoading}
-              {...register("city", { required: true })}
-            />
+              <Input
+                type="text"
+                label="City"
+                placeholder="XYZ-City"
+                Icon={Globe}
+                disabled={isLoading}
+                {...register("city", { required: true })}
+              />
 
-            <Input
-              type="text"
-              label="Country:"
-              placeholder="XYZ-Country"
-              disabled={isLoading}
-              Icon={Globe}
-              {...register("country", { required: true })}
-            />
+              <Input
+                type="text"
+                label="Country"
+                placeholder="XYZ-Country"
+                disabled={isLoading}
+                Icon={Globe}
+                {...register("country", { required: true })}
+              />
+            </div>
           </div>
         </div>
 
-        {/* SUBMIT */}
-        <div className="flex justify-end">
-          <Button type="submit" Icon={Save} disabled={isLoading}>
-            Register
+        {/* SUBMIT BUTTON */}
+        <div className="flex items-center justify-end border-t border-slate-100 pt-6">
+          <Button
+            type="submit"
+            Icon={Save}
+            disabled={isLoading}
+            className="min-w-37.5"
+          >
+            Register Business
           </Button>
         </div>
       </form>
