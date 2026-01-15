@@ -313,9 +313,6 @@ export const setInvoiceLogoStampAndSign = asyncHandler(async (req, res) => {
   const stamp = req?.files["stamp"]?.[0]?.path;
   const sign = req?.files["sign"]?.[0]?.path;
 
-console.log(logo)
-console.log(stamp)
-console.log(sign)
 
   if (!(logo && stamp && sign))
     throw new ApiError(400, "All Fields Are Required");

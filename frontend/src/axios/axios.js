@@ -3,7 +3,7 @@ import axios from "axios";
 export const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   withCredentials: true,
-  timeout: 500000,
+  timeout: 50000,
 });
 
 axiosInstance.interceptors.response.use(
@@ -13,6 +13,7 @@ axiosInstance.interceptors.response.use(
     status: res?.status,
   }),
   async (error) => {
+    console.log(error);
     const orignalRequest = error.config;
     if (error.response?.status === 401 && !orignalRequest._retry) {
       orignalRequest._retry = true;

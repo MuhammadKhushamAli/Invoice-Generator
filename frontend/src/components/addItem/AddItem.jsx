@@ -45,14 +45,17 @@ export function AddItem({ onClick = null }) {
   }, [isLoggedIn]);
 
   const dataURLtoBlob = useCallback((dataURL) => {
-    const [header, data] = dataURL.split(",");
-    const mime = header.match(/:(.*?);/)[1];
-    const binary = atob(data);
-    const array = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) {
-      array[i] = binary.charCodeAt(i);
+    const arr = dataUrl.split(",");
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
     }
-    return new Blob([array], { type: mime });
+
+    return new Blob([u8arr], { type: mime });
   }, []);
 
   const onDrop = useCallback((file) => {
@@ -71,18 +74,21 @@ export function AddItem({ onClick = null }) {
 
         if (isCaptured) {
           readyImage = dataURLtoBlob(image);
-          setIsCaptured(false);
         }
 
         const formData = new FormData();
-        formData.append("image", image, "image.png");
+        formData.append("image", readyImage, "image.jpeg");
 
         for (const key in data) {
-          formData.append(key, data[key]);
+          const value = data[key];
+          formData.append(
+            key,
+            typeof value === "object" ? JSON.stringify(value) : value
+          );
         }
 
-        const response = await axiosInstance.patch(
-          "api/v1/item/add-item",
+        const response = await axiosInstance.post(
+          "/api/v1/item/add-item",
           formData
         );
         if (response?.status === 200) navigate("/");
@@ -90,9 +96,13 @@ export function AddItem({ onClick = null }) {
         setAlert("Please Upload Image");
       }
     } catch (error) {
+        console.log(error);
       setAlert(error?.message);
     } finally {
       setIsLoading(false);
+      setIsCaptured(false);
+      setImage(null);
+      setPreview(null);
     }
   };
 
