@@ -2,8 +2,8 @@
 
 @keyframes slideDownUp {
   0% { transform: translate(-50%, -100%); }
-  10% { transform: translate(-50%, 20px); }
-  90% { transform: translate(-50%, 20px); }
+  10% { transform: translate(-50%, 0); }
+  90% { transform: translate(-50%, 0); }
   100% { transform: translate(-50%, -100%); }
 }
 
