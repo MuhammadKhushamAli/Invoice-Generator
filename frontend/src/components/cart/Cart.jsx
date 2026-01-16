@@ -40,7 +40,7 @@ export function Cart({ onClick }) {
     /* ---------------- SALE FORM STATE ---------------- */
     /* Wrapped in an overlay to look like a professional Modal Popup */
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-900/20 backdrop-blur-sm p-4 animate-[fadeIn_0.2s_ease-out]">
+      <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-900/20 backdrop-blur-sm px-3 sm:px-4 md:px-6 pt-20 sm:pt-20 md:pt-24 lg:pt-28 pb-4 sm:pb-6 md:pb-8 animate-[fadeIn_0.2s_ease-out]">
         <div className="w-full max-w-5xl">
           <SaleForm onClick={() => setIsSaleForm(false)} />
         </div>
