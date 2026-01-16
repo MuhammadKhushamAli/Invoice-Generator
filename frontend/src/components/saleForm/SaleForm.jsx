@@ -177,17 +177,8 @@ export function SaleForm({ onClick }) {
               Icon={MapPin}
               {...register("customerStreet", {
                 required: true,
-                validate: (value) =>
-                  value.startsWith("Street") || "Must Start with 'Street'",
-                onChange: (e) => {
-                  let value = e.target.value;
-                  const PREFIX = "Street ";
-                  if (!value.startsWith(PREFIX)) {
-                    value = PREFIX + value.replace(/street/i, "");
-                    setValue("customerStreet", value);
-                  }
                 },
-              })}
+              )}
             />
 
             <Input
@@ -247,6 +238,7 @@ export function SaleForm({ onClick }) {
                 label="Sales Tax Rate"
                 placeholder="0"
                 Icon={Percent}
+                min={0}
                 {...register("salesTaxRate", {
                   required: true,
                   validate: (value) => /^\d+$/.test(value) || "Must be Numbers",
@@ -266,6 +258,7 @@ export function SaleForm({ onClick }) {
                 label="Special Excise Rate"
                 placeholder="0"
                 Icon={Percent}
+                min={0}
                 {...register("specialExciseRate", {
                   required: true,
                   validate: (value) => /^\d+$/.test(value) || "Must be Numbers",
@@ -284,6 +277,7 @@ export function SaleForm({ onClick }) {
                 label="Further Sales Tax"
                 placeholder="0"
                 Icon={Percent}
+                min={0}
                 {...register("furtherSalesTaxRate", {
                   required: true,
                   validate: (value) => /^\d+$/.test(value) || "Must be Numbers",

@@ -217,17 +217,6 @@ export function Register() {
                   Icon={MapPin}
                   {...register("street", {
                     required: true,
-                    validate: (value) =>
-                      value.startsWith("Street") || "Must have Prefix 'Street'",
-                    onChange: (e) => {
-                      const PREFIX = "Street ";
-                      let value = e.target.value;
-
-                      if (!value.startsWith(PREFIX)) {
-                        value = PREFIX + value.replace(/street/i, "");
-                        setValue("street", value);
-                      }
-                    },
                   })}
                 />
 

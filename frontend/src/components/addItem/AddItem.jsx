@@ -91,17 +91,17 @@ export function AddItem({ onClick = null }) {
           "/api/v1/item/add-item",
           formData
         );
-        if (response?.status === 200){
+        if (response?.status === 200) {
           setAlert(response?.message);
           onClick && onClick();
           if (window.location.pathname === "/products")
             window.location.reload();
-        };
+        }
       } else {
         setAlert("Please Upload Image");
       }
     } catch (error) {
-        console.log(error);
+      console.log(error);
       setAlert(error?.message);
     } finally {
       setIsLoading(false);
@@ -154,7 +154,6 @@ export function AddItem({ onClick = null }) {
       {alert && <Error message={alert} />}
       {/* Form */}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-
         {/* Input Fields Grid */}
         <div className="grid gap-5 md:grid-cols-2">
           {/* Full width for Name */}
@@ -173,6 +172,7 @@ export function AddItem({ onClick = null }) {
             label="Price:"
             placeholder="123"
             Icon={DollarSign}
+            min={0}
             {...register("price", {
               required: true,
               validate: (value) => value >= 0,
@@ -184,6 +184,7 @@ export function AddItem({ onClick = null }) {
             label="Available Quantity:"
             placeholder="123"
             Icon={Package}
+            min={0}
             {...register("quantity", {
               required: true,
               validate: (value) => value >= 0,
