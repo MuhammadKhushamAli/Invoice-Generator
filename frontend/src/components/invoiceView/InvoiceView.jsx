@@ -7,7 +7,10 @@ import { Loading } from "../Loading.jsx";
 import { Error } from "../Error.jsx";
 import { FileText, Download } from "lucide-react";
 
-import { Document, Page } from "react-pdf";
+import { Document, Page, pdfjs } from "react-pdf";
+import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+
+pdfjs.GlobalWorkerOptions.workerSrc = pdfWorker;
 
 export function InvoiceView() {
   const { invoiceId } = useParams();
@@ -32,7 +35,6 @@ export function InvoiceView() {
 
         if (invoiceResponse?.status === 200) {
           setInvoice(invoiceResponse?.data);
-          console.log(invoiceResponse);
         }
       } catch (error) {
         setAlert(error.message);
@@ -41,7 +43,19 @@ export function InvoiceView() {
       }
     };
     fetchData();
-  }, [invoiceId]);
+  }, [invoiceId, isLoggedIn, navigate]);
+
+  const handleDownload = async () => {
+    console.log("Downloading Invoice...");
+    const response = await fetch(invoice?.url);
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${invoice?._id}.pdf`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
   return isLoading ? (
     <Loading />
   ) : (
@@ -77,16 +91,16 @@ export function InvoiceView() {
         <Document
           file={invoice?.url}
           className="flex flex-col gap-8"
+          onLoadStart={() => setIsLoading(true)}
           onLoadSuccess={({ numPages }) => {
             setPages(numPages);
             setIsLoading(false);
           }}
-          onLoadError={() => {
+          onLoadError={(error) => {
             setIsLoading(false);
             setAlert("PDF Loading Failed");
-            navigate(-1);
+            console.error("Error while loading PDF:", error);
           }}
-          onLoadStart={() => setIsLoading(true)}
         >
           {Array.from({ length: pages }, (_, index) => (
             /* Page Wrapper: Adds a realistic 'Paper' shadow and lift effect */
@@ -111,17 +125,10 @@ export function InvoiceView() {
         <Button
           disabled={isLoading}
           Icon={Download}
+          onClick={handleDownload}
           className="w-full shadow-lg shadow-indigo-500/20 md:w-auto"
         >
-          <a
-            href={invoice?.url}
-            download={invoice?.name}
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center gap-2 text-inherit no-underline"
-          >
-            Download Invoice
-          </a>
+          Download Invoice
         </Button>
       </div>
     </div>

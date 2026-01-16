@@ -192,6 +192,7 @@ export const addSale = asyncHandler(async (req, res) => {
           {
             invoice: invoice?._id,
             owner: req?.user?._id,
+            price: totalPayableWithTaxes?.toFixed(2),
           },
         ],
         { session }

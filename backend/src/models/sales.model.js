@@ -10,6 +10,8 @@ const salesSchema = new mongoose.Schema(
     ],
     price: {
       type: Number,
+      default: 0,
+      required: [true, "Sale Price is required"],
     },
     invoice: {
       type: mongoose.Schema.Types.ObjectId,

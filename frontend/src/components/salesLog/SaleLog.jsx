@@ -28,12 +28,12 @@ export function SaleLog({ sale }) {
         {/* Date */}
         <div className="flex items-center gap-2 text-xs font-medium text-slate-400">
           <Calendar className="h-3.5 w-3.5" />
-          {sale?.createdAt}
+          {new Date(sale?.createdAt).toString().split(" GMT")[0]}
         </div>
 
         {/* View Invoice Link */}
         <Link
-          to={`/invoice/${sale?.invoice}`}
+          to={`/invoice/${sale?.invoice?._id}`}
           className="group flex items-center gap-1 text-sm font-semibold text-indigo-600 transition-colors hover:text-indigo-800"
         >
           View Invoice

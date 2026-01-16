@@ -30,7 +30,6 @@ export function SalesPage() {
             }
           );
           if (salesResponse?.status === 200) {
-            console.log(salesResponse);
             const newSales = salesResponse?.data?.docs?.[0].sales || [];
             setSales((prev) => [...prev, ...newSales]);
             isNextPage.current = salesResponse?.data?.hasNextPage;
@@ -70,7 +69,6 @@ export function SalesPage() {
   ) : (
     <Container className="max-w-7xl!">
       {" "}
-      {alert && <Error message={alert} />}
       {/* Expand container width for grid layout */}
       {/* Page Header */}
       <div className="mb-8 flex flex-col gap-2 border-b border-slate-200 pb-6 md:flex-row md:items-center md:justify-between">
@@ -83,6 +81,7 @@ export function SalesPage() {
           </p>
         </div>
 
+      {alert && <Error message={alert} />}
         {/* Record Counter Badge */}
         <span className="inline-flex items-center rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/10">
           {sales?.length || 0} Transactions
