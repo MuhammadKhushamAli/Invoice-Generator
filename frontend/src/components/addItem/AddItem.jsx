@@ -91,7 +91,12 @@ export function AddItem({ onClick = null }) {
           "/api/v1/item/add-item",
           formData
         );
-        if (response?.status === 200) navigate("/");
+        if (response?.status === 200){
+          setAlert(response?.message);
+          onClick && onClick();
+          if (window.location.pathname === "/products")
+            window.location.reload();
+        };
       } else {
         setAlert("Please Upload Image");
       }
@@ -145,10 +150,10 @@ export function AddItem({ onClick = null }) {
         </div>
       )}
 
+      {/* Error Toast */}
+      {alert && <Error message={alert} />}
       {/* Form */}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Error Toast */}
-        {alert && <Error message={alert} />}
 
         {/* Input Fields Grid */}
         <div className="grid gap-5 md:grid-cols-2">

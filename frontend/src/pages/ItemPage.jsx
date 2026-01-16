@@ -91,9 +91,12 @@ export function ItemPage() {
       )}
       {/* Product Grid Layout */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {items?.map((item) => (
-          <ItemCard key={item?._id} item={item} />
-        ))}
+        {items?.map(
+          (item) => {
+            if(item?.quantity > 0)
+               return <ItemCard key={item?._id} item={item} />
+          }
+        )}
 
         {/* Empty State */}
         {items?.length === 0 && (

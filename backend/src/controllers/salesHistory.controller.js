@@ -166,7 +166,7 @@ export const addSale = asyncHandler(async (req, res) => {
       further_sales_tax_rate: furtherSalesTaxRate,
       further_sales_tax: totalFurtherSaleTax,
       freight_other_charges: freightOtherCharges,
-      value_including_sales_tax: totalPayableWithTaxes,
+      value_including_sales_tax: totalPayableWithTaxes.toFixed(2),
       amount_in_words: toWords(totalPayableWithTaxes),
     };
 

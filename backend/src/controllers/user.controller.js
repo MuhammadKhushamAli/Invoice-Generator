@@ -336,20 +336,28 @@ export const setInvoiceLogoStampAndSign = asyncHandler(async (req, res) => {
     });
     if (!signUrl) throw new ApiError(500, "Error in Uploading Sign");
 
-    await User.findByIdAndUpdate(req?.user?._id, {
-      $set: {
-        invoiceLogo: logoUrl?.url,
-        invoiceStamp: stampUrl?.url,
-        invoiceSign: signUrl?.url,
+    const updatedUser = await User.findByIdAndUpdate(
+      req?.user?._id,
+      {
+        $set: {
+          invoiceLogo: logoUrl?.url,
+          invoiceStamp: stampUrl?.url,
+          invoiceSign: signUrl?.url,
+        },
       },
-    });
+      {
+        new: true,
+      }
+    ).select("-password -refreshToken");
+    if (!updatedUser) throw new ApiError(500, "Error in Updating User Details");
 
     return res
       .status(200)
       .json(
         new ApiResponse(
           200,
-          "Invoice's Logo, Stamp and Sign Successfully Updated"
+          "Invoice's Logo, Stamp and Sign Successfully Updated",
+          updatedUser
         )
       );
   } catch (error) {
@@ -489,14 +497,14 @@ export const getSaleHistory = asyncHandler(async (req, res) => {
     },
     {
       $lookup: {
-        form: "sales",
+        from: "sales",
         localField: "salesHistory",
         foreignField: "_id",
         as: "sales",
         pipeline: [
           {
             $lookup: {
-              form: "itemssolds",
+              from: "itemssolds",
               localField: "items",
               foreignField: "_id",
               as: "items",

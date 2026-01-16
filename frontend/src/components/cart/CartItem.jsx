@@ -35,7 +35,7 @@ export function CartItem({ item, onDelete }) {
       {/* Right Side: Delete Action */}
       <div>
         <Button
-          onclick={() => onDelete(item)}
+          onClick={() => onDelete(item)}
           className="bg-white! p-2! text-red-500 shadow-none ring-1 ring-slate-200 hover:bg-red-50! hover:text-red-600 hover:ring-red-200"
         >
           <Trash2 className="h-5 w-5" />

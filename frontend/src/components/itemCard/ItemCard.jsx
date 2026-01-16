@@ -13,7 +13,7 @@ export function ItemCard({ item }) {
   const dispatch = useDispatch();
   const [isAddToCart, setIsAddToCart] = useState(false);
   const [quantity, setQuantity] = useState(0);
-  const { register, handleSubmit } = useForm();
+  const { register, handleSubmit, reset } = useForm();
   const [alert, setAlert] = useState("");
   const navigate = useNavigate();
 
@@ -27,6 +27,8 @@ export function ItemCard({ item }) {
 
   const onSubmit = useCallback(
     (data) => {
+      setIsAddToCart(false);
+      reset();
       if (isLoggedIn && data?.quantity <= item?.quantity) {
         const itemToBeAdded = { ...item };
         itemToBeAdded.quantity = data?.quantity;
@@ -90,7 +92,6 @@ export function ItemCard({ item }) {
                   autoFocus
                   min={0}
                   max={item?.quantity}
-                  disabled={quantity === 0}
                   className="bg-white" // Override default input bg for better contrast
                   {...register("quantity", {
                     required: true,
@@ -112,7 +113,7 @@ export function ItemCard({ item }) {
                   label="Price"
                   placeholder={item?.price}
                   min={0}
-                  disabled={quantity === 0}
+                  disabled={quantity < 0}
                   className="bg-white"
                   {...register("price", {
                     required: true,

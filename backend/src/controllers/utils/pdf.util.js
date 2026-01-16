@@ -9,31 +9,31 @@ export const generatePdf = async (inputObj, userId) => {
   try {
     const invoiceNum = await getInvoiceNumber(userId);
     const pdfPath = `./public/temp/${invoiceNum}.pdf`;
-    const templatePath = path.join(
-      process.cwd(),
-      "src",
-      "utils",
-      "pdf_template.ejs"
-    );
+    const templatePath = path.join(process.cwd(), "src", "utils", "pdf_template.ejs");
 
-    ejs.renderFile(templatePath, inputObj, {}, async (err, html) => {
-      if (err) throw new ApiError(500, `Error in Rendering Template: ${err}`);
-      const browser = await puppeteer.launch();
-      const page = await browser.newPage();
-      await page.setContent(html, { waitUntil: "networkidle0" });
-      await page.pdf({
-        path: pdfPath,
-        format: "A4",
-        printBackground: true,
+    // Convert renderFile to a Promise
+    const html = await new Promise((resolve, reject) => {
+      ejs.renderFile(templatePath, inputObj, {}, (err, str) => {
+        if (err) reject(new ApiError(500, `Error in Rendering Template: ${err}`));
+        else resolve(str);
       });
-      console.log("PDF Generated");
-      await browser.close();
-
-      const pdfUrl = await uploadToCloudinary(pdfPath);
-      if (!pdfUrl) throw new ApiError(500, "Error in Uploading PDF");
-
-      return pdfUrl?.url;
     });
+
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.setContent(html, { waitUntil: "networkidle0" });
+    await page.pdf({
+      path: pdfPath,
+      format: "A4",
+      printBackground: true,
+    });
+    console.log("PDF Generated");
+    await browser.close();
+
+    const pdfUrl = await uploadToCloudinary(pdfPath , {resource_type: "auto", access_mode: "public"});
+    if (!pdfUrl) throw new ApiError(500, "Error in Uploading PDF");
+
+    return pdfUrl?.url;
   } catch (error) {
     throw error;
   }

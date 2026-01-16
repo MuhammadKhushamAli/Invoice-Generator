@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import { axiosInstance } from "../../axios/axios";
 import { useDropzone } from "react-dropzone";
@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { Loading } from "../Loading.jsx";
+import { login } from "../../features/authentication/authSlice.js";
 
 export function InvoiceCredentials({ onClick = null }) {
   const [alert, setAlert] = useState("");
@@ -27,6 +28,8 @@ export function InvoiceCredentials({ onClick = null }) {
   const [signPreview, setSignPreview] = useState(null);
   const isLoggedIn = useSelector((state) => state?.auth?.loginStatus);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   // just for Login Check
   useEffect(() => {
     setIsLoading(true);
@@ -67,7 +70,12 @@ export function InvoiceCredentials({ onClick = null }) {
           "api/v1/user/set-invoice-credentials",
           formData
         );
-        if (response?.status === 200) navigate("/");
+        if (response?.status === 200) {
+          console.log(response);
+          dispatch(login({ userData: response?.data }));
+          setAlert(response?.message);
+          onClick ? onClick() : navigate("/");
+        }
       } else {
         setAlert("Please Upload All Credentials");
       }

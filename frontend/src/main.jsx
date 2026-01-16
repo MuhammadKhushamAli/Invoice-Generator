@@ -70,7 +70,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "/invoice/:itemId",
+        path: "/invoice/:invoiceId",
         element: (
           <AuthLayout isAuthRequired={true}>
             <InvoiceViewPage />

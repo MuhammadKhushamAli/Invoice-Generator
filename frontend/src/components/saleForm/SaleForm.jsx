@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import { Loading } from "../Loading.jsx";
 import { Input } from "../Input.jsx";
 import { Button } from "../Button.jsx";
 import { axiosInstance } from "../../axios/axios.js";
+import { Error } from "../Error.jsx";
 import {
   FileText,
   User,
@@ -18,6 +19,7 @@ import {
   CheckCircle,
   X,
 } from "lucide-react";
+import { clearCart } from "../../features/itemCart/itemSlice.js";
 
 export function SaleForm({ onClick }) {
   const isLoggedIn = useSelector((state) => state?.auth?.loginStatus);
@@ -27,7 +29,8 @@ export function SaleForm({ onClick }) {
   const [alert, setAlert] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
-  const { register, handleSubmit, setValue } = useForm();
+  const { register, handleSubmit, setValue, reset } = useForm();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     setIsLoading(true);
@@ -40,18 +43,41 @@ export function SaleForm({ onClick }) {
 
     setAlert("");
     setIsLoading(true);
+    console.log("1123");
     try {
       data.itemsInfo = cart;
       const response = await axiosInstance.post("/api/v1/sales/add-sale", data);
 
       if (response?.status === 200) {
+        reset();
+        dispatch(clearCart());
+        console.log("response", response);
         setAlert("Invoice Generated");
         const url = response?.data?.inv_url;
-        const link = document.createElement("a");
-        link.href = url;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+
+        const downloadInvoice = async () => {
+          const res = await fetch(url);
+          const blob = await res.blob();
+
+          const blobUrl = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+
+          link.href = blobUrl;
+          link.download = `${response?.data?.sale?.invoice}.pdf`;
+
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+
+          URL.revokeObjectURL(blobUrl);
+        };
+        downloadInvoice();
+        onClick && onClick();
+        if (
+          window.location.pathname === "/sales" ||
+          window.location.pathname === "/invoices"
+        )
+          window.location.reload();
       }
     } catch (error) {
       setAlert(error?.message);
@@ -64,7 +90,7 @@ export function SaleForm({ onClick }) {
     <Loading />
   ) : (
     // CHANGED: 'mt-28' for Mobile (balanced), 'md:mt-40' for Desktop (spacious)
-    <div className="relative mx-auto w-full max-w-5xl rounded-xl border border-slate-200 bg-white p-4 shadow-xl shadow-slate-200/50 mt-28 md:mt-40 md:p-10 mb-20">
+    <div className="relative mx-auto w-full max-w-5xl rounded-xl border border-slate-200 bg-white p-4 shadow-xl shadow-slate-200/50 mt-80 md:mt-96 md:p-10 mb-0">
       {/* Error Toast */}
       {alert && (
         <div className="mb-6">
@@ -155,7 +181,7 @@ export function SaleForm({ onClick }) {
                   value.startsWith("Street") || "Must Start with 'Street'",
                 onChange: (e) => {
                   let value = e.target.value;
-                  const PREFIX = "Street";
+                  const PREFIX = "Street ";
                   if (!value.startsWith(PREFIX)) {
                     value = PREFIX + value.replace(/street/i, "");
                     setValue("customerStreet", value);
@@ -258,7 +284,7 @@ export function SaleForm({ onClick }) {
                 label="Further Sales Tax"
                 placeholder="0"
                 Icon={Percent}
-                {...register("freightOtherCharges", {
+                {...register("furtherSalesTaxRate", {
                   required: true,
                   validate: (value) => /^\d+$/.test(value) || "Must be Numbers",
                   min: 0,

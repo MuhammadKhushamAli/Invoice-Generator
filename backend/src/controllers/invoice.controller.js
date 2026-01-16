@@ -9,7 +9,7 @@ export const invoiceView = asyncHandler(async (req, res) => {
   invoiceId = invoiceId?.trim();
 
   if (!invoiceId) throw new ApiError(400, "Invoice ID Required");
-  if (isValidObjectId(invoiceId)) throw new ApiError(400, "Invalid Invoice ID");
+  if (!isValidObjectId(invoiceId)) throw new ApiError(400, "Invalid Invoice ID");
 
   const invoice = await Invoice.findOne({
     $and: [{ _id: invoiceId }, { owner: req?.user?._id }],

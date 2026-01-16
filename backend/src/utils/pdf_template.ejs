@@ -237,8 +237,8 @@
                 <tr>
                     <td><%= index + 1 %></td>
                     <td><%= item.name %></td>
-                    <td><%= item.range %></td>
-                    <td><%= item.design %></td>
+                    <td><%= item.range || "Pure" %></td>
+                    <td><%= item.design || "As Approved" %></td>
                     <td><%= item.quantity %></td>
                     <td><%= item.price %></td>
                     <td><%= (item.quantity * item.price).toFixed(2) %></td>

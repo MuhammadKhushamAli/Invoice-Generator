@@ -1,19 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router";
 import { axiosInstance } from "../../axios/axios.js";
-import { Document, Page } from "react-pdf";
 import { Button } from "../Button.jsx";
 import { Loading } from "../Loading.jsx";
 import { Error } from "../Error.jsx";
 import { FileText, Download } from "lucide-react";
+
+import { Document, Page } from "react-pdf";
 
 export function InvoiceView() {
   const { invoiceId } = useParams();
   const [alert, setAlert] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [pages, setPages] = useState(0);
-  const [invoice, setInvoice] = useState(null);
+  const [invoice, setInvoice] = useState("");
   const isLoggedIn = useSelector((state) => state?.auth?.loginStatus);
   const navigate = useNavigate();
 
@@ -26,11 +27,12 @@ export function InvoiceView() {
       setIsLoading(true);
       try {
         const invoiceResponse = await axiosInstance.get(
-          `/api/v1/invoice/invoice-item/${invoiceId}`
+          `/api/v1/invoice/view-invoice/${invoiceId}`
         );
 
         if (invoiceResponse?.status === 200) {
           setInvoice(invoiceResponse?.data);
+          console.log(invoiceResponse);
         }
       } catch (error) {
         setAlert(error.message);
@@ -39,7 +41,7 @@ export function InvoiceView() {
       }
     };
     fetchData();
-  }, [itemId]);
+  }, [invoiceId]);
   return isLoading ? (
     <Loading />
   ) : (
@@ -60,9 +62,8 @@ export function InvoiceView() {
           <h4 className="mt-2 flex items-center gap-2 text-sm font-medium text-slate-500">
             <FileText className="h-4 w-4 text-indigo-500" />
             Reference No:
-            {/* Monospace font is standard for financial IDs */}
             <span className="rounded-md bg-slate-100 px-2 py-0.5 font-mono text-slate-700">
-              {(invoice?.name).replace(".pdf", "")}
+              {invoice?.name?.replace(".pdf", "")}
             </span>
           </h4>
         </div>

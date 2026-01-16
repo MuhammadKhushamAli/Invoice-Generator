@@ -1,33 +1,43 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-    cart: []
+  cart: [],
 };
 
 const itemSlice = createSlice({
-    name: "itemsCart",
-    initialState,
-    reducers: {
-        addItem: (state, action) => {
-            const itemToBeAdded = action?.payload?.item;
-            const index = state?.cart?.findIndex(item => item?._id === itemToBeAdded?._id);
-            if(index === -1)
-            {
-                state?.cart?.push(itemToBeAdded);
-            }
-            else{
-                state.cart[index].quantity += itemToBeAdded?.quantity
-            }
-        },
-        removeItem: (state, action) => {
-            const itemToBeAdded = action?.payload?.item;
-            state.cart = state?.cart?.filter(item => item?._id !== itemToBeAdded?._id);
-        },
-        clearCart: (state) => {
-            state.cart = [];
+  name: "itemsCart",
+  initialState,
+  reducers: {
+    addItem: (state, action) => {
+      const itemToBeAdded = action?.payload?.item;
+      const index = state?.cart?.findIndex(
+        (item) => item?._id === itemToBeAdded?._id
+      );
+      if (index === -1) {
+        state?.cart?.push(itemToBeAdded);
+      } else {
+        if (state.cart[index].price === itemToBeAdded?.price) {
+          const incomingQuantity = parseInt(itemToBeAdded?.quantity);
+          console.log(incomingQuantity)
+          const orignalQuantity = parseInt(state.cart[index].quantity);
+          console.log(orignalQuantity)
+          state.cart[index].quantity = incomingQuantity + orignalQuantity;
+        } else {
+          state.cart.push(itemToBeAdded);
         }
-    }
-})
+      }
+    },
+    removeItem: (state, action) => {
+      const itemToBeAdded = action?.payload?.item;
+      state.cart = state?.cart?.filter(
+        (item) => item?._id !== itemToBeAdded?._id
+      );
+    },
+    clearCart: (state) => {
+      state.cart = [];
+    },
+  },
+});
 
 export const { addItem, removeItem, clearCart } = itemSlice.actions;
 
