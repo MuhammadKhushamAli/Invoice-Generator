@@ -55,7 +55,7 @@ export function InvoiceView() {
 
   const handleDownload = async () => {
     console.log("Downloading Invoice...");
-    window.alert("Your download will start shortly.");
+    window.alert(invoice?.url);
     const response = await fetch(invoice?.url);
     const blob = await response.blob();
     const url = window.URL.createObjectURL(blob);
