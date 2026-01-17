@@ -41,8 +41,7 @@ export function InvoiceView() {
         );
 
         if (invoiceResponse?.status === 200) {
-          invoiceResponse?.data?.url?.replace("http://", "https://");
-          window.alert(invoiceResponse?.data?.url);
+          invoiceResponse.data.url = invoiceResponse?.data?.url?.replace("http://", "https://");
           setInvoice(invoiceResponse?.data);
         }
       } catch (error) {
@@ -60,7 +59,6 @@ export function InvoiceView() {
 
       return;
     }
-    window.alert(invoice?.url);
     if (invoice?.url.includes("cloudinary")) {
       console.log("Downloading Invoice...");
 
