@@ -12,6 +12,13 @@ import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
 pdfjs.GlobalWorkerOptions.workerSrc = pdfWorker;
 
+const pdfOptions = {
+  cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
+  cMapPacked: true,
+  standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts/`,
+};
+
+
 export function InvoiceView() {
   const { invoiceId } = useParams();
   const [alert, setAlert] = useState("");
@@ -34,7 +41,6 @@ export function InvoiceView() {
         );
 
         if (invoiceResponse?.status === 200) {
-          setAlert(invoiceResponse?.message);
           setInvoice(invoiceResponse?.data);
         }
       } catch (error) {
@@ -91,6 +97,7 @@ export function InvoiceView() {
       <div className="flex min-h-150 flex-col items-center justify-center rounded-xl bg-slate-100/50 p-8 shadow-inner ring-1 ring-slate-900/5 backdrop-blur-sm">
         <Document
           file={invoice?.url}
+          options={pdfOptions}
           className="flex flex-col gap-8"
           onLoadStart={() => setIsLoading(true)}
           onLoadSuccess={({ numPages }) => {
