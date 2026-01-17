@@ -470,6 +470,8 @@ export const getItems = asyncHandler(async (req, res) => {
               price: 1,
               quantity: 1,
               image: 1,
+              range: 1,
+              design: 1,
             },
           },
         ],

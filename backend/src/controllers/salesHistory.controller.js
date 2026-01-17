@@ -130,6 +130,7 @@ export const addSale = asyncHandler(async (req, res) => {
     const address = await Address.findById(user?.address);
     if (!address) throw new ApiError(500, "Address Not Found");
 
+    console.log(itemsInfo);
     const inputObj = {
       business_name: user?.businessName,
       email: user?.email,
