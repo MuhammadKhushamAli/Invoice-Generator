@@ -97,7 +97,7 @@ export function InvoiceView() {
       {/* PDF Document Container */}
       <div className="flex min-h-150 flex-col items-center justify-center rounded-xl bg-slate-100/50 p-8 shadow-inner ring-1 ring-slate-900/5 backdrop-blur-sm">
         <Document
-          file={invoice?.url}
+          file={`${invoice?.url}?t=${Date.now()}`}
           options={pdfOptions}
           className="flex flex-col gap-8"
           onLoadStart={() => setIsLoading(true)}
