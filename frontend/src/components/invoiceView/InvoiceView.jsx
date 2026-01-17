@@ -62,6 +62,7 @@ export function InvoiceView() {
       console.log("Downloading Invoice...");
 
       const url = invoice?.url?.replace("/upload/", "/upload/fl_attachment/");
+      window.alert(url)
       const a = document.createElement("a");
       document.body.appendChild(a);
       a.href = url;
