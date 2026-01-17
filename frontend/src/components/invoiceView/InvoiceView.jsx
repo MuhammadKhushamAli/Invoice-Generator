@@ -56,6 +56,7 @@ export function InvoiceView() {
   const handleDownload = async () => {
     console.log("Downloading Invoice...");
     const response = await fetch(invoice?.url);
+    window.alert(response)
     const blob = await response.blob();
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
