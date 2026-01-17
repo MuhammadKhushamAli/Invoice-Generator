@@ -37,6 +37,19 @@ app.use("/api/v1/user", userRoute);
 app.use("/api/v1/item", itemRoute);
 app.use("/api/v1/sales", salesRoute);
 app.use("/api/v1/invoice", invoiceRoute);
+app.get("/health/puppeteer", async (req, res) => {
+  try {
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    });
+    await browser.close();
+    res.send("Puppeteer OK");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Puppeteer FAILED");
+  }
+});
 
 
 app.use((err, _, res, __) => {
