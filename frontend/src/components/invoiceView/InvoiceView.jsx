@@ -42,6 +42,7 @@ export function InvoiceView() {
 
         if (invoiceResponse?.status === 200) {
           invoiceResponse?.data?.url?.replace("http://", "https://");
+          window.alert(invoiceResponse?.data?.url);
           setInvoice(invoiceResponse?.data);
         }
       } catch (error) {
