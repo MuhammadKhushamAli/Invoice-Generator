@@ -19,7 +19,6 @@ const pdfOptions = {
   disableStream: true,
 };
 
-
 export function InvoiceView() {
   const { invoiceId } = useParams();
   const [alert, setAlert] = useState("");
@@ -38,10 +37,11 @@ export function InvoiceView() {
       setIsLoading(true);
       try {
         const invoiceResponse = await axiosInstance.get(
-          `/api/v1/invoice/view-invoice/${invoiceId}`
+          `/api/v1/invoice/view-invoice/${invoiceId}`,
         );
 
         if (invoiceResponse?.status === 200) {
+          invoiceResponse?.data?.url?.replace("http://", "https://");
           setInvoice(invoiceResponse?.data);
         }
       } catch (error) {
@@ -53,20 +53,32 @@ export function InvoiceView() {
     fetchData();
   }, [invoiceId, isLoggedIn, navigate]);
 
-  const handleDownload = async () => {
-    console.log("Downloading Invoice...");
-    window.alert(invoice?.url);
-    const secureUrl = invoice.url.replace("http://", "https://");
-    const response = await fetch(secureUrl);
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${invoice?._id}.pdf`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
+  const handleDownload = () => {
+    if (!invoice?.url) {
+      setAlert("Invoice URL is not available for download.");
+
+      return;
+    }
+
+    if (invoice?.url.includes("cloudinary")) {
+      console.log("Downloading Invoice...");
+
+      const url = invoice?.url?.replace("/upload/", "/upload/fl_attachment/");
+
+      const a = document.createElement("a");
+
+      document.body.appendChild(a);
+
+      a.href = url;
+
+      a.download = `${invoice?._id}.pdf`;
+
+      a.click();
+
+      document.body.removeChild(a);
+    } else {
+      window.open(invoice?.url, "_blank");
+    }
   };
   return isLoading ? (
     <Loading />
