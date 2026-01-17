@@ -99,7 +99,7 @@ export function InvoiceView() {
           onLoadError={(error) => {
             setIsLoading(false);
             setAlert("PDF Loading Failed");
-            console.error("Error while loading PDF:", error);
+            console.log("Error while loading PDF:", error);
           }}
         >
           {Array.from({ length: pages }, (_, index) => (
