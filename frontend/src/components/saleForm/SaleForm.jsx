@@ -44,7 +44,6 @@ export function SaleForm({ onClick }) {
 
     setAlert("");
     setIsLoading(true);
-    console.log("1123");
     try {
       data.itemsInfo = cart;
       const response = await axiosInstance.post("/api/v1/sales/add-sale", data);
@@ -52,22 +51,24 @@ export function SaleForm({ onClick }) {
       if (response?.status === 200) {
         reset();
         dispatch(clearCart());
-        console.log("response", response);
         setAlert("Invoice Generated");
         let url = response?.data?.inv_url?.replace("http://", "https://");
 
-        const downloadInvoice = async () => {
+        const downloadInvoice = () => {
           if (!url) {
             setAlert("Invoice URL is not available for download.");
-
             return;
           }
-          if (url.includes("cloudinary")) {
+          if (url?.includes("cloudinary")) {
+            
+            const decodedUrl = decodeURIComponent(url);
+            let fileNameWithExt = decodedUrl.split("/").pop();
+            fileNameWithExt = fileNameWithExt.replace(/\.[^/.]+$/, "");
+
             url = url?.replace(
               "/upload/",
-              `/upload/fl_attachment:${userData?.businessName}-${invoice?.name}/`,
+              `/upload/fl_attachment:${userData?.businessName}-${fileNameWithExt}/`,
             );
-
             const a = document.createElement("a");
 
             a.href = url;
@@ -300,6 +301,7 @@ export function SaleForm({ onClick }) {
               type="number"
               label="Freight / Other Charges"
               placeholder="0"
+              min={0}
               Icon={Truck}
               {...register("freightOtherCharges", {
                 required: true,
