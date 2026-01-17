@@ -223,8 +223,12 @@ export const login = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .cookie("accessToken", accessToken, options)
-    .cookie("refreshToken", refreshToken, options)
+    .cookie("accessToken", accessToken, (options.maxAge = 24 * 60 * 60 * 1000))
+    .cookie(
+      "refreshToken",
+      refreshToken,
+      (options.maxAge = 10 * 24 * 60 * 60 * 1000)
+    )
     .json(
       new ApiResponse(200, "User Logged In Successfully", {
         newUser,
@@ -263,8 +267,12 @@ export const refreshTokens = asyncHandler(async (req, res) => {
   };
   res
     .status(200)
-    .cookie("refreshToken", refreshToken, options)
-    .cookie("accessToken", accessToken, options)
+    .cookie(
+      "refreshToken",
+      refreshToken,
+      (options.maxAge = 10 * 24 * 60 * 60 * 1000)
+    )
+    .cookie("accessToken", accessToken, (options.maxAge = 24 * 60 * 60 * 1000))
     .json(
       new ApiResponse(200, "New Tokens Recieved", {
         refreshToken,
@@ -285,8 +293,8 @@ export const logout = asyncHandler(async (req, res) => {
   };
   res
     .status(200)
-    .clearCookie("refreshToken", options)
-    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", (options.maxAge = 10 * 24 * 60 * 60 * 1000))
+    .clearCookie("accessToken", (options.maxAge = 24 * 60 * 60 * 1000))
     .json(new ApiResponse(200, "Successfully Logged-Out"));
 });
 
