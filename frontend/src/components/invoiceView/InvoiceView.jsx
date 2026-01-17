@@ -53,7 +53,8 @@ export function InvoiceView() {
   }, [invoiceId, isLoggedIn, navigate]);
 
   const handleDownload = () => {
-    setAlert(invoice?.url);
+    window.alert("Your download will start shortly.");
+
     if (!invoice?.url) {
       setAlert("Invoice URL is not available for download.");
       return;
@@ -62,7 +63,6 @@ export function InvoiceView() {
       console.log("Downloading Invoice...");
 
       const url = invoice?.url?.replace("/upload/", "/upload/fl_attachment/");
-      setAlert(url);
       const a = document.createElement("a");
       a.href = url;
       a.download = `${invoice?._id}.pdf`;
