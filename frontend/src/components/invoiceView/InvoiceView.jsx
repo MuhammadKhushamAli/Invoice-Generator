@@ -8,9 +8,8 @@ import { Error } from "../Error.jsx";
 import { FileText, Download } from "lucide-react";
 
 import { Document, Page, pdfjs } from "react-pdf";
-import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
-pdfjs.GlobalWorkerOptions.workerSrc = pdfWorker;
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 const pdfOptions = {
   cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
