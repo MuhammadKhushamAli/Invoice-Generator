@@ -299,9 +299,9 @@ export const logout = asyncHandler(async (req, res) => {
     .status(200)
     .clearCookie("refreshToken", {
       ...options,
-      maxAge: 10 * 24 * 60 * 60 * 1000,
+      maxAge: 0,
     })
-    .clearCookie("accessToken", { ...options, maxAge: 24 * 60 * 60 * 1000 })
+    .clearCookie("accessToken", { ...options, maxAge: 0 })
     .json(new ApiResponse(200, "Successfully Logged-Out"));
 });
 
