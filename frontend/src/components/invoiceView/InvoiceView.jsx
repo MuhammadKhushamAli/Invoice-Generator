@@ -62,7 +62,6 @@ export function InvoiceView() {
       return;
     }
     if (invoice?.url.includes("cloudinary")) {
-      console.log("Downloading Invoice...");
 
       const url = invoice?.url?.replace(
         "/upload/",

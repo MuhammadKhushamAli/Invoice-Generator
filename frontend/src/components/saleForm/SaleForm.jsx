@@ -29,7 +29,7 @@ export function SaleForm({ onClick }) {
   const [alert, setAlert] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
-  const { register, handleSubmit, setValue, reset } = useForm();
+  const { register, handleSubmit, reset } = useForm();
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -53,23 +53,28 @@ export function SaleForm({ onClick }) {
         dispatch(clearCart());
         console.log("response", response);
         setAlert("Invoice Generated");
-        const url = response?.data?.inv_url;
+        let url = response?.data?.inv_url?.replace("http://", "https://");
 
         const downloadInvoice = async () => {
-          const res = await fetch(url);
-          const blob = await res.blob();
+          if (!url) {
+            setAlert("Invoice URL is not available for download.");
 
-          const blobUrl = URL.createObjectURL(blob);
-          const link = document.createElement("a");
+            return;
+          }
+          if (url.includes("cloudinary")) {
+            url = url?.replace(
+              "/upload/",
+              `/upload/fl_attachment:${userData?.businessName}-${invoice?.name}/`,
+            );
 
-          link.href = blobUrl;
-          link.download = `${response?.data?.sale?.invoice}.pdf`;
+            const a = document.createElement("a");
 
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
+            a.href = url;
 
-          URL.revokeObjectURL(blobUrl);
+            a.click();
+          } else {
+            window.open(url, "_blank");
+          }
         };
         downloadInvoice();
         onClick && onClick();
@@ -108,7 +113,10 @@ export function SaleForm({ onClick }) {
         </div>
       )}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 sm:space-y-8 md:space-y-10">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="space-y-6 sm:space-y-8 md:space-y-10"
+      >
         {/* ---------------- FORM HEADER ---------------- */}
         <div className="border-b border-slate-200 pb-4 sm:pb-6 pr-8 sm:pr-10 md:pr-12 pt-0">
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">
@@ -176,8 +184,7 @@ export function SaleForm({ onClick }) {
               Icon={MapPin}
               {...register("customerStreet", {
                 required: true,
-                },
-              )}
+              })}
             />
 
             <Input
