@@ -63,10 +63,13 @@ export function InvoiceView() {
       }
     };
     fetchData();
-    updatePdfWidth();
+    const timeoutId = setTimeout(updatePdfWidth, 0);
 
     window.addEventListener("resize", updatePdfWidth);
-    return () => window.removeEventListener("resize", updatePdfWidth);
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener("resize", updatePdfWidth);
+    };
   }, [invoiceId, isLoggedIn, navigate]);
 
   const handleDownload = () => {
