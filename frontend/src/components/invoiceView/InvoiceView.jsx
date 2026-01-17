@@ -53,13 +53,13 @@ export function InvoiceView() {
   }, [invoiceId, isLoggedIn, navigate]);
 
   const handleDownload = () => {
-    window.alert("Your download will start shortly.");
-
+    
     if (!invoice?.url) {
       setAlert("Invoice URL is not available for download.");
       return;
     }
     if (invoice?.url.includes("cloudinary")) {
+      window.alert("Your download will start shortly.");
       console.log("Downloading Invoice...");
 
       const url = invoice?.url?.replace("/upload/", "/upload/fl_attachment/");
