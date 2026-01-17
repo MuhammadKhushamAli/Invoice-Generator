@@ -3,6 +3,10 @@
     {
       "source": "/api/:path*",
       "destination": "https://invoice-generator-pbu0.onrender.com/api/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/"
     }
   ]
 }
