@@ -60,7 +60,8 @@ export function InvoiceView() {
     if (invoice?.url.includes("cloudinary")) {
       console.log("Downloading Invoice...");
 
-      const url = invoice.url.replace("/upload/", "/upload/fl_attachment/");
+      const url = invoice?.url?.replace("/upload/", "/upload/fl_attachment/");
+      setAlert(url);
       const a = document.createElement("a");
       a.href = url;
       a.download = `${invoice?._id}.pdf`;
