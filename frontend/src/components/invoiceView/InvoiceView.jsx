@@ -57,6 +57,7 @@ export function InvoiceView() {
       setAlert("Invoice URL is not available for download.");
       return;
     }
+    setAlert(invoice?.url)
     if (invoice?.url.includes("cloudinary")) {
       console.log("Downloading Invoice...");
 
