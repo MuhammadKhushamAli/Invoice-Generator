@@ -34,6 +34,7 @@ export function InvoiceView() {
         );
 
         if (invoiceResponse?.status === 200) {
+          setAlert(invoiceResponse?.message);
           setInvoice(invoiceResponse?.data);
         }
       } catch (error) {
