@@ -59,7 +59,7 @@ export function InvoiceView() {
 
       return;
     }
-
+    window.alert(invoice?.url);
     if (invoice?.url.includes("cloudinary")) {
       console.log("Downloading Invoice...");
 
