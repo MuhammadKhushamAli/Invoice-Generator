@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router";
 import { axiosInstance } from "../../axios/axios.js";
@@ -22,10 +22,12 @@ export function InvoiceView() {
   const [alert, setAlert] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [pages, setPages] = useState(0);
+  const [pdfWidth, setPdfWidth] = useState(null);
   const [invoice, setInvoice] = useState("");
   const isLoggedIn = useSelector((state) => state?.auth?.loginStatus);
   const userData = useSelector((state) => state?.auth?.userData);
   const navigate = useNavigate();
+  const pdfWraperRef = useRef(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -52,7 +54,19 @@ export function InvoiceView() {
         setIsLoading(false);
       }
     };
+
+    const updatePdfWidth = () => {
+      if (pdfWraperRef.current) {
+        if (pdfWraperRef.current.clientWidth <= 768)
+          setPdfWidth(pdfWraperRef.current.clientWidth);
+        else setPdfWidth(null);
+      }
+    };
     fetchData();
+    updatePdfWidth();
+
+    window.addEventListener("resize", updatePdfWidth);
+    return () => window.removeEventListener("resize", updatePdfWidth);
   }, [invoiceId, isLoggedIn, navigate]);
 
   const handleDownload = () => {
@@ -62,7 +76,6 @@ export function InvoiceView() {
       return;
     }
     if (invoice?.url.includes("cloudinary")) {
-
       const url = invoice?.url?.replace(
         "/upload/",
         `/upload/fl_attachment:${userData?.businessName}-${invoice?.name}/`,
@@ -80,7 +93,8 @@ export function InvoiceView() {
   return isLoading ? (
     <Loading />
   ) : (
-    <div className="mx-auto w-full rounded-2xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/50 md:p-8">
+    /* 1. Added 'max-w-5xl' here to stop the container from getting too wide on huge screens */
+    <div className="mx-auto w-full max-w-5xl rounded-2xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/50 md:p-8">
       {/* Error Toast */}
       {alert && (
         <div className="mb-6">
@@ -103,42 +117,45 @@ export function InvoiceView() {
           </h4>
         </div>
 
-        {/* Desktop Placeholder for alignment (Optional) */}
+        {/* Desktop Placeholder for alignment */}
         <div className="hidden md:block"></div>
       </div>
 
       {/* PDF Document Container */}
-      <div className="flex min-h-150 flex-col items-center justify-center rounded-xl bg-slate-100/50 p-8 shadow-inner ring-1 ring-slate-900/5 backdrop-blur-sm">
-        <Document
-          file={invoice?.url}
-          options={pdfOptions}
-          className="flex flex-col gap-8"
-          onLoadStart={() => setIsLoading(true)}
-          onLoadSuccess={({ numPages }) => {
-            setPages(numPages);
-            setIsLoading(false);
-          }}
-          onLoadError={(error) => {
-            setIsLoading(false);
-            setAlert(`PDF Loading Failed ${error}`);
-          }}
-        >
-          {Array.from({ length: pages }, (_, index) => (
-            /* Page Wrapper: Adds a realistic 'Paper' shadow and lift effect */
-            <div
-              key={index}
-              className="overflow-hidden rounded-lg shadow-lg shadow-slate-400/20 ring-1 ring-slate-900/5 transition-transform duration-300 hover:scale-[1.005]"
-            >
-              <Page
-                pageNumber={index + 1}
-                renderTextLayer={false}
-                renderAnnotationLayer={false}
-                className="bg-white" // Ensures the page background is pure white
-                scale={1.0}
-              />
-            </div>
-          ))}
-        </Document>
+      <div className="flex min-h-150 flex-col items-center justify-center rounded-xl bg-slate-100/50 p-4 shadow-inner ring-1 ring-slate-900/5 backdrop-blur-sm md:p-8">
+        <div ref={pdfWraperRef} className="w-full">
+          <Document
+            file={invoice?.url}
+            options={pdfOptions}
+            /* 2. Added 'items-center' here. This forces the PDF pages to center horizontally */
+            className="flex flex-col gap-8 items-center"
+            onLoadStart={() => setIsLoading(true)}
+            onLoadSuccess={({ numPages }) => {
+              setPages(numPages);
+              setIsLoading(false);
+            }}
+            onLoadError={(error) => {
+              setIsLoading(false);
+              setAlert(`PDF Loading Failed ${error}`);
+            }}
+          >
+            {Array.from({ length: pages }, (_, index) => (
+              /* Page Wrapper */
+              <div
+                key={index}
+                className="overflow-hidden rounded-lg shadow-lg shadow-slate-400/20 ring-1 ring-slate-900/5 transition-transform duration-300 hover:scale-[1.005]"
+              >
+                <Page
+                  pageNumber={index + 1}
+                  renderTextLayer={false}
+                  renderAnnotationLayer={false}
+                  className="bg-white"
+                  width={pdfWidth || undefined}
+                />
+              </div>
+            ))}
+          </Document>
+        </div>
       </div>
 
       {/* Footer / Download Action */}
