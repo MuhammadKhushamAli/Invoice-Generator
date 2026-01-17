@@ -15,8 +15,6 @@ const pdfOptions = {
   cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
   cMapPacked: true,
   standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts/`,
-  disableRange: true,
-  disableStream: true,
 };
 
 export function InvoiceView() {
@@ -41,7 +39,10 @@ export function InvoiceView() {
         );
 
         if (invoiceResponse?.status === 200) {
-          invoiceResponse.data.url = invoiceResponse?.data?.url?.replace("http://", "https://");
+          invoiceResponse.data.url = invoiceResponse?.data?.url?.replace(
+            "http://",
+            "https://",
+          );
           setInvoice(invoiceResponse?.data);
         }
       } catch (error) {
@@ -112,7 +113,7 @@ export function InvoiceView() {
       {/* PDF Document Container */}
       <div className="flex min-h-150 flex-col items-center justify-center rounded-xl bg-slate-100/50 p-8 shadow-inner ring-1 ring-slate-900/5 backdrop-blur-sm">
         <Document
-          file={`${invoice?.url}?t=${Date.now()}`}
+          file={invoice?.url}
           options={pdfOptions}
           className="flex flex-col gap-8"
           onLoadStart={() => setIsLoading(true)}
