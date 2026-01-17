@@ -46,10 +46,14 @@ app.get("/health/puppeteer", async (req, res) => {
     await browser.close();
     res.send("Puppeteer OK");
   } catch (err) {
-    console.error(err);
-    res.status(500).send("Puppeteer FAILED");
+    console.error("PUPPETEER ERROR FULL:", err);
+    res.status(500).json({
+      message: "Puppeteer FAILED",
+      error: err.message,
+    });
   }
 });
+
 
 
 app.use((err, _, res, __) => {
