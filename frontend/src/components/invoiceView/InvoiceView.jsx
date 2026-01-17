@@ -64,13 +64,14 @@ export function InvoiceView() {
     if (invoice?.url.includes("cloudinary")) {
       console.log("Downloading Invoice...");
 
-      const url = invoice?.url?.replace("/upload/", "/upload/fl_attachment/");
+      const url = invoice?.url?.replace(
+        "/upload/",
+        `/upload/fl_attachment:${userData?.businessName}-${invoice?.name}/`,
+      );
 
       const a = document.createElement("a");
 
       a.href = url;
-
-      a.download = `${userData?.businessName}-${invoice?.name}.pdf`;
 
       a.click();
     } else {
