@@ -23,6 +23,7 @@ import { clearCart } from "../../features/itemCart/itemSlice.js";
 
 export function SaleForm({ onClick }) {
   const isLoggedIn = useSelector((state) => state?.auth?.loginStatus);
+  const userData = useSelector((state) => state?.auth?.userData);
   const cart = useSelector((state) => state?.itemsCart?.cart);
   const navigate = useNavigate();
 
