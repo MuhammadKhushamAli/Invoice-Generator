@@ -42,7 +42,6 @@ app.get("/health/puppeteer", async (req, res) => {
   try {
     const browser = await puppeteer.launch({
       headless: true,
-      executablePath: puppeteer.executablePath(), // ⭐ IMPORTANT
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
 
