@@ -59,14 +59,15 @@ export function InvoiceView() {
       return;
     }
     if (invoice?.url.includes("cloudinary")) {
-      window.alert("Your download will start shortly.");
       console.log("Downloading Invoice...");
 
       const url = invoice?.url?.replace("/upload/", "/upload/fl_attachment/");
       const a = document.createElement("a");
+      document.body.appendChild(a);
       a.href = url;
       a.download = `${invoice?._id}.pdf`;
       a.click();
+      document.body.removeChild(a);
     } else {
       window.open(invoice?.url, "_blank");
     }
