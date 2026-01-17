@@ -24,6 +24,7 @@ export function InvoiceView() {
   const [pages, setPages] = useState(0);
   const [invoice, setInvoice] = useState("");
   const isLoggedIn = useSelector((state) => state?.auth?.loginStatus);
+  const userData = useSelector((state) => state?.auth?.userData);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -67,15 +68,11 @@ export function InvoiceView() {
 
       const a = document.createElement("a");
 
-      document.body.appendChild(a);
-
       a.href = url;
 
-      a.download = `${invoice?._id}.pdf`;
+      a.download = `${userData?.businessName}-${invoice?.name}.pdf`;
 
       a.click();
-
-      document.body.removeChild(a);
     } else {
       window.open(invoice?.url, "_blank");
     }
