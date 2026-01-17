@@ -54,7 +54,9 @@ export function InvoiceView() {
         setIsLoading(false);
       }
     };
-
+    fetchData();
+  }, [invoiceId, isLoggedIn, navigate]);
+  useEffect(() => {
     const updatePdfWidth = () => {
       if (pdfWraperRef.current) {
         if (pdfWraperRef.current.clientWidth <= 768)
@@ -62,7 +64,6 @@ export function InvoiceView() {
         else setPdfWidth(null);
       }
     };
-    fetchData();
     const timeoutId = setTimeout(updatePdfWidth, 0);
 
     window.addEventListener("resize", updatePdfWidth);
@@ -70,7 +71,7 @@ export function InvoiceView() {
       clearTimeout(timeoutId);
       window.removeEventListener("resize", updatePdfWidth);
     };
-  }, [invoiceId, isLoggedIn, navigate]);
+  }, [isLoading]);
 
   const handleDownload = () => {
     if (!invoice?.url) {
