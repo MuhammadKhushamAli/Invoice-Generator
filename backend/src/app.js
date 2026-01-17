@@ -42,12 +42,14 @@ app.get("/health/puppeteer", async (req, res) => {
   try {
     const browser = await puppeteer.launch({
       headless: true,
+      executablePath: puppeteer.executablePath(), // ⭐ IMPORTANT
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
+
     await browser.close();
     res.send("Puppeteer OK");
   } catch (err) {
-    console.error("PUPPETEER ERROR FULL:", err);
+    console.error("PUPPETEER ERROR:", err);
     res.status(500).json({
       message: "Puppeteer FAILED",
       error: err.message,
