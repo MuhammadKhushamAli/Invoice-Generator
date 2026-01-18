@@ -28,7 +28,7 @@ export const addItem = asyncHandler(async (req, res) => {
   if (price <= 0 || quantity <= 0)
     throw new ApiError(400, "Price and Quantity Must be Greater than Zero");
 
-  const item = await Item.findOne({ name });
+  const item = await Item.findOne({ name, owner: req?.user?._id });
   if (item) throw new ApiError(400, "Item already exists");
 
   let imageUrl = null;

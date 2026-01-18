@@ -52,6 +52,7 @@ export const registerUser = asyncHandler(async (req, res) => {
     area,
     city,
     country,
+    website,
   } = req?.body;
 
   if (
@@ -139,6 +140,7 @@ export const registerUser = asyncHandler(async (req, res) => {
             address: address._id,
             gst_no,
             ntn_no,
+            website,
           },
         ],
         { session }

@@ -32,6 +32,7 @@ export const addSale = asyncHandler(async (req, res) => {
     specialExciseRate,
     discount,
     freightOtherCharges,
+    po,
   } = req?.body;
 
   hsCode = hsCode?.trim();
@@ -48,6 +49,7 @@ export const addSale = asyncHandler(async (req, res) => {
   specialExciseRate = specialExciseRate?.trim();
   discount = discount?.trim();
   freightOtherCharges = freightOtherCharges?.trim();
+  po = po?.trim();
 
   salesTaxRate = parseFloat(salesTaxRate);
   specialExciseRate = parseFloat(specialExciseRate);
@@ -75,6 +77,7 @@ export const addSale = asyncHandler(async (req, res) => {
         customerCountry,
         customerGST,
         customerNTN,
+        po,
       ].some((field) => !field || field?.trim() === "")
     )
   )
@@ -130,6 +133,7 @@ export const addSale = asyncHandler(async (req, res) => {
     if (!address) throw new ApiError(500, "Address Not Found");
 
     const inputObj = {
+      customer_PO: po,
       business_name: user?.businessName,
       email: user?.email,
       slogan: user?.slogan,
@@ -144,6 +148,7 @@ export const addSale = asyncHandler(async (req, res) => {
       tele_no: user?.phone_no,
       your_GST: user?.gst_no,
       your_NTN: user?.ntn_no,
+      website: user?.website,
       invoice_no: await getInvoiceNumber(user?._id),
       date: new Date().toLocaleDateString("en-us"),
       hs_code: hsCode,

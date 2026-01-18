@@ -18,6 +18,10 @@ const userSchema = new mongoose.Schema(
       required: [true, "Business Name is required"],
       trim: true,
     },
+    website: {
+      type: String,
+      trim: true,
+    },
     slogan: {
       type: String,
       trim: true,

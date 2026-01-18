@@ -58,7 +58,7 @@ export function Register() {
       try {
         const response = await axiosInstance.post(
           "/api/v1/user/register-user",
-          data
+          data,
         );
         console.log(response);
         if (response.status === 200) {
@@ -67,7 +67,7 @@ export function Register() {
             {
               email: data.email,
               password: data.password,
-            }
+            },
           );
           if (logInResponse.status === 200) {
             dispatch(login({ userData: logInResponse.data.newUser }));
@@ -84,11 +84,10 @@ export function Register() {
         setIsLoading(false);
       }
     },
-    [dispatch, navigate]
+    [dispatch, navigate],
   );
 
   return (
-    /* Inside your component definition */
     <div className="w-full">
       {/* Error Toast */}
       {alert && <Error message={alert} />}
@@ -137,9 +136,9 @@ export function Register() {
                 <Input
                   type="text"
                   label="Username"
-                  disabled // Disabled inputs usually don't need placeholders
+                  disabled
                   Icon={User}
-                  className="bg-slate-100 text-slate-500" // Visual cue for disabled
+                  className="bg-slate-100 text-slate-500"
                   {...register("userName", { required: true })}
                 />
 
@@ -150,6 +149,16 @@ export function Register() {
                   disabled={isLoading}
                   Icon={Mail}
                   {...register("email", { required: true })}
+                />
+
+                {/* --- Website Field (Styled & Fixed) --- */}
+                <Input
+                  type="text"
+                  label="Website (optional)"
+                  placeholder="xyz.com"
+                  disabled={isLoading}
+                  Icon={Globe}
+                  {...register("website")}
                 />
 
                 <Input

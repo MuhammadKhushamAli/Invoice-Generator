@@ -228,6 +228,14 @@ export function SaleForm({ onClick }) {
               Icon={CreditCard}
               {...register("customerNTN", { required: true })}
             />
+
+            <Input
+              type="text"
+              label="Customer PO"
+              placeholder="1234567"
+              Icon={CreditCard}
+              {...register("po", { required: true })}
+            />
           </div>
         </div>
 
