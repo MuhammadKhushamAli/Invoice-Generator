@@ -8,20 +8,18 @@
         body {
             font-family: 'Arial', sans-serif;
             margin: 0;
-            padding: 20px;
-            background-color: #f0f0f0;
+            padding: 0;
+            background-color: #ffffff;
             font-size: 12px;
         }
         .invoice-box {
-            max-width: 800px;
-            margin: auto;
+            width: 100%;
+            margin: 0;
             padding: 30px;
-            border: 1px solid #eee;
             background-color: #fff;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
             position: relative;
+            box-sizing: border-box; 
         }
-        /* Header Section */
         .header {
             text-align: center;
             margin-bottom: 20px;
@@ -41,11 +39,10 @@
         }
         .tagline {
             font-size: 14px;
-            font-style: italic;
+            font-style: normal;
             margin-top: 5px;
         }
         
-        /* Top Info Grid */
         .top-info {
             display: flex;
             justify-content: space-between;
@@ -64,9 +61,34 @@
         }
         .info-label {
             font-weight: bold;
+            white-space: nowrap; 
         }
 
-        /* Customer Section */
+
+        .top-info .info-row span:last-child {
+            text-align: right;
+            flex-grow: 1;
+        }
+
+
+        .customer-section .info-row {
+            justify-content: flex-start;
+        }
+        
+
+        .customer-section .info-label {
+            width: 110px;
+            min-width: 110px;
+            display: inline-block;
+        }
+
+        .customer-section .info-row span:last-child {
+            text-align: left;
+        }
+
+        /* --- END ALIGNMENTS --- */
+
+        /* Customer Section Container */
         .customer-section {
             margin-bottom: 20px;
             border: 1px solid #000;
@@ -138,9 +160,8 @@
 
         .signature-section {
             display: flex;
-            /* Changed to center or start since it is now in a smaller column */
             justify-content: flex-start; 
-            margin-top: 20px; /* Reduced margin slightly to fit better under terms */
+            margin-top: 20px; 
             page-break-inside: avoid;
         }
         
@@ -159,7 +180,6 @@
             object-fit: contain;
         }
 
-        /* The Stamp */
         .signature-box img:nth-of-type(1) {
             width: 90px;
             margin-bottom: -50px; 
@@ -168,7 +188,6 @@
             opacity: 0.9;
         }
 
-        /* The Signature */
         .signature-box img:nth-of-type(2) {
             width: 110px;
             position: relative;
@@ -182,6 +201,10 @@
             margin-top: 20px;
             border-top: 1px solid #ccc;
             padding-top: 10px;
+        }
+
+        .textAlignmentRight {
+            text-align: right;
         }
     </style>
 </head>
@@ -214,7 +237,7 @@
             <div class="info-row"><span class="info-label">Attn To:</span> <span><%= Attn_to %></span></div>
             <div class="info-row">
                 <span class="info-label">Customer:</span> 
-                <span><%= customer_name %><br><%= customer_landmark %>, <%= customer_street %>, <%= customer_area %>, <%= customer_city %>, <%= customer_country %></span>
+                <span><%= customer_name %><br><%= customer_landmark %>, <%= customer_street %>, <%= customer_area %><br> <%= customer_city %>, <%= customer_country %></span>
             </div>
             <div class="info-row"><span class="info-label">GST No.:</span> <span><%= customer_GST %></span></div>
             <div class="info-row"><span class="info-label">NTN:</span> <span><%= customer_NTN %></span></div>
@@ -223,13 +246,13 @@
         <table>
             <thead>
                 <tr>
-                    <th>Sr #</th>
-                    <th>Description</th>
-                    <th>Range</th>
-                    <th>Design</th>
-                    <th>Qty</th>
-                    <th>Rate</th>
-                    <th>Amount</th>
+                    <th style="width: 5%;">Sr #</th>
+                    <th style="width: 40%;">Description</th>
+                    <th style="width: 10%;">Range</th>
+                    <th style="width: 10%;">Design</th>
+                    <th style="width: 10%;">Qty</th>
+                    <th style="width: 10%;">Rate</th>
+                    <th style="width: 15%;">Amount</th>
                 </tr>
             </thead>
             <tbody>
