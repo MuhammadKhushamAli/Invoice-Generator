@@ -30,7 +30,7 @@ export const addSale = asyncHandler(async (req, res) => {
     customerNTN,
     salesTaxRate,
     specialExciseRate,
-    furtherSalesTaxRate,
+    discount,
     freightOtherCharges,
   } = req?.body;
 
@@ -46,18 +46,18 @@ export const addSale = asyncHandler(async (req, res) => {
   customerNTN = customerNTN?.trim();
   salesTaxRate = salesTaxRate?.trim();
   specialExciseRate = specialExciseRate?.trim();
-  furtherSalesTaxRate = furtherSalesTaxRate?.trim();
+  discount = discount?.trim();
   freightOtherCharges = freightOtherCharges?.trim();
 
   salesTaxRate = parseFloat(salesTaxRate);
   specialExciseRate = parseFloat(specialExciseRate);
-  furtherSalesTaxRate = parseFloat(furtherSalesTaxRate);
+  discount = parseFloat(discount);
   freightOtherCharges = parseFloat(freightOtherCharges);
 
   if (
     salesTaxRate < 0 ||
     specialExciseRate < 0 ||
-    furtherSalesTaxRate < 0 ||
+    discount < 0 ||
     freightOtherCharges < 0
   )
     throw new ApiError(400, "All Taxes fields are required");
@@ -85,7 +85,7 @@ export const addSale = asyncHandler(async (req, res) => {
   session.startTransaction();
 
   try {
-    let totalPayableWithoutTaxes = 0;
+    let subTotal = 0;
     await Promise.all(
       itemsInfo?.map(async (item) => {
         if (item.quantity <= 0 || item.price <= 0)
@@ -111,26 +111,24 @@ export const addSale = asyncHandler(async (req, res) => {
           }
         );
         if (!updateItem) throw new ApiError(500, "Item Update Failed");
-        totalPayableWithoutTaxes += item?.price * item?.quantity;
+        subTotal += item?.price * item?.quantity;
       })
     );
 
+    const totalPayableWithoutTaxes =
+      subTotal - discount < 0 ? 0 : subTotal - discount;
     const totalSaleTax = (salesTaxRate / 100) * totalPayableWithoutTaxes;
     const totalExciseTax = (specialExciseRate / 100) * totalPayableWithoutTaxes;
-    const totalFurtherSaleTax =
-      (furtherSalesTaxRate / 100) * totalPayableWithoutTaxes;
     const totalPayableWithTaxes =
       totalPayableWithoutTaxes +
       totalSaleTax +
       totalExciseTax +
-      totalFurtherSaleTax +
       freightOtherCharges;
 
     const user = req?.user;
     const address = await Address.findById(user?.address);
     if (!address) throw new ApiError(500, "Address Not Found");
 
-    console.log(itemsInfo);
     const inputObj = {
       business_name: user?.businessName,
       email: user?.email,
@@ -159,13 +157,13 @@ export const addSale = asyncHandler(async (req, res) => {
       customer_GST: customerGST,
       customer_NTN: customerNTN,
       items: itemsInfo,
+      sub_total: subTotal.toFixed(2),
+      discount: discount.toFixed(2),
       taxable_value: totalPayableWithoutTaxes.toFixed(2),
       sales_tax_rate: salesTaxRate,
       sales_tax: totalSaleTax.toFixed(2),
       special_excise_rate: specialExciseRate,
       special_excise_tax: totalExciseTax.toFixed(2),
-      further_sales_tax_rate: furtherSalesTaxRate,
-      further_sales_tax: totalFurtherSaleTax.toFixed(2),
       freight_other_charges: freightOtherCharges.toFixed(2),
       value_including_sales_tax: totalPayableWithTaxes.toFixed(2),
       amount_in_words: toWords(totalPayableWithTaxes),

@@ -18,6 +18,7 @@ import {
   Truck,
   CheckCircle,
   X,
+  Scissors,
 } from "lucide-react";
 import { clearCart } from "../../features/itemCart/itemSlice.js";
 
@@ -60,7 +61,6 @@ export function SaleForm({ onClick }) {
             return;
           }
           if (url?.includes("cloudinary")) {
-            
             const decodedUrl = decodeURIComponent(url);
             let fileNameWithExt = decodedUrl.split("/").pop();
             fileNameWithExt = fileNameWithExt.replace(/\.[^/.]+$/, "");
@@ -250,7 +250,6 @@ export function SaleForm({ onClick }) {
                 {...register("salesTaxRate", {
                   required: true,
                   validate: (value) => /^\d+$/.test(value) || "Must be Numbers",
-                  min: 0,
                 })}
               />
               <span className="pointer-events-none absolute right-3 top-9.5 flex h-5 items-center text-xs sm:text-sm font-medium text-slate-400">
@@ -269,7 +268,6 @@ export function SaleForm({ onClick }) {
                 {...register("specialExciseRate", {
                   required: true,
                   validate: (value) => /^\d+$/.test(value) || "Must be Numbers",
-                  min: 0,
                 })}
               />
               <span className="pointer-events-none absolute right-3 top-9.5 flex h-5 items-center text-xs sm:text-sm font-medium text-slate-400">
@@ -281,19 +279,15 @@ export function SaleForm({ onClick }) {
             <div className="relative">
               <Input
                 type="number"
-                label="Further Sales Tax"
+                label="Discount:"
                 placeholder="0"
-                Icon={Percent}
+                Icon={Scissors}
                 min={0}
-                {...register("furtherSalesTaxRate", {
+                {...register("discount", {
                   required: true,
                   validate: (value) => /^\d+$/.test(value) || "Must be Numbers",
-                  min: 0,
                 })}
               />
-              <span className="pointer-events-none absolute right-3 top-9.5 flex h-5 items-center text-xs sm:text-sm font-medium text-slate-400">
-                %
-              </span>
             </div>
 
             {/* Freight Charges */}
@@ -306,7 +300,6 @@ export function SaleForm({ onClick }) {
               {...register("freightOtherCharges", {
                 required: true,
                 validate: (value) => /^\d+$/.test(value) || "Must be Numbers",
-                min: 0,
               })}
             />
           </div>
