@@ -336,20 +336,20 @@ export const setInvoiceLogoStampAndSign = asyncHandler(async (req, res) => {
   let signUrl = null;
   try {
     logoUrl = await uploadToCloudinary(logo, {
-      background_removal: "cloudinary_ai",
-      resource_type: "image",
+      transformation: [{ effect: "remove_background" }],
+      resource_type: "auto",
     });
     if (!logoUrl) throw new ApiError(500, "Error in Uploading Logo");
 
     stampUrl = await uploadToCloudinary(stamp, {
-      background_removal: "cloudinary_ai",
-      resource_type: "image",
+      transformation: [{ effect: "remove_background" }],
+      resource_type: "auto",
     });
     if (!stampUrl) throw new ApiError(500, "Error in Uploading Stamp");
 
     signUrl = await uploadToCloudinary(sign, {
-      background_removal: "cloudinary_ai",
-      resource_type: "image",
+      transformation: [{ effect: "remove_background" }],
+      resource_type: "auto",
     });
     if (!signUrl) throw new ApiError(500, "Error in Uploading Sign");
 
