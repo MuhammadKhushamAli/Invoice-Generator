@@ -22,7 +22,7 @@ export function Login() {
       setAlert("");
 
       try {
-        const loginResponse = await axiosInstance.patch(
+        const loginResponse = await axiosInstance.post(
           "/api/v1/user/login",
           data
         );
