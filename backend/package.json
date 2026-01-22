@@ -9,6 +9,7 @@
     "dev": "nodemon src/index.js",
     "start": "node src/index.js",
     "postinstall": "npx puppeteer browsers install chrome"
+    "build": "echo 'No Build Necessary'"
   },
   "repository": {
     "type": "git",
