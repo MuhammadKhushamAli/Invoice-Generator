@@ -1,9 +1,12 @@
 import ejs from "ejs";
-import puppeteer from "puppeteer";
+// 1. CHANGE: Import puppeteer-core instead of puppeteer
+import puppeteer from "puppeteer-core";
 import { ApiError } from "../../utils/ApiError.js";
 import path from "path";
 import { uploadToCloudinary } from "../../utils/cloudinary.js";
 import { getInvoiceNumber } from "./invoiceNum.util.js";
+import dotenv from "dotenv";
+dotenv.config(); 
 
 export const generatePdf = async (inputObj, userId) => {
   try {
@@ -16,7 +19,6 @@ export const generatePdf = async (inputObj, userId) => {
       "pdf_template.ejs"
     );
 
-    // Convert renderFile to a Promise
     const html = await new Promise((resolve, reject) => {
       ejs.renderFile(templatePath, inputObj, {}, (err, str) => {
         if (err)
@@ -25,12 +27,16 @@ export const generatePdf = async (inputObj, userId) => {
       });
     });
 
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: ["--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage"],
-    });
+    let browser;
+    
+    if (process.env.BROWSER_WS_ENDPOINT) {
+        browser = await puppeteer.connect({
+            browserWSEndpoint: process.env.BROWSER_WS_ENDPOINT,
+        });
+    } else {
+        throw new ApiError(500, "Browser Endpoint Missing: Configure BROWSER_WS_ENDPOINT in .env");
+    }
+
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: "networkidle0" });
     await page.pdf({
@@ -49,6 +55,7 @@ export const generatePdf = async (inputObj, userId) => {
 
     return pdfUrl?.url;
   } catch (error) {
+    console.error("PDF Generation Error:", error);
     throw error;
   }
 };
