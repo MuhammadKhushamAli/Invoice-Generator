@@ -16,7 +16,7 @@ import { upload } from "../middlewares/multer.middleware.js";
 const router = Router();
 
 router.route("/register-user").post(registerUser);
-router.route("/login").patch(login);
+router.route("/login").post(login);
 
 router.route("/current-user").get(authentication, getCurrentUser);
 router.route("/set-invoice-credentials").patch(
