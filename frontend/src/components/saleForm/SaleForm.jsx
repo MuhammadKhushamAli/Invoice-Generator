@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
@@ -21,8 +21,11 @@ import {
   Scissors,
 } from "lucide-react";
 import { clearCart } from "../../features/itemCart/itemSlice.js";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
 
 export function SaleForm({ onClick }) {
+  const clientQuery = useQueryClient();
   const isLoggedIn = useSelector((state) => state?.auth?.loginStatus);
   const userData = useSelector((state) => state?.auth?.userData);
   const cart = useSelector((state) => state?.itemsCart?.cart);
@@ -33,6 +36,54 @@ export function SaleForm({ onClick }) {
 
   const { register, handleSubmit } = useForm();
   const dispatch = useDispatch();
+
+  const downloadInvoice = useCallback(
+    (url) => {
+      if (!url) {
+        setAlert("Invoice URL is not available for download.");
+        return;
+      }
+      if (url?.includes("cloudinary")) {
+        const decodedUrl = decodeURIComponent(url);
+        let fileNameWithExt = decodedUrl.split("/").pop();
+        fileNameWithExt = fileNameWithExt.replace(/\.[^/.]+$/, "");
+
+        url = url?.replace(
+          "/upload/",
+          `/upload/fl_attachment:${userData?.businessName}-${fileNameWithExt}/`,
+        );
+        const a = document.createElement("a");
+
+        a.href = url;
+
+        a.click();
+      } else {
+        window.open(url, "_blank");
+      }
+    },
+    [userData],
+  );
+
+  const addInvoiceMutate = useMutation({
+    mutationFn: async (data) => {
+      const response = await axiosInstance.post("/api/v1/sales/add-sale", data);
+      return response.data;
+    },
+    onSuccess: (newData) => {
+      dispatch(clearCart());
+      setAlert("Invoice Generated");
+      let url = newData?.inv_url?.replace("http://", "https://");
+      downloadInvoice(url);
+      onClick && onClick();
+    },
+    onError: (error) => {
+      setAlert(error?.message);
+    },
+    onSettled: () => {
+      clientQuery.invalidateQueries({ queryKey: ["invoices", userData?._id] });
+      clientQuery.invalidateQueries({ queryKey: ["sales", userData?._id] });
+    },
+  });
 
   useEffect(() => {
     if (!isLoggedIn) navigate("/login");
@@ -45,39 +96,7 @@ export function SaleForm({ onClick }) {
     setIsLoading(true);
     try {
       data.itemsInfo = cart;
-      const response = await axiosInstance.post("/api/v1/sales/add-sale", data);
-
-      if (response?.status === 200) {
-        dispatch(clearCart());
-        setAlert("Invoice Generated");
-        let url = response?.data?.inv_url?.replace("http://", "https://");
-
-        const downloadInvoice = () => {
-          if (!url) {
-            setAlert("Invoice URL is not available for download.");
-            return;
-          }
-          if (url?.includes("cloudinary")) {
-            const decodedUrl = decodeURIComponent(url);
-            let fileNameWithExt = decodedUrl.split("/").pop();
-            fileNameWithExt = fileNameWithExt.replace(/\.[^/.]+$/, "");
-
-            url = url?.replace(
-              "/upload/",
-              `/upload/fl_attachment:${userData?.businessName}-${fileNameWithExt}/`,
-            );
-            const a = document.createElement("a");
-
-            a.href = url;
-
-            a.click();
-          } else {
-            window.open(url, "_blank");
-          }
-        };
-        downloadInvoice();
-        onClick && onClick();
-      }
+      await addInvoiceMutate.mutateAsync(data);
     } catch (error) {
       setAlert(error?.message);
     } finally {
