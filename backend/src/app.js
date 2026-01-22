@@ -5,12 +5,16 @@ import { ApiError } from "./utils/ApiError.js";
 
 const app = express();
 
-app.use("*",
-  cors({
-    origin: process.env.CORS_ORIGIN,
-    credentials: true,
-  })
-);
+const corsOptions = {
+  origin: process.env.CORS_ORIGIN,
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
+
 
 app.use(
   express.json({
