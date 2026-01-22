@@ -37,7 +37,7 @@ export function AddItem({ onClick, item = null }) {
   const navigate = useNavigate();
 
   const clientQuery = useQueryClient();
-  
+
   const addItemMutate = useMutation({
     mutationFn: async (formData) => {
       const response = await axiosInstance.post(
@@ -47,15 +47,13 @@ export function AddItem({ onClick, item = null }) {
       return response.data;
     },
     onSuccess: (data) => {
-      clientQuery.setQueriesData(
+      clientQuery.setQueryData(
         { queryKey: ["items", userData?._id] },
         (oldData) => {
           const lastPageIndex = oldData?.pages?.length - 1;
           if (
             !oldData?.pages?.find((page) =>
-              page?.docs?.[0]?.items?.find(
-                (item) => item?._id === data?._id,
-              ),
+              page?.docs?.[0]?.items?.find((item) => item?._id === data?._id),
             )
           )
             return {
@@ -72,14 +70,13 @@ export function AddItem({ onClick, item = null }) {
           return oldData;
         },
       );
+      onClick();
     },
     onError: (error) => {
-      console.log("Error: ", error);
       setAlert(error?.message);
     },
     onSettled: () => {
       clientQuery.invalidateQueries({ queryKey: ["items", userData?._id] });
-      onClick();
     },
   });
 
@@ -92,37 +89,42 @@ export function AddItem({ onClick, item = null }) {
       return response.data;
     },
     onSuccess: (newData) => {
-      clientQuery.setQueriesData({ queryKey: ["items"] }, (oldData) => {
-        if (
-          oldData?.pages?.find((page) =>
-            page?.docs?.[0]?.items?.find((item) => item?._id === newData?._id),
+      clientQuery.setQueryData(
+        { queryKey: ["items", userData?._id] },
+        (oldData) => {
+          if (
+            oldData?.pages?.find((page) =>
+              page?.docs?.[0]?.items?.find(
+                (item) => item?._id === newData?._id,
+              ),
+            )
           )
-        )
-          return {
-            ...oldData,
-            pages: oldData?.pages?.map((page) =>
-              page?.docs?.[0]?.items?.map((item) => {
-                if (item?._id === newData?._id) {
-                  item.name = newData?.name;
-                  item.price = newData?.price;
-                  item.quantity = newData?.quantity;
-                  item.range = newData?.range;
-                  item.design = newData?.design;
-                  item.image = newData?.image;
-                }
-                return item;
-              }),
-            ),
-          };
-        return oldData;
-      });
+            return {
+              ...oldData,
+              pages: oldData?.pages?.map((page) =>
+                page?.docs?.[0]?.items?.map((item) => {
+                  if (item?._id === newData?._id) {
+                    item.name = newData?.name;
+                    item.price = newData?.price;
+                    item.quantity = newData?.quantity;
+                    item.range = newData?.range;
+                    item.design = newData?.design;
+                    item.image = newData?.image;
+                  }
+                  return item;
+                }),
+              ),
+            };
+          return oldData;
+        },
+      );
+      onClick();
     },
     onError: (error) => {
       setAlert(error?.message);
     },
     onSettled: () => {
-      clientQuery.invalidateQueries({ queryKey: ["items"] });
-      onClick();
+      clientQuery.invalidateQueries({ queryKey: ["items", userData?._id] });
     },
   });
 
@@ -135,38 +137,41 @@ export function AddItem({ onClick, item = null }) {
       return response.data;
     },
     onSuccess: (newData) => {
-      clientQuery.setQueriesData({ queryKey: ["items"] }, (oldData) => {
-        console.log(oldData);
-        console.log(newData);
-        if (
-          oldData?.pages?.find((page) =>
-            page?.docs?.[0]?.items?.find((item) => item?._id === newData?._id),
+      clientQuery.setQueriesData(
+        { queryKey: ["items", userData?._id] },
+        (oldData) => {
+          if (
+            oldData?.pages?.find((page) =>
+              page?.docs?.[0]?.items?.find(
+                (item) => item?._id === newData?._id,
+              ),
+            )
           )
-        )
-          return {
-            ...oldData,
-            pages: oldData?.pages?.map((page) =>
-              page?.docs?.[0]?.items?.map((item) => {
-                if (item?._id === newData?._id) {
-                  item.name = newData?.name;
-                  item.price = newData?.price;
-                  item.quantity = newData?.quantity;
-                  item.range = newData?.range;
-                  item.design = newData?.design;
-                }
-                return item;
-              }),
-            ),
-          };
-        return oldData;
-      });
+            return {
+              ...oldData,
+              pages: oldData?.pages?.map((page) =>
+                page?.docs?.[0]?.items?.map((item) => {
+                  if (item?._id === newData?._id) {
+                    item.name = newData?.name;
+                    item.price = newData?.price;
+                    item.quantity = newData?.quantity;
+                    item.range = newData?.range;
+                    item.design = newData?.design;
+                  }
+                  return item;
+                }),
+              ),
+            };
+          return oldData;
+        },
+      );
+      onClick();
     },
     onError: (error) => {
       setAlert(error?.message);
     },
     onSettled: () => {
-      clientQuery.invalidateQueries({ queryKey: ["items"] });
-      onClick();
+      clientQuery.invalidateQueries({ queryKey: ["items", userData?._id] });
     },
   });
 
@@ -232,7 +237,7 @@ export function AddItem({ onClick, item = null }) {
           );
         }
         if (item === null) {
-           await addItemMutate.mutateAsync(formData);
+          await addItemMutate.mutateAsync(formData);
         } else {
           formData.append(
             "url",
@@ -259,9 +264,6 @@ export function AddItem({ onClick, item = null }) {
       setAlert(error?.message);
     } finally {
       setIsLoading(false);
-      setIsCaptured(false);
-      setImage(null);
-      setPreview(null);
     }
   };
 
@@ -305,13 +307,7 @@ export function AddItem({ onClick, item = null }) {
       )}
 
       {/* Error Toast */}
-      {
-        //   addItemMutate.isError ||
-        // addItemMutate.isError ||
-        //   updateItemWithImageMutate.isError ||
-        //   updateItemWithoutImageMutate.isError ||
-        //   (alert && <Error message={alert} />)
-      }
+      {alert && <Error message={alert} />}
       {/* Form */}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Input Fields Grid */}
