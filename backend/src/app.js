@@ -2,7 +2,6 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import { ApiError } from "./utils/ApiError.js";
-import puppeteer from "puppeteer";
 
 const app = express();
 
