@@ -1,71 +1,79 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { axiosInstance } from "../axios/axios.js";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import { Container, Error, ItemCard, Loading } from "../components/index.js";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
 export function ItemPage() {
   const isLoggedIn = useSelector((state) => state?.auth?.loginStatus);
   const userData = useSelector((state) => state?.auth?.userData);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [items, setItems] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [alert, setAlert] = useState("");
-  const isNextPage = useRef(false);
   const navigate = useNavigate();
+  
+  const {
+    data,
+    fetchNextPage,
+    isLoading,
+    hasNextPage,
+    isFetchingNextPage,
+    isError,
+    error,
+  } = useInfiniteQuery({
+    queryKey: ["items", userData?._id],
+    queryFn: async ({ pageParam = 1 }) => {
+      const itemsResponse = await axiosInstance.get("/api/v1/user/get-items", {
+        params: { userId: userData?._id, page: pageParam },
+      });
+      return itemsResponse?.data;
+    },
+    getNextPageParam: (lastPage, pages) => {
+      return lastPage.hasNextPage ? pages.length + 1 : undefined;
+    },
+    keepPreviousData: true,
+    enabled: isLoggedIn,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    staleTime: 5 * 60 * 1000,
+    cacheTime: 15 * 60 * 1000,
+  });
+  
+  const fetchingNextPage = useRef(isFetchingNextPage);
+  const hasNext = useRef(hasNextPage);
 
   useEffect(() => {
-    const controller = new AbortController();
-    const fetchItems = async () => {
-      try {
-        if (!isLoggedIn) navigate("/login");
-        setAlert("");
-        setIsLoading(true);
+    fetchingNextPage.current = isFetchingNextPage;
+    hasNext.current = hasNextPage;
+  }, [isFetchingNextPage, hasNextPage]);
 
-        const itemsResponse = await axiosInstance.get(
-          "/api/v1/user/get-items",
-          {
-            params: { userId: userData?._id, page: currentPage },
-            signal: controller.signal,
-          }
-        );
-        if (itemsResponse?.status === 200) {
-          const newItems = itemsResponse?.data?.docs?.[0].items || [];
-          setItems((prev) => [...prev, ...newItems]);
-          isNextPage.current = itemsResponse?.data?.hasNextPage;
-        }
-      } catch (error) {
-        if (error.name !== "CanceledError" || error.code !== "ERR_CANCELED")
-          setAlert(error.message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchItems();
-    return () => controller.abort();
-  }, [currentPage, isLoggedIn]);
+  useEffect(() => {
+    if (!isLoggedIn) {
+      navigate("/login");
+    }
+  }, [isLoggedIn]);
 
   useEffect(() => {
     const handleScroll = () => {
-      if (isNextPage.current) {
+      if (hasNext.current && !fetchNextPage.current) {
         if (
           window.innerHeight + window.scrollY >=
           document.body?.offsetHeight - 50
         ) {
-          setCurrentPage((prev) => prev + 1);
+          fetchNextPage();
         }
       }
     };
     window.addEventListener("scroll", handleScroll);
 
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [fetchNextPage]);
+
+  const items = useMemo(() => (data?.pages?.flatMap(page => page?.docs?.[0]?.items) || []), [data]);
 
   return isLoading ? (
     <Loading />
   ) : (
     <Container className="max-w-7xl!">
-      {alert && <Error message={alert} />}{" "}
+      {" "}
       {/* Wider container for product grid */}
       {/* Page Header */}
       <div className="mb-8 flex flex-col gap-2 border-b border-slate-200 pb-6 md:flex-row md:items-center md:justify-between">
@@ -84,19 +92,22 @@ export function ItemPage() {
         </span>
       </div>
       {/* Global Error Message */}
-      {alert && (
+      {isError && (
         <div className="mb-6">
-          <Error message={alert} />
+          <Error message={error?.message} />
         </div>
       )}
       {/* Product Grid Layout */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {items?.map(
-          (item) => {
-            if(item?.quantity > 0)
-               return <ItemCard key={item?._id} item={item} />
-          }
-        )}
+        {items?.map((item) => {
+          if (item?.quantity > 0)
+            return <ItemCard key={item?._id} item={item} />;
+        })}
+        {
+          isFetchingNextPage && (
+            <h2>loading...</h2>
+          )
+        }
 
         {/* Empty State */}
         {items?.length === 0 && (

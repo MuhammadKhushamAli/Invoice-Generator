@@ -1,68 +1,80 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { axiosInstance } from "../axios/axios.js";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import { Container, Error, InvoiceCard, Loading } from "../components";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
 export function InvoicePage() {
   const isLoggedIn = useSelector((state) => state?.auth?.loginStatus);
   const userData = useSelector((state) => state?.auth?.userData);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [invoices, setInvoices] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [alert, setAlert] = useState("");
-  const isNextPage = useRef(false);
   const navigate = useNavigate();
 
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["invoices", userData?._id],
+    queryFn: async ({ pageParam = 1 }) => {
+      const invoicesResponse = await axiosInstance.get(
+        "/api/v1/user/get-invoices",
+        {
+          params: { userId: userData?._id, page: pageParam },
+        },
+      );
+      return invoicesResponse?.data;
+    },
+    getNextPageParam: (lastPage, pages) => {
+      return lastPage?.hasNextPage ? pages.length + 1 : undefined;
+    },
+    keepPreviousData: true,
+    enabled: isLoggedIn,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    staleTime: 5 * 60 * 1000,
+    cacheTime: 15 * 60 * 1000,
+  });
+
+  const isFetchingNextPageRef = useRef(isFetchingNextPage);
+  const hasNextRef = useRef(hasNextPage);
+
   useEffect(() => {
-    const controller = new AbortController();
-    const fetchInvoices = async () => {
-      try {
-        if (isLoggedIn) {
-          setAlert("");
-          setIsLoading(true);
-          const invoicesResponse = await axiosInstance.get(
-            "/api/v1/user/get-invoices",
-            {
-              params: { userId: userData?._id, page: currentPage },
-              signal: controller.signal,
-            }
-          );
-          if (invoicesResponse?.status === 200) {
-            const newInvoices =
-              invoicesResponse?.data?.docs?.[0].invoices || [];
-            setInvoices((prev) => [...prev, ...newInvoices]);
-            isNextPage.current = invoicesResponse?.data?.hasNextPage;
-          }
-        } else {
-          navigate("/login");
-        }
-      } catch (error) {
-        if (error.name !== "CanceledError" || error.code !== "ERR_CANCELED")
-          setAlert(error.message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchInvoices();
-    return () => controller.abort();
-  }, [currentPage, isLoggedIn]);
+    if (!isLoggedIn) {
+      navigate("/login");
+    }
+  }, [isLoggedIn]);
+
+  useEffect(() => {
+    isFetchingNextPageRef.current = isFetchingNextPage;
+    hasNextRef.current = hasNextPage;
+  }, [hasNextPage, isFetchingNextPage]);
 
   useEffect(() => {
     const handleScroll = () => {
-      if (isNextPage.current) {
+      if (hasNextRef.current && !isFetchingNextPageRef.current) {
         if (
           window.innerHeight + window.scrollY >=
           document.body?.offsetHeight - 50
         ) {
-          setCurrentPage((prev) => prev + 1);
+          fetchNextPage();
         }
       }
     };
     window.addEventListener("scroll", handleScroll);
 
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [fetchNextPage]);
+
+  const invoices = useMemo(
+    () => data?.pages?.flatMap((page) => page?.docs?.[0]?.invoices),
+    [data],
+  );
+
 
   return isLoading ? (
     <Loading />
@@ -70,7 +82,7 @@ export function InvoicePage() {
     <Container className="max-w-7xl!">
       {" "}
       {/* Increased width for better grid view */}
-      {alert && <Error message={alert} />}
+      {isError && <Error message={error?.message} />}
       {/* Page Header */}
       <div className="mb-8 flex flex-col gap-2 border-b border-slate-200 pb-6 md:flex-row md:items-center md:justify-between">
         <div>
@@ -91,7 +103,7 @@ export function InvoicePage() {
         {invoices?.map((invoice) => (
           <InvoiceCard key={invoice?._id} invoice={invoice} />
         ))}
-
+        {isFetchingNextPage && <h2>loading...</h2>}
         {/* Empty State Handling (Visual only, does not break logic) */}
         {invoices?.length === 0 && (
           <div className="col-span-full flex flex-col items-center justify-center py-12 text-center text-slate-500">

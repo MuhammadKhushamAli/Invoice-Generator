@@ -22,26 +22,169 @@ import { useState } from "react";
 import { Loading } from "../Loading.jsx";
 import { useForm } from "react-hook-form";
 import { Input } from "../Input.jsx";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-export function AddItem({ onClick = null }) {
+export function AddItem({ onClick, item = null }) {
   const [alert, setAlert] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [image, setImage] = useState(null);
-  const [preview, setPreview] = useState(null);
+  const [preview, setPreview] = useState(item ? item.image : null);
   const [isCaptured, setIsCaptured] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
   const isLoggedIn = useSelector((state) => state?.auth?.loginStatus);
+  const userData = useSelector((state) => state?.auth?.userData);
   const webCamRef = useRef(null);
   const navigate = useNavigate();
-  const { register, handleSubmit } = useForm();
+
+  const clientQuery = useQueryClient();
+  
+  const addItemMutate = useMutation({
+    mutationFn: async (formData) => {
+      const response = await axiosInstance.post(
+        "/api/v1/item/add-item",
+        formData,
+      );
+      return response.data;
+    },
+    onSuccess: (data) => {
+      clientQuery.setQueriesData(
+        { queryKey: ["items", userData?._id] },
+        (oldData) => {
+          const lastPageIndex = oldData?.pages?.length - 1;
+          if (
+            !oldData?.pages?.find((page) =>
+              page?.docs?.[0]?.items?.find(
+                (item) => item?._id === data?._id,
+              ),
+            )
+          )
+            return {
+              ...oldData,
+              pages: oldData?.pages?.map((page, index) =>
+                index === lastPageIndex
+                  ? page?.docs?.map((doc) => ({
+                      ...doc,
+                      items: [...doc?.items, data],
+                    }))
+                  : page,
+              ),
+            };
+          return oldData;
+        },
+      );
+    },
+    onError: (error) => {
+      console.log("Error: ", error);
+      setAlert(error?.message);
+    },
+    onSettled: () => {
+      clientQuery.invalidateQueries({ queryKey: ["items", userData?._id] });
+      onClick();
+    },
+  });
+
+  const updateItemWithImageMutate = useMutation({
+    mutationFn: async ({ formData, itemId }) => {
+      const response = await axiosInstance.put(
+        `/api/v1/item/update-item/${itemId}`,
+        formData,
+      );
+      return response.data;
+    },
+    onSuccess: (newData) => {
+      clientQuery.setQueriesData({ queryKey: ["items"] }, (oldData) => {
+        if (
+          oldData?.pages?.find((page) =>
+            page?.docs?.[0]?.items?.find((item) => item?._id === newData?._id),
+          )
+        )
+          return {
+            ...oldData,
+            pages: oldData?.pages?.map((page) =>
+              page?.docs?.[0]?.items?.map((item) => {
+                if (item?._id === newData?._id) {
+                  item.name = newData?.name;
+                  item.price = newData?.price;
+                  item.quantity = newData?.quantity;
+                  item.range = newData?.range;
+                  item.design = newData?.design;
+                  item.image = newData?.image;
+                }
+                return item;
+              }),
+            ),
+          };
+        return oldData;
+      });
+    },
+    onError: (error) => {
+      setAlert(error?.message);
+    },
+    onSettled: () => {
+      clientQuery.invalidateQueries({ queryKey: ["items"] });
+      onClick();
+    },
+  });
+
+  const updateItemWithoutImageMutate = useMutation({
+    mutationFn: async ({ data, itemId }) => {
+      const response = await axiosInstance.put(
+        `/api/v1/item/update-item/${itemId}`,
+        data,
+      );
+      return response.data;
+    },
+    onSuccess: (newData) => {
+      clientQuery.setQueriesData({ queryKey: ["items"] }, (oldData) => {
+        console.log(oldData);
+        console.log(newData);
+        if (
+          oldData?.pages?.find((page) =>
+            page?.docs?.[0]?.items?.find((item) => item?._id === newData?._id),
+          )
+        )
+          return {
+            ...oldData,
+            pages: oldData?.pages?.map((page) =>
+              page?.docs?.[0]?.items?.map((item) => {
+                if (item?._id === newData?._id) {
+                  item.name = newData?.name;
+                  item.price = newData?.price;
+                  item.quantity = newData?.quantity;
+                  item.range = newData?.range;
+                  item.design = newData?.design;
+                }
+                return item;
+              }),
+            ),
+          };
+        return oldData;
+      });
+    },
+    onError: (error) => {
+      setAlert(error?.message);
+    },
+    onSettled: () => {
+      clientQuery.invalidateQueries({ queryKey: ["items"] });
+      onClick();
+    },
+  });
+
+  const { register, handleSubmit } = useForm({
+    defaultValues: {
+      name: item ? item?.name : "",
+      price: item ? item?.price : "",
+      quantity: item ? item?.quantity : "",
+      range: item ? item?.range : "",
+      design: item ? item?.design : "",
+    },
+  });
 
   // just for Login Check
   useEffect(() => {
-    setIsLoading(true);
     if (!isLoggedIn) {
       navigate("/login");
     }
-    setIsLoading(false);
   }, [isLoggedIn]);
 
   const dataURLtoBlob = useCallback((dataURL) => {
@@ -69,6 +212,8 @@ export function AddItem({ onClick = null }) {
     setAlert("");
     setIsLoading(true);
     try {
+      if (!isLoggedIn) navigate("/login");
+
       if (image !== null) {
         let readyImage = image;
 
@@ -83,25 +228,34 @@ export function AddItem({ onClick = null }) {
           const value = data[key];
           formData.append(
             key,
-            typeof value === "object" ? JSON.stringify(value) : value
+            typeof value === "object" ? JSON.stringify(value) : value,
           );
         }
-
-        const response = await axiosInstance.post(
-          "/api/v1/item/add-item",
-          formData
-        );
-        if (response?.status === 200) {
-          setAlert(response?.message);
-          onClick && onClick();
-          if (window.location.pathname === "/products")
-            window.location.reload();
+        if (item === null) {
+           await addItemMutate.mutateAsync(formData);
+        } else {
+          formData.append(
+            "url",
+            typeof item?.image === "object"
+              ? JSON.stringify(item?.image)
+              : item?.image,
+          );
+          await updateItemWithImageMutate.mutateAsync({
+            formData,
+            itemId: item?._id,
+          });
         }
       } else {
-        setAlert("Please Upload Image");
+        if (item) {
+          await updateItemWithoutImageMutate.mutateAsync({
+            data,
+            itemId: item?._id,
+          });
+        } else {
+          setAlert("Please Upload Image");
+        }
       }
     } catch (error) {
-      console.log(error);
       setAlert(error?.message);
     } finally {
       setIsLoading(false);
@@ -151,7 +305,13 @@ export function AddItem({ onClick = null }) {
       )}
 
       {/* Error Toast */}
-      {alert && <Error message={alert} />}
+      {
+        //   addItemMutate.isError ||
+        // addItemMutate.isError ||
+        //   updateItemWithImageMutate.isError ||
+        //   updateItemWithoutImageMutate.isError ||
+        //   (alert && <Error message={alert} />)
+      }
       {/* Form */}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Input Fields Grid */}
@@ -162,6 +322,11 @@ export function AddItem({ onClick = null }) {
               type="text"
               label="Item Name:"
               placeholder="XYZ"
+              disabled={
+                addItemMutate.isLoading ||
+                updateItemWithImageMutate.isLoading ||
+                updateItemWithoutImageMutate.isLoading
+              }
               Icon={Tag}
               {...register("name", { required: true })}
             />
@@ -171,6 +336,11 @@ export function AddItem({ onClick = null }) {
             type="number"
             label="Price:"
             placeholder="123"
+            disabled={
+              addItemMutate.isLoading ||
+              updateItemWithImageMutate.isLoading ||
+              updateItemWithoutImageMutate.isLoading
+            }
             Icon={DollarSign}
             min={0}
             {...register("price", {
@@ -183,6 +353,11 @@ export function AddItem({ onClick = null }) {
             type="number"
             label="Available Quantity:"
             placeholder="123"
+            disabled={
+              addItemMutate.isLoading ||
+              updateItemWithImageMutate.isLoading ||
+              updateItemWithoutImageMutate.isLoading
+            }
             Icon={Package}
             min={0}
             {...register("quantity", {
@@ -195,16 +370,26 @@ export function AddItem({ onClick = null }) {
             type="text"
             label="Range:"
             placeholder="XYZ"
+            disabled={
+              addItemMutate.isLoading ||
+              updateItemWithImageMutate.isLoading ||
+              updateItemWithoutImageMutate.isLoading
+            }
             Icon={Layers}
-            {...register("range")}
+            {...register("range", { required: true })}
           />
 
           <Input
             type="text"
             label="Design:"
             placeholder="XYZ"
+            disabled={
+              addItemMutate.isLoading ||
+              updateItemWithImageMutate.isLoading ||
+              updateItemWithoutImageMutate.isLoading
+            }
             Icon={Palette}
-            {...register("design")}
+            {...register("design", { required: true })}
           />
         </div>
 

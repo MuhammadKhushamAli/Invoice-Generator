@@ -55,11 +55,9 @@ export function NavBar() {
     [isLoggedIn],
   );
   const logOutHandler = useCallback(async () => {
-    console.log(1);
     try {
       const response = await axiosInstance.get("/api/v1/user/logout");
       if (response?.status === 200) {
-        console.log(response);
         setAlert("Logged Out Successfully");
         dispatch(logout());
         navigate("/");

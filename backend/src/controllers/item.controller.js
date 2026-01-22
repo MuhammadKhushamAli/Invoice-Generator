@@ -21,10 +21,13 @@ export const addItem = asyncHandler(async (req, res) => {
   )
     throw new ApiError(400, "All Fields are required");
 
-  name = name?.trim();
-  price = parseInt(price);
-  quantity = parseInt(quantity);
-
+    
+    name = name?.trim();
+    range = range?.trim();
+    design = design?.trim();
+    price = parseInt(price);
+    quantity = parseInt(quantity);
+    
   if (price <= 0 || quantity <= 0)
     throw new ApiError(400, "Price and Quantity Must be Greater than Zero");
 
@@ -58,7 +61,7 @@ export const addItem = asyncHandler(async (req, res) => {
       )
     )[0];
     if (!newItem) throw new ApiError(500, "Unable to Create Item");
-
+    
     const updatedUser = await User.findByIdAndUpdate(
       req?.user?._id,
       {
@@ -75,12 +78,17 @@ export const addItem = asyncHandler(async (req, res) => {
     );
     if (!updatedUser) throw new ApiError(500, "User Update Failed");
 
+
+    const items = await Item.findById(newItem?._id).session(session).select("-owner -__v");
+    if (!items) throw new ApiError(500, "Unable to fetch Item Data");
+
+
     await session.commitTransaction();
     session.endSession();
 
     return res
       .status(200)
-      .json(new ApiResponse(200, "Item Successfully Created", newItem));
+      .json(new ApiResponse(200, "Item Successfully Created", items));
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
@@ -89,54 +97,60 @@ export const addItem = asyncHandler(async (req, res) => {
   }
 });
 
-export const updateQuantity = asyncHandler(async (req, res) => {
-  let { itemId, quantity } = req?.query;
-  itemId = itemId?.trim();
+export const updateItem = asyncHandler(async (req, res) => {
+  let { name, price, quantity, range, design, url } = req?.body;
+  const image = req?.file?.path;
+  const { itemId } = req?.params;
+  if (
+    [name, range, design, itemId].some(
+      (field) => !field || field?.trim() === ""
+    )
+  )
+    throw new ApiError(400, "All Fields are required");
 
-  if (!isValidObjectId(itemId)) throw new ApiError(400, "Invalid Item Id");
+  if (!isValidObjectId(itemId)) throw new ApiError(400, "Invalid Item ID");
 
-  if (!(itemId && quantity)) throw new ApiError(400, "All fields Required");
-
+  name = name?.trim();
+  range = range?.trim();
+  design = design?.trim();
+  price = parseInt(price);
   quantity = parseInt(quantity);
-  if (quantity <= 0)
-    throw new ApiError(400, "Quantity cannot be less than or equal to zero");
+  url = url?.trim();
 
-  const item = await Item.findOne({_id:itemId, owner: req?.user?._id});
-  if (!item) throw new ApiError(404, "Item not Found");
 
-  const updatedItem = await Item.findByIdAndUpdate(
-    itemId,
-    {
-      $set: {
-        quantity,
-      },
-    },
-    {
-      new: true,
+  if (price <= 0 || quantity <= 0)
+    throw new ApiError(400, "Price and Quantity Must be Greater than Zero");
+  let imageUrl = null;
+  try {
+    if (image && url) {
+      deleteFromCloudinary(url);
+      imageUrl = await uploadToCloudinary(image);
+      if (!imageUrl)
+        throw new ApiError(500, "Unable to upload Image on Cloudinary");
     }
-  );
-  if (!updatedItem) throw new ApiError(500, "Unable to Update the Quantity");
+    const updatedItem = await Item.findOneAndUpdate(
+      {
+        _id: itemId,
+        owner: req?.user?._id,
+      },
+      {
+        $set: {
+          name,
+          price,
+          quantity,
+          range,
+          design,
+          ...(imageUrl && { image: imageUrl?.url }),
+        },
+      }
+    ).select("-owner -__v");
+    if (!updatedItem) throw new ApiError(500, "Unable to Update Item");
 
-  return res
-    .status(200)
-    .json(new ApiResponse(200, "Quantity Successfully Updated", updatedItem));
-});
-
-export const viewItem = asyncHandler(async (req, res) => {
-  let { itemId } = req?.params;
-
-  itemId = itemId?.trim();
-  if (!itemId) throw new ApiError(400, "Item Id Required");
-
-  if (!isValidObjectId(itemId)) throw new ApiError(400, "Invlaid Item ID");
-
-  const item = await Item.findOne({
-    _id: itemId,
-    owner: req?.user?._id,
-  }).select("-owner");
-  if (!item) throw new ApiError(500, "Unable to Fetch the Item");
-
-  return res
-    .status(200)
-    .json(new ApiResponse(200, "Current Quantity Successfully Fetched", item));
+    return res
+      .status(200)
+      .json(new ApiResponse(200, "Item Successfully Created", updatedItem));
+  } catch (error) {
+    if (imageUrl) await deleteFromCloudinary(imageUrl?.url);
+    throw error;
+  }
 });

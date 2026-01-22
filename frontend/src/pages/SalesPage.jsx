@@ -1,68 +1,79 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useMemo } from "react";
 import { axiosInstance } from "../axios/axios.js";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import { Container, Error, Loading, SaleLog } from "../components";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
 export function SalesPage() {
   const isLoggedIn = useSelector((state) => state?.auth?.loginStatus);
   const userData = useSelector((state) => state?.auth?.userData);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [sales, setSales] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [alert, setAlert] = useState("");
-  const isNextPage = useRef(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const controller = new AbortController();
-    const fetchSales = async () => {
-      try {
-        if (isLoggedIn) {
-          setAlert("");
-          setIsLoading(true);
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["sales", userData?._id],
+    queryFn: async ({ pageParam = 1 }) => {
+      const salesResponse = await axiosInstance.get(
+        "/api/v1/user/get-sale-history",
+        {
+          params: { userId: userData?._id, page: pageParam },
+        },
+      );
+      return salesResponse?.data;
+    },
+    getNextPageParam: (lastPage, pages) => {
+      return lastPage?.hasNextPage ? pages.length + 1 : undefined;
+    },
+    keepPreviousData: true,
+    enabled: isLoggedIn,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    staleTime: 5 * 60 * 1000,
+    cacheTime: 15 * 60 * 1000,
+  });
 
-          const salesResponse = await axiosInstance.get(
-            "/api/v1/user/get-sale-history",
-            {
-              params: { userId: userData?._id, page: currentPage },
-              signal: controller.signal,
-            }
-          );
-          if (salesResponse?.status === 200) {
-            const newSales = salesResponse?.data?.docs?.[0].sales || [];
-            setSales((prev) => [...prev, ...newSales]);
-            isNextPage.current = salesResponse?.data?.hasNextPage;
-          }
-        } else {
-          navigate("/login");
-        }
-      } catch (error) {
-        if (error.name !== "CanceledError" || error.code !== "ERR_CANCELED")
-          setAlert(error.message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchSales();
-    return () => controller.abort();
-  }, [currentPage, isLoggedIn]);
+  const isFetchingNextPageRef = useRef(isFetchingNextPage);
+  const hasNextRef = useRef(hasNextPage);
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      navigate("/login");
+    }
+  }, [isLoggedIn]);
+
+  useEffect(() => {
+    isFetchingNextPageRef.current = isFetchingNextPage;
+    hasNextRef.current = hasNextPage;
+  }, [hasNextPage, isFetchingNextPage]);
 
   useEffect(() => {
     const handleScroll = () => {
-      if (isNextPage.current) {
+      if (hasNextRef.current && !isFetchingNextPageRef.current) {
         if (
           window.innerHeight + window.scrollY >=
           document.body?.offsetHeight - 50
         ) {
-          setCurrentPage((prev) => prev + 1);
+          fetchNextPage();
         }
       }
     };
     window.addEventListener("scroll", handleScroll);
 
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [fetchNextPage]);
+
+  const sales = useMemo(
+    () => data?.pages?.flatMap((page) => page?.docs?.[0]?.sales),
+    [data],
+  );
 
   return isLoading ? (
     <Loading />
@@ -81,7 +92,7 @@ export function SalesPage() {
           </p>
         </div>
 
-      {alert && <Error message={alert} />}
+        {isError && <Error message={error?.message} />}
         {/* Record Counter Badge */}
         <span className="inline-flex items-center rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/10">
           {sales?.length || 0} Transactions
@@ -99,6 +110,7 @@ export function SalesPage() {
             <p>No sales records found.</p>
           </div>
         )}
+        {isFetchingNextPage && <h2>loading...</h2>}
       </div>
     </Container>
   );

@@ -35,9 +35,7 @@ export function SaleForm({ onClick }) {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    setIsLoading(true);
-    if (!(cart?.length && isLoggedIn)) navigate("/login");
-    setIsLoading(false);
+    if (!isLoggedIn) navigate("/login");
   }, []);
 
   const onSubmit = async (data) => {

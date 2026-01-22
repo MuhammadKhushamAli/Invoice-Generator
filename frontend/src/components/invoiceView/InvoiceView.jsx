@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router";
 import { axiosInstance } from "../../axios/axios.js";
@@ -8,6 +8,7 @@ import { Error } from "../Error.jsx";
 import { FileText, Download } from "lucide-react";
 
 import { Document, Page, pdfjs } from "react-pdf";
+import { useQuery } from "@tanstack/react-query";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -19,43 +20,38 @@ const pdfOptions = {
 
 export function InvoiceView() {
   const { invoiceId } = useParams();
-  const [alert, setAlert] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
   const [pages, setPages] = useState(0);
   const [pdfWidth, setPdfWidth] = useState(null);
-  const [invoice, setInvoice] = useState("");
   const isLoggedIn = useSelector((state) => state?.auth?.loginStatus);
   const userData = useSelector((state) => state?.auth?.userData);
   const navigate = useNavigate();
   const pdfWraperRef = useRef(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!isLoggedIn) {
-        navigate("/login");
-      }
-      setAlert("");
-      setIsLoading(true);
-      try {
-        const invoiceResponse = await axiosInstance.get(
-          `/api/v1/invoice/view-invoice/${invoiceId}`,
-        );
+  const { data, isLoading, isError, error, isFetching } = useQuery({
+    queryKey: ["view-invoice", invoiceId],
+    queryFn: async () => {
+      const invoiceResponse = await axiosInstance.get(
+        `/api/v1/invoice/view-invoice/${invoiceId}`,
+      );
+      return invoiceResponse?.data;
+    },
+    select: (data) => ({
+      ...data,
+      url: data?.url?.replace("http://", "https://"),
+    }),
+    enabled: !!invoiceId && isLoggedIn,
+    staleTime: 5 * 60 * 1000,
+    cacheTime: 15 * 60 * 1000,
+    refetchOnMount: true,
+  });
+  const invoice = useMemo(() => data, [data]);
 
-        if (invoiceResponse?.status === 200) {
-          invoiceResponse.data.url = invoiceResponse?.data?.url?.replace(
-            "http://",
-            "https://",
-          );
-          setInvoice(invoiceResponse?.data);
-        }
-      } catch (error) {
-        setAlert(error.message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchData();
-  }, [invoiceId, isLoggedIn, navigate]);
+  useEffect(() => {
+    if (!isLoggedIn) {
+      navigate("/login");
+    }
+  }, [isLoggedIn]);
+
   useEffect(() => {
     const updatePdfWidth = () => {
       if (pdfWraperRef.current) {
@@ -94,15 +90,16 @@ export function InvoiceView() {
       window.open(invoice?.url, "_blank");
     }
   };
-  return isLoading ? (
+
+  return isLoading || isFetching ? (
     <Loading />
   ) : (
     /* 1. Added 'max-w-5xl' here to stop the container from getting too wide on huge screens */
     <div className="mx-auto w-full max-w-5xl rounded-2xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/50 md:p-8">
       {/* Error Toast */}
-      {alert && (
+      {isError && (
         <div className="mb-6">
-          <Error message={alert} />
+          <Error message={error?.message} />
         </div>
       )}
 
@@ -133,14 +130,8 @@ export function InvoiceView() {
             options={pdfOptions}
             /* 2. Added 'items-center' here. This forces the PDF pages to center horizontally */
             className="flex flex-col gap-8 items-center"
-            onLoadStart={() => setIsLoading(true)}
             onLoadSuccess={({ numPages }) => {
               setPages(numPages);
-              setIsLoading(false);
-            }}
-            onLoadError={(error) => {
-              setIsLoading(false);
-              setAlert(`PDF Loading Failed ${error}`);
             }}
           >
             {Array.from({ length: pages }, (_, index) => (
