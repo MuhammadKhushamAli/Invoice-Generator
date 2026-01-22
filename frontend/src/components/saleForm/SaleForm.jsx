@@ -29,9 +29,9 @@ export function SaleForm({ onClick }) {
   const navigate = useNavigate();
 
   const [alert, setAlert] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const { register, handleSubmit, reset } = useForm();
+  const { register, handleSubmit } = useForm();
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -48,7 +48,6 @@ export function SaleForm({ onClick }) {
       const response = await axiosInstance.post("/api/v1/sales/add-sale", data);
 
       if (response?.status === 200) {
-        reset();
         dispatch(clearCart());
         setAlert("Invoice Generated");
         let url = response?.data?.inv_url?.replace("http://", "https://");
@@ -78,11 +77,6 @@ export function SaleForm({ onClick }) {
         };
         downloadInvoice();
         onClick && onClick();
-        if (
-          window.location.pathname === "/sales" ||
-          window.location.pathname === "/invoices"
-        )
-          window.location.reload();
       }
     } catch (error) {
       setAlert(error?.message);

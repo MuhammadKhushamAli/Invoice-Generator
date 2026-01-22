@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
-import { Loading } from "../Loading.jsx";
 import { CartItem } from "./CartItem.jsx";
 import { Error } from "../Error.jsx";
 import { Button } from "../Button.jsx";
@@ -18,13 +17,10 @@ export function Cart({ onClick }) {
   const navigate = useNavigate();
 
   const [alert, setAlert] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
   const [isSaleForm, setIsSaleForm] = useState(false);
 
   useEffect(() => {
-    setIsLoading(true);
     if (!isLoggedIn) navigate("/login");
-    setIsLoading(false);
   }, []);
 
   const onDelete = useCallback((item) => {
@@ -35,10 +31,7 @@ export function Cart({ onClick }) {
       setAlert("Unable to Delete Cart Item");
     }
   }, []);
-
   if (isSaleForm) {
-    /* ---------------- SALE FORM STATE ---------------- */
-    /* Wrapped in an overlay to look like a professional Modal Popup */
     return (
       <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-900/20 backdrop-blur-sm px-3 sm:px-4 md:px-6 pt-20 sm:pt-20 md:pt-24 lg:pt-28 pb-4 sm:pb-6 md:pb-8 animate-[fadeIn_0.2s_ease-out]">
         <div className="w-full max-w-5xl">
@@ -47,9 +40,7 @@ export function Cart({ onClick }) {
       </div>
     );
   } else {
-    return isLoading ? (
-      <Loading />
-    ) : cart ? (
+    return cart ? (
       /* ---------------- HAS ITEMS STATE ---------------- */
       /* Main Overlay: Full screen, blurred background */
       <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/20 backdrop-blur-sm transition-all">
