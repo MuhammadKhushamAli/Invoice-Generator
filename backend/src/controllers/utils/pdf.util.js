@@ -30,8 +30,7 @@ export const generatePdf = async (inputObj, userId) => {
       browserWSEndpoint: `wss://chrome.browserless.io?token=${process.env.BROWSERLESS_TOKEN}`,
     });
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "networkidle0" });
-    console.log("Browser Connected");
+    await page.setContent(html, { waitUntil: "load", timeout: 30000});
     await page.pdf({
       path: pdfPath,
       format: "A4",
