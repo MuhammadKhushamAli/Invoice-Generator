@@ -36,6 +36,9 @@ app.use("/api/v1/user", userRoute);
 app.use("/api/v1/item", itemRoute);
 app.use("/api/v1/sales", salesRoute);
 app.use("/api/v1/invoice", invoiceRoute);
+app.get("/", (req, res) => {
+  res.send("Hello World");
+})
 
 app.use((err, _, res, __) => {
   res
