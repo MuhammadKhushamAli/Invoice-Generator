@@ -1,11 +1,12 @@
 import ejs from "ejs";
-import puppeteer from "puppeteer";
+import puppeteer from "puppeteer-core";
 import { ApiError } from "../../utils/ApiError.js";
 import path from "path";
 import { uploadToCloudinary } from "../../utils/cloudinary.js";
 import { getInvoiceNumber } from "./invoiceNum.util.js";
 
 export const generatePdf = async (inputObj, userId) => {
+  let browser = null;
   try {
     const invoiceNum = await getInvoiceNumber(userId);
     const pdfPath = `./public/temp/${invoiceNum}.pdf`;
@@ -25,14 +26,12 @@ export const generatePdf = async (inputObj, userId) => {
       });
     });
 
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: ["--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage"],
+    browser = await puppeteer.connect({
+      browserWSEndpoint: `wss://chrome.browserless.io?token=${process.env.BROWSERLESS_TOKEN}`,
     });
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: "networkidle0" });
+    console.log("Browser Connected");
     await page.pdf({
       path: pdfPath,
       format: "A4",
@@ -49,6 +48,7 @@ export const generatePdf = async (inputObj, userId) => {
 
     return pdfUrl?.url;
   } catch (error) {
+    if (browser) await browser.close();
     throw error;
   }
 };
