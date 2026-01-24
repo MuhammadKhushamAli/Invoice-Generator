@@ -22,6 +22,14 @@ const invoicesSchema = new mongoose.Schema(
       ref: "User",
       required: [true, "Invoice Owner is required"],
     },
+    deliveryChalan: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "DeliveryChalan",
+    },
+    quotation: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Quotation",
+    },
   },
   {
     timestamps: true,

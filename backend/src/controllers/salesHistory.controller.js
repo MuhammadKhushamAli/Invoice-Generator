@@ -181,10 +181,13 @@ export const addSale = asyncHandler(async (req, res) => {
           throw new ApiError(400, "Invalid Quantity or Price");
         if (!isValidObjectId(item._id))
           throw new ApiError(400, "Invalid Item Id");
-        const itemFound = await Item.findOne({
-          _id: item?._id,
-          owner: req?.user?._id,
-        }, { session });
+        const itemFound = await Item.findOne(
+          {
+            _id: item?._id,
+            owner: req?.user?._id,
+          },
+          { session }
+        );
         if (!itemFound) throw new ApiError(404, "Item Not Found");
         if (!itemFound?.isQuantityValid(item?.quantity))
           throw new ApiError(400, "Invalid Quantity");
@@ -327,8 +330,10 @@ export const addSale = asyncHandler(async (req, res) => {
     }
 
     // Update Delivery Chalan
+    let updateDeliveryChalan = null;
+    let updatedQuotation = null;
     if (deliveryChallanId) {
-      const updateDeliveryChalan = await DeliveryChallan.findByIdAndUpdate(
+      updateDeliveryChalan = await DeliveryChallan.findByIdAndUpdate(
         deliveryChallanId,
         {
           $set: {
@@ -343,7 +348,7 @@ export const addSale = asyncHandler(async (req, res) => {
       if (!updateDeliveryChalan)
         throw new ApiError(500, "Unable to Update Delivery Chalan");
       // Quotation Updated
-      const updatedQuotation = await Quotation.findByIdAndUpdate(
+      updatedQuotation = await Quotation.findByIdAndUpdate(
         quotationId,
         {
           $set: {
@@ -382,6 +387,8 @@ export const addSale = asyncHandler(async (req, res) => {
       {
         $set: {
           sale: sale?._id,
+          deliveryChalan: updateDeliveryChalan?._id,
+          quotation: updatedQuotation?._id,
         },
       },
       { session },
