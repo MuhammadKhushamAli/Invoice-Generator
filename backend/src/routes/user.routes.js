@@ -1,8 +1,10 @@
 import { Router } from "express";
 import {
   getCurrentUser,
+  getDeliveryChalans,
   getInvoices,
   getItems,
+  getQuotations,
   getSaleHistory,
   login,
   logout,
@@ -42,5 +44,7 @@ router.route("/refresh-tokens").get(refreshTokens);
 router.route("/get-invoices").get(authentication, getInvoices);
 router.route("/get-items").get(authentication, getItems);
 router.route("/get-sale-history").get(authentication, getSaleHistory);
+router.route("/get-quotations").get(authentication, getQuotations);
+router.route("/get-delivery-challan").get(authentication, getDeliveryChalans);
 
 export default router;
