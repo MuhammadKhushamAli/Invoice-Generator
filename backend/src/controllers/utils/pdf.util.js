@@ -5,10 +5,10 @@ import path from "path";
 import { uploadToCloudinary } from "../../utils/cloudinary.js";
 import { getInvoiceNumber } from "./invoiceNum.util.js";
 
-export const generatePdf = async (inputObj, userId, templateName) => {
+export const generatePdf = async (inputObj, userId, templateName, key) => {
   let browser = null;
   try {
-    const invoiceNum = await getInvoiceNumber(userId);
+    const invoiceNum = await getInvoiceNumber(userId, key);
     const pdfPath = `./public/temp/${invoiceNum}.pdf`;
     const templatePath = path.join(
       process.cwd(),

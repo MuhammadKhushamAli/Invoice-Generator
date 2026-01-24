@@ -167,7 +167,7 @@ export const addQuotation = asyncHandler(async (req, res) => {
       amount_in_words: toWords(totalPayableWithTaxes),
     };
 
-    fileUrl = await generatePdf(inputObj, user?._id, "quote.ejs");
+    fileUrl = await generatePdf(inputObj, user?._id, "quote.ejs", "Quotation");
     if (!fileUrl) throw new ApiError(500, "Unable to Generate PDF");
 
     // Quotation Generated

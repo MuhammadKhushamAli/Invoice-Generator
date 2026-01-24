@@ -239,7 +239,7 @@ export const addSale = asyncHandler(async (req, res) => {
       your_GST: user?.gst_no,
       your_NTN: user?.ntn_no,
       website: user?.website,
-      invoice_no: await getInvoiceNumber(user?._id),
+      invoice_no: await getInvoiceNumber(user?._id, "Invoice"),
       date: new Date().toLocaleDateString("en-us"),
       hs_code: hsCode,
       Attn_to: AttnTo,
@@ -264,7 +264,7 @@ export const addSale = asyncHandler(async (req, res) => {
       amount_in_words: toWords(totalPayableWithTaxes),
     };
 
-    fileUrl = await generatePdf(inputObj, user?._id, "invoice_template.ejs");
+    fileUrl = await generatePdf(inputObj, user?._id, "invoice_template.ejs", "Invoice");
     if (!fileUrl) throw new ApiError(500, "Unable to Generate PDF");
 
     // Invoice Generated

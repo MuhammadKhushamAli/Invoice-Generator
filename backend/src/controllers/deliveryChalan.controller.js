@@ -181,7 +181,7 @@ export const addDeliveryChalan = asyncHandler(async (req, res) => {
       po_date: poDate,
     };
 
-    fileUrl = await generatePdf(inputObj, user?._id, "dc.ejs");
+    fileUrl = await generatePdf(inputObj, user?._id, "dc.ejs", "DeliveryChalan");
     if (!fileUrl) throw new ApiError(500, "Unable to Generate PDF");
 
     const deliveryChallan = await DeliveryChallan.create([
