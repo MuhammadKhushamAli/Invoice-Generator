@@ -39,7 +39,6 @@ app.use("/api/v1/item", itemRoute);
 app.use("/api/v1/sales", salesRoute);
 app.use("/api/v1/invoice", invoiceRoute);
 app.use("/api/v1/customer", customerRoute);
-)
 
 
 
