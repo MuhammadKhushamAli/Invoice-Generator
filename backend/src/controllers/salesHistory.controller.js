@@ -137,7 +137,6 @@ export const addSale = asyncHandler(async (req, res) => {
     }
 
     // Item Manipulation and Total Calculation
-
     let subTotal = 0;
     await Promise.all(
       itemsInfo?.map(async (item) => {
@@ -168,6 +167,7 @@ export const addSale = asyncHandler(async (req, res) => {
       })
     );
 
+    // Taxes Calculated
     const totalPayableWithoutTaxes =
       subTotal - discount < 0 ? 0 : subTotal - discount;
     const totalSaleTax = (salesTaxRate / 100) * totalPayableWithoutTaxes;
@@ -182,6 +182,7 @@ export const addSale = asyncHandler(async (req, res) => {
     const address = await Address.findById(user?.address);
     if (!address) throw new ApiError(500, "Address Not Found");
 
+    // PDF Generation
     const inputObj = {
       customer_PO: po,
       business_name: user?.businessName,
@@ -224,11 +225,10 @@ export const addSale = asyncHandler(async (req, res) => {
       amount_in_words: toWords(totalPayableWithTaxes),
     };
 
-    fileUrl = await generatePdf(inputObj, user?._id);
+    fileUrl = await generatePdf(inputObj, user?._id, "invoice_template.ejs");
     if (!fileUrl) throw new ApiError(500, "Unable to Generate PDF");
 
     // Invoice Generated
-
     const invoice = (
       await Invoice.create(
         [

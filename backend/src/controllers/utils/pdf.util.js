@@ -5,7 +5,7 @@ import path from "path";
 import { uploadToCloudinary } from "../../utils/cloudinary.js";
 import { getInvoiceNumber } from "./invoiceNum.util.js";
 
-export const generatePdf = async (inputObj, userId) => {
+export const generatePdf = async (inputObj, userId, templateName) => {
   let browser = null;
   try {
     const invoiceNum = await getInvoiceNumber(userId);
@@ -14,7 +14,7 @@ export const generatePdf = async (inputObj, userId) => {
       process.cwd(),
       "src",
       "utils",
-      "pdf_template.ejs"
+      templateName
     );
 
     // Convert renderFile to a Promise
