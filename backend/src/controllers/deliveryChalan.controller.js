@@ -291,3 +291,21 @@ export const addDeliveryChalan = asyncHandler(async (req, res) => {
     throw error;
   }
 });
+
+
+export const deliveryChalanView = asyncHandler(async (req, res) => {
+  let { deliveryChalanId } = req?.params;
+  deliveryChalanId = deliveryChalanId?.trim();
+
+  if (!deliveryChalanId) throw new ApiError(400, "Delivery Chalan ID Required");
+  if (!isValidObjectId(deliveryChalanId)) throw new ApiError(400, "Invalid Delivery Chalan ID");
+
+  const deliveryChalan = await DeliveryChallan.findOne({
+    $and: [{ _id: deliveryChalanId }, { owner: req?.user?._id }],
+  }).select("-owner -itemSold");
+  if (!deliveryChalan) throw new ApiError(404, "Delivery Chalan not Found");
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Successfully Fetch Delivery Chalan", deliveryChalan));
+});

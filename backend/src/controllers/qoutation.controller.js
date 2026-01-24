@@ -267,3 +267,20 @@ export const addQuotation = asyncHandler(async (req, res) => {
     throw error;
   }
 });
+
+export const quotationView = asyncHandler(async (req, res) => {
+  let { quotationId } = req?.params;
+  quotationId = quotationId?.trim();
+
+  if (!quotationId) throw new ApiError(400, "Quotation ID Required");
+  if (!isValidObjectId(quotationId)) throw new ApiError(400, "Invalid Quotation ID");
+
+  const quotation = await Quotation.findOne({
+    $and: [{ _id: quotationId }, { owner: req?.user?._id }],
+  }).select("-owner -itemSold");
+  if (!quotation) throw new ApiError(404, "Quotation not Found");
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Successfully Fetch Quotation", quotation));
+});
