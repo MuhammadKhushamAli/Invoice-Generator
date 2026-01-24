@@ -28,7 +28,7 @@ const deliveryChalanSchema = new mongoose.Schema(
   }
 );
 
-invoicesSchema.pre("save", async function (next) {
+deliveryChalanSchema.pre("save", async function (next) {
   if (this.isModified("name")) return next();
   const dcNum = await InvoiceNum.findOne({
     key: "DeliveryChalan",

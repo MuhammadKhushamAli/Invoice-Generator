@@ -35,7 +35,7 @@ const quotationsSchema = new mongoose.Schema(
   }
 );
 
-invoicesSchema.pre("save", async function (next) {
+quotationsSchema.pre("save", async function (next) {
   if (this.isModified("name")) return next();
   const quotNum = await InvoiceNum.findOne({
     key: "Quotation",
