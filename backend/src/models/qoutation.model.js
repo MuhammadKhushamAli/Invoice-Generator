@@ -25,6 +25,10 @@ const quotationsSchema = new mongoose.Schema(
       ref: "User",
       required: [true, "Invoice Owner is required"],
     },
+    deliveryChalan: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "DeliveryChalan",
+    },
   },
   {
     timestamps: true,
@@ -54,4 +58,4 @@ invoicesSchema.pre("save", async function (next) {
     throw new ApiError(500, "Unable to Updated Quotation Number");
 });
 
-export const Invoice = mongoose.model("Quotation", quotationsSchema);
+export const Quotation = mongoose.model("Quotation", quotationsSchema);
