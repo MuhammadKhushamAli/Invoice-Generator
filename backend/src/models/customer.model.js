@@ -43,6 +43,17 @@ const customerSchema = new mongoose.Schema(
             type: String,
             trim: true,
         },
+        owner: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: [true, "Customer Owner is required"],
+        },
+        invoices: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Invoice",
+            }
+        ]
     }
 )
 
