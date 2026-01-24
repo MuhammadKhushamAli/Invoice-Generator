@@ -134,13 +134,13 @@ export const addQuotation = asyncHandler(async (req, res) => {
 
     // PDF Generation
     const inputObj = {
-      signatory_name: user?.userName,
+      signatory_name: user?.businessName,
       signatory_phone: user?.phone_no,
       signatory_designation: "Sales Manager",
       business_name: user?.businessName,
       logo_url: user?.invoiceLogo,
       email: user?.email,
-      signature_url: user?.invoiceSign,
+      sign_url: user?.invoiceSign,
       landmark: address?.landmark,
       street: address?.street,
       area: address?.area,
@@ -150,7 +150,7 @@ export const addQuotation = asyncHandler(async (req, res) => {
       website: user?.website,
       invoice_no: await getInvoiceNumber(user?._id, "Quotation"),
       date: new Date().toLocaleDateString("en-us"),
-      valid_until_date: validUntil,
+      valid_until_date: new Date(validUntil).toLocaleDateString("en-us"),
       customer_id: customer?._id.toString(),
       customer_name: customerName,
       customer_landmark: customerLandmark,
