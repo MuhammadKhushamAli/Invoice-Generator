@@ -162,6 +162,34 @@ export const registerUser = asyncHandler(async (req, res) => {
     )[0];
     if (!invNum) throw new ApiError(500, "Unable to create Invoice Number");
 
+    const quoteNum = (
+      await InvoiceNum.create(
+        [
+          {
+            key: "Quotation",
+            inv_num: 0,
+            owner: newUser?._id,
+          },
+        ],
+        { session }
+      )
+    )[0];
+    if (!quoteNum) throw new ApiError(500, "Unable to create Quotation Number");
+
+    const dcNum = (
+      await InvoiceNum.create(
+        [
+          {
+            key: "DeliveryChalan",
+            inv_num: 0,
+            owner: newUser?._id,
+          },
+        ],
+        { session }
+      )
+    )[0];
+    if (!dcNum) throw new ApiError(500, "Unable to create Delivery Chalan Number");
+
     const user = await User.findById(newUser?._id)
       .session(session)
       .select("-password -refreshToken");
