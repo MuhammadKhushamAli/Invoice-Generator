@@ -159,7 +159,7 @@ export const addDeliveryChalan = asyncHandler(async (req, res) => {
           }
         );
         if (!updateItem) throw new ApiError(500, "Item Update Failed");
-        totalQty++;
+        totalQty+=parseInt(item?.quantity);
       })
     );
 
@@ -190,7 +190,7 @@ export const addDeliveryChalan = asyncHandler(async (req, res) => {
       items: itemsInfo,
       total_qty: totalQty || 0,
       po_no: poNo,
-      po_date: poDate,
+      po_date: new Date(poDate).toLocaleDateString("en-us"),
     };
 
     fileUrl = await generatePdf(
@@ -201,14 +201,18 @@ export const addDeliveryChalan = asyncHandler(async (req, res) => {
     );
     if (!fileUrl) throw new ApiError(500, "Unable to Generate PDF");
 
-    const deliveryChallan = await DeliveryChallan.create([
-      {
-        url: fileUrl,
-        owner: req?.user?._id,
-        quotation: quotationId || null,
-      },
-      { session },
-    ])[0];
+    const deliveryChallan = (
+      await DeliveryChallan.create(
+        [
+          {
+            url: fileUrl,
+            owner: req?.user?._id,
+            quotation: quotationId || null,
+          },
+        ],
+        { session }
+      )
+    )[0];
     if (!deliveryChallan)
       throw new ApiError(500, "Delivery Chalan Creation Failed");
 

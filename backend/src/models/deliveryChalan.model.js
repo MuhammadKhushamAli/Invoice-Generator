@@ -10,13 +10,13 @@ const deliveryChalanSchema = new mongoose.Schema(
     },
     url: {
       type: String,
-      required: [true, "Delivery Chalan URL is required"],
+      required: [true, "Delivery Challan URL is required"],
       trim: true,
     },
     owner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: [true, "Invoice Owner is required"],
+      required: [true, "Delivery Challan Owner is required"],
     },
     itemSold: [
       {
