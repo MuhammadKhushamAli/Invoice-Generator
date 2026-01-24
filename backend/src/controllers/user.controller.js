@@ -188,7 +188,8 @@ export const registerUser = asyncHandler(async (req, res) => {
         { session }
       )
     )[0];
-    if (!dcNum) throw new ApiError(500, "Unable to create Delivery Chalan Number");
+    if (!dcNum)
+      throw new ApiError(500, "Unable to create Delivery Chalan Number");
 
     const user = await User.findById(newUser?._id)
       .session(session)
@@ -630,5 +631,121 @@ export const getSaleHistory = asyncHandler(async (req, res) => {
         "Sale History Successfully Fetched",
         paginatedSaleHistory
       )
+    );
+});
+
+export const getQuotations = asyncHandler(async (req, res) => {
+  let { page = 1, userId } = req?.query;
+  userId = userId?.trim();
+  page = parseInt(page);
+
+  if (!userId) throw new ApiError(400, "User ID must be required");
+  if (!isValidObjectId(userId)) throw new ApiError(400, "Invalid Object Id");
+  if (page < 1) page = 1;
+
+  const quotations = User.aggregate([
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(userId),
+      },
+    },
+    {
+      $lookup: {
+        from: "quotations",
+        localField: "quotations",
+        foreignField: "_id",
+        as: "quotations",
+        pipeline: [
+          {
+            $project: {
+              name: 1,
+              url: 1,
+              deliveryChalan: 1,
+              saleInvoice: 1,
+              createdAt: 1,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $project: {
+        quotations: 1,
+      },
+    },
+  ]);
+  if (!quotations) throw new ApiError(500, "Unable to Fetch Quotations");
+
+  const options = {
+    page,
+    limit: 10,
+  };
+
+  const paginatedQuotations = await User.aggregatePaginate(quotations, options);
+  if (!paginatedQuotations)
+    throw new ApiError(500, "Unable to Paginate Quotations");
+
+  res
+    .status(200)
+    .json(
+      new ApiResponse(200, "Successfully Fetched Quotations", paginatedQuotations)
+    );
+});
+
+export const getDeliveryChalans = asyncHandler(async (req, res) => {
+  let { page = 1, userId } = req?.query;
+  userId = userId?.trim();
+  page = parseInt(page);
+
+  if (!userId) throw new ApiError(400, "User ID must be required");
+  if (!isValidObjectId(userId)) throw new ApiError(400, "Invalid Object Id");
+  if (page < 1) page = 1;
+
+  const deliveryChallans = User.aggregate([
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(userId),
+      },
+    },
+    {
+      $lookup: {
+        from: "DeliveryChalan",
+        localField: "deliveryChallan",
+        foreignField: "_id",
+        as: "deliveryChallans",
+        pipeline: [
+          {
+            $project: {
+              name: 1,
+              url: 1,
+              quotation: 1,
+              saleInvoice: 1,
+              createdAt: 1,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $project: {
+        deliveryChallans: 1,
+      },
+    },
+  ]);
+  if (!deliveryChallans) throw new ApiError(500, "Unable to Fetch Delivery Challans");
+
+  const options = {
+    page,
+    limit: 10,
+  };
+
+  const paginatedDeliveryChallans = await User.aggregatePaginate(deliveryChallans, options);
+  if (!paginatedDeliveryChallans)
+    throw new ApiError(500, "Unable to Paginate Delivery Challans");
+
+  res
+    .status(200)
+    .json(
+      new ApiResponse(200, "Successfully Fetched Delivery Challans", paginatedDeliveryChallans)
     );
 });
