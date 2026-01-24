@@ -136,7 +136,6 @@ export const addSale = asyncHandler(async (req, res) => {
       if (!customer) throw new ApiError(500, "Customer Creation Failed");
     }
 
-
     // Item Manipulation and Total Calculation
 
     let subTotal = 0;
@@ -243,7 +242,6 @@ export const addSale = asyncHandler(async (req, res) => {
     )[0];
     if (!invoice) throw new ApiError(500, "Unable to Create Invoice");
 
-
     // Customer Updated
     const updatedCustomer = await Customer.findByIdAndUpdate(
       customer?._id,
@@ -306,7 +304,6 @@ export const addSale = asyncHandler(async (req, res) => {
     );
     if (!updatedSale) throw new ApiError(500, "Unable to Created Updated Sale");
 
-
     // Invoice Updated
     const updateInv = await Invoice.findByIdAndUpdate(
       invoice?._id,
@@ -329,6 +326,11 @@ export const addSale = asyncHandler(async (req, res) => {
         $push: {
           salesHistory: sale?._id,
           invoices: invoice?._id,
+        },
+      },
+      {
+        $addToSet: {
+          customers: customer?._id,
         },
       },
       { session },
