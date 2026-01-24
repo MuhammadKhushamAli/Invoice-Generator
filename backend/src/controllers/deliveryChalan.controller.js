@@ -147,6 +147,18 @@ export const addDeliveryChalan = asyncHandler(async (req, res) => {
         if (!itemFound) throw new ApiError(404, "Item Not Found");
         if (!itemFound?.isQuantityValid(item?.quantity))
           throw new ApiError(400, "Invalid Quantity");
+        const updateItem = await Item.findByIdAndUpdate(
+          item?._id,
+          {
+            $inc: {
+              quantity: -item?.quantity,
+            },
+          },
+          {
+            session,
+          }
+        );
+        if (!updateItem) throw new ApiError(500, "Item Update Failed");
         totalQty++;
       })
     );

@@ -183,20 +183,22 @@ export const addSale = asyncHandler(async (req, res) => {
           owner: req?.user?._id,
         }).session(session);
         if (!itemFound) throw new ApiError(404, "Item Not Found");
-        if (!itemFound?.isQuantityValid(item?.quantity))
-          throw new ApiError(400, "Invalid Quantity");
-        const updateItem = await Item.findByIdAndUpdate(
-          item?._id,
-          {
-            $inc: {
-              quantity: -item?.quantity,
+        if (!deliveryChallanId) {
+          if (!itemFound?.isQuantityValid(item?.quantity))
+            throw new ApiError(400, "Invalid Quantity");
+          const updateItem = await Item.findByIdAndUpdate(
+            item?._id,
+            {
+              $inc: {
+                quantity: -item?.quantity,
+              },
             },
-          },
-          {
-            session,
-          }
-        );
-        if (!updateItem) throw new ApiError(500, "Item Update Failed");
+            {
+              session,
+            }
+          );
+          if (!updateItem) throw new ApiError(500, "Item Update Failed");
+        }
         subTotal += item?.price * item?.quantity;
       })
     );
