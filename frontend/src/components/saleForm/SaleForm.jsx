@@ -143,7 +143,7 @@ export function SaleForm({ onClick }) {
     return [];
   }, [customerFetch?.data]);
 
-  return isLoading ? (
+  return isLoading || customerFetch?.isLoading ? (
     <Loading />
   ) : (
     <div className="relative mx-auto w-full max-w-5xl rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-200/60 transition-all duration-300">
