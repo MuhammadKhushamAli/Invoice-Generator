@@ -17,13 +17,7 @@ const itemsSoldSchema = new mongoose.Schema({
   sale: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Sales",
-    required: [true, "Sale is required"],
   },
-});
-
-itemsSoldSchema.pre("save", async function () {
-  const p = this?.quantity * this?.price;
-  console.log(p);
 });
 
 export const ItemsSold = mongoose.model("ItemsSold", itemsSoldSchema);
