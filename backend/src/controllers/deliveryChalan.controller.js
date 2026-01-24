@@ -7,15 +7,12 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ItemsSold } from "../models/itemsSold.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { deleteFromCloudinary } from "../utils/cloudinary.js";
-import pkg from "number-to-words";
 import { generatePdf } from "./utils/pdf.util.js";
 import { getInvoiceNumber } from "./utils/invoiceNum.util.js";
 import { Customer } from "../models/customer.model.js";
 import { Quotation } from "../models/qoutation.model.js";
 
-const { toWords } = pkg;
-
-export const addQuotation = asyncHandler(async (req, res) => {
+export const addDeliveryChalan = asyncHandler(async (req, res) => {
   let {
     itemsInfo,
     customerName,
@@ -24,9 +21,11 @@ export const addQuotation = asyncHandler(async (req, res) => {
     customerArea,
     customerCity,
     customerCountry,
-    salesTaxRate,
-    validUntil,
+    poNo,
+    poDate,
   } = req?.body;
+
+  const { quotationId } = req?.params;
 
   customerName = customerName?.trim();
   customerLandmark = customerLandmark?.trim();
@@ -35,12 +34,34 @@ export const addQuotation = asyncHandler(async (req, res) => {
   customerCity = customerCity?.trim();
   customerCountry = customerCountry?.trim();
   salesTaxRate = salesTaxRate?.trim();
-  validUntil = validUntil?.trim();
+  poNo = poNo?.trim();
+  poDate = poDate?.trim();
 
-  salesTaxRate = parseInt(salesTaxRate);
+  if (quotationId?.trim()) {
+    if (!isValidObjectId(quotationId))
+      throw new ApiError(400, "Invalid Quotation Id");
 
-  if (salesTaxRate < 0)
-    throw new ApiError(400, "Sales Taxes fields are required");
+    const quotation = await Quotation.findOne({
+      _id: quotationId,
+      owner: req?.user?._id,
+    }).select("itemSold");
+    if (!quotation) throw new ApiError(404, "Quotation Not Found");
+
+    await Promise.all(
+      (itemsInfo = quotation?.itemSold?.map(async (item) => {
+        const itemRecoded = await ItemsSold.findById(item).select("-sale");
+        if (!itemRecoded) throw new ApiError(404, "Item Not Found");
+
+        const item = await Item.findById(itemRecoded?.item);
+        if (!item) throw new ApiError(404, "Item Not Found");
+
+        item.quantity = itemRecoded?.quantity;
+        item.price = itemRecoded?.price;
+        return item;
+      }))
+    );
+  }
+
   if (
     !(
       Array.isArray(itemsInfo) &&
@@ -51,7 +72,8 @@ export const addQuotation = asyncHandler(async (req, res) => {
         customerArea,
         customerCity,
         customerCountry,
-        validUntil,
+        poNo,
+        poDate,
       ].some((field) => !field || field?.trim() === "")
     )
   )
@@ -105,8 +127,8 @@ export const addQuotation = asyncHandler(async (req, res) => {
       if (!customer) throw new ApiError(500, "Customer Creation Failed");
     }
 
+    let totalQty = null;
     // Item Manipulation and Total Calculation
-    let subTotal = 0;
     await Promise.all(
       itemsInfo?.map(async (item) => {
         if (item.quantity <= 0 || item.price <= 0)
@@ -120,13 +142,9 @@ export const addQuotation = asyncHandler(async (req, res) => {
         if (!itemFound) throw new ApiError(404, "Item Not Found");
         if (!itemFound?.isQuantityValid(item?.quantity))
           throw new ApiError(400, "Invalid Quantity");
-        subTotal += item?.price * item?.quantity;
+        totalQty++;
       })
     );
-
-    // Taxes Calculated
-    const totalSaleTax = (salesTaxRate / 100) * subTotal;
-    const totalPayableWithTaxes = subTotal + totalSaleTax;
 
     const user = req?.user;
     const address = await Address.findById(user?.address);
@@ -134,13 +152,9 @@ export const addQuotation = asyncHandler(async (req, res) => {
 
     // PDF Generation
     const inputObj = {
-      signatory_name: user?.userName,
-      signatory_phone: user?.phone_no,
-      signatory_designation: "Sales Manager",
       business_name: user?.businessName,
       logo_url: user?.invoiceLogo,
       email: user?.email,
-      signature_url: user?.invoiceSign,
       landmark: address?.landmark,
       street: address?.street,
       area: address?.area,
@@ -148,10 +162,8 @@ export const addQuotation = asyncHandler(async (req, res) => {
       country: address?.country,
       tele_no: user?.phone_no,
       website: user?.website,
-      invoice_no: await getInvoiceNumber(user?._id, "Quotation"),
-      date: new Date().toLocaleDateString("en-us"),
-      valid_until_date: validUntil,
-      customer_id: customer?._id.toString(),
+      challan_no: await getInvoiceNumber(user?._id, "DeliveryChalan"),
+      challan_date: new Date().toLocaleDateString("en-us"),
       customer_name: customerName,
       customer_landmark: customerLandmark,
       customer_street: customerStreet,
@@ -159,15 +171,12 @@ export const addQuotation = asyncHandler(async (req, res) => {
       customer_city: customerCity,
       customer_country: customerCountry,
       items: itemsInfo,
-      sub_total: subTotal.toFixed(2),
-      taxable_value: subTotal.toFixed(2),
-      sales_tax_rate: salesTaxRate,
-      sales_tax: totalSaleTax.toFixed(2),
-      value_including_sales_tax: totalPayableWithTaxes.toFixed(2),
-      amount_in_words: toWords(totalPayableWithTaxes),
+      total_qty: totalQty || 0,
+      po_no: poNo,
+      po_date: poDate,
     };
 
-    fileUrl = await generatePdf(inputObj, user?._id, "quote.ejs");
+    fileUrl = await generatePdf(inputObj, user?._id, "dc.ejs");
     if (!fileUrl) throw new ApiError(500, "Unable to Generate PDF");
 
     // Quotation Generated
