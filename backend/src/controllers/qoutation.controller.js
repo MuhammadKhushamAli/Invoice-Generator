@@ -25,7 +25,7 @@ export const addQuotation = asyncHandler(async (req, res) => {
     customerCity,
     customerCountry,
     salesTaxRate,
-    validUntil
+    validUntil,
   } = req?.body;
 
   customerName = customerName?.trim();
@@ -51,7 +51,7 @@ export const addQuotation = asyncHandler(async (req, res) => {
         customerArea,
         customerCity,
         customerCountry,
-        validUntil
+        validUntil,
       ].some((field) => !field || field?.trim() === "")
     )
   )
@@ -134,12 +134,12 @@ export const addQuotation = asyncHandler(async (req, res) => {
 
     // PDF Generation
     const inputObj = {
-        signatory_name: user?.userName,
-        signatory_phone: user?.phone_no,
-        signatory_designation: "Sales Manager",
-        business_name: user?.businessName,
-        logo_url: user?.invoiceLogo,
-        email: user?.email,
+      signatory_name: user?.userName,
+      signatory_phone: user?.phone_no,
+      signatory_designation: "Sales Manager",
+      business_name: user?.businessName,
+      logo_url: user?.invoiceLogo,
+      email: user?.email,
       signature_url: user?.invoiceSign,
       landmark: address?.landmark,
       street: address?.street,
@@ -184,6 +184,20 @@ export const addQuotation = asyncHandler(async (req, res) => {
     )[0];
     if (!quotation) throw new ApiError(500, "Unable to Create Invoice");
 
+    // Items Sold Created
+    const itemsSoldDocs = await ItemsSold.insertMany(
+      // Item Info has _id, quantity, price which is of one piece entered by user
+      itemsInfo?.map((item_) => ({
+        item: item_?._id,
+        quantity: item_?.quantity,
+        price: item_?.price,
+      })),
+      { session }
+    );
+    if (!itemsSoldDocs) throw new ApiError(500, "Items Sold Creation Failed");
+
+    const itemsSoldIds = itemsSoldDocs?.map((item_) => item_?._id);
+
     // Customer Updated
     const updatedCustomer = await Customer.findByIdAndUpdate(
       customer?._id,
@@ -198,21 +212,6 @@ export const addQuotation = asyncHandler(async (req, res) => {
       }
     );
     if (!updatedCustomer) throw new ApiError(500, "Unable to Update Customer");
-
-
-    // Items Sold Created
-    const itemsSoldDocs = await ItemsSold.insertMany(
-      // Item Info has _id, quantity, price which is of one piece entered by user
-      itemsInfo?.map((item_) => ({
-        item: item_?._id,
-        quantity: item_?.quantity,
-        price: item_?.price,
-      })),
-      { session }
-    );
-    if (!itemsSoldDocs) throw new ApiError(500, "Items Sold Creation Failed");
-
-    const itemsSoldIds = itemsSoldDocs?.map((item_) => item_?._id);
 
     // Quotation Updated
     const updatedQuotation = await Quotation.findByIdAndUpdate(
@@ -229,7 +228,8 @@ export const addQuotation = asyncHandler(async (req, res) => {
         new: true,
       }
     );
-    if (!updatedQuotation) throw new ApiError(500, "Unable to Created Updated Quotation");
+    if (!updatedQuotation)
+      throw new ApiError(500, "Unable to Created Updated Quotation");
 
     // User Updated
     const updatedUser = await User.findByIdAndUpdate(
