@@ -6,6 +6,6 @@ import {
 
 const router = Router();
 
-router.route("/add-sale").post(authentication, addSale);
+router.route("/add-sale/:deliveryChallanId?").post(authentication, addSale);
 
 export default router;

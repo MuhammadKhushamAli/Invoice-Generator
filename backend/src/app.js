@@ -31,7 +31,10 @@ import userRoute from "./routes/user.routes.js";
 import itemRoute from "./routes/item.routes.js";
 import salesRoute from "./routes/sales.routes.js";
 import invoiceRoute from "./routes/invoice.routes.js";
-import customerRoute from "./routes/customer.route.js";
+import customerRoute from "./routes/customer.routes.js";
+import deliveryChallanRoute from "./routes/deliveryChalan.routes.js";
+import quotationRoute from "./routes/quotation.routes.js";
+
 
 
 app.use("/api/v1/user", userRoute);
@@ -39,6 +42,8 @@ app.use("/api/v1/item", itemRoute);
 app.use("/api/v1/sales", salesRoute);
 app.use("/api/v1/invoice", invoiceRoute);
 app.use("/api/v1/customer", customerRoute);
+app.use("/api/v1/deliveryChalan", deliveryChallanRoute);
+app.use("/api/v1/quotation", quotationRoute);
 
 
 
