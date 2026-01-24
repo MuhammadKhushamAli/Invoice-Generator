@@ -13,7 +13,10 @@ import pkg from "number-to-words";
 import { generatePdf } from "./utils/pdf.util.js";
 import { getInvoiceNumber } from "./utils/invoiceNum.util.js";
 import { Customer } from "../models/customer.model.js";
-import { DeliveryChalan } from "../models/deliveryChalan.model.js";
+import {
+  DeliveryChalan,
+  DeliveryChallan,
+} from "../models/deliveryChalan.model.js";
 
 const { toWords } = pkg;
 
@@ -68,24 +71,23 @@ export const addSale = asyncHandler(async (req, res) => {
   )
     throw new ApiError(400, "All Taxes fields are required");
 
-
- if (deliveryChallanId?.trim()) {
+  let itemsSoldIds = null;
+  if (deliveryChallanId?.trim()) {
     if (!isValidObjectId(deliveryChallanId))
       throw new ApiError(400, "Invalid Quotation Id");
 
-    const deliveryChallan = await DeliveryChalan.findOne({
+    const deliveryChalan = await DeliveryChalan.findOne({
       _id: deliveryChallanId,
       owner: req?.user?._id,
-    }).select()
-
-    const quotation = await Quotation.findOne({
-      _id: quotationId,
-      owner: req?.user?._id,
     }).select("itemSold");
-    if (!quotation) throw new ApiError(404, "Quotation Not Found");
+    if (!deliveryChalan) throw new ApiError(404, "Quotation Not Found");
+
+    itemsSoldIds = deliveryChalan?.itemSold;
+    if (!itemsSoldIds?.length)
+      throw new ApiError(404, "No Items Found in DeliveryChallan");
 
     await Promise.all(
-      (itemsInfo = quotation?.itemSold?.map(async (item) => {
+      (itemsInfo = itemsSoldIds?.map(async (item) => {
         const itemRecoded = await ItemsSold.findById(item).select("-sale");
         if (!itemRecoded) throw new ApiError(404, "Item Not Found");
 
@@ -98,8 +100,6 @@ export const addSale = asyncHandler(async (req, res) => {
       }))
     );
   }
-
-
 
   if (
     !(
@@ -216,7 +216,7 @@ export const addSale = asyncHandler(async (req, res) => {
       freightOtherCharges;
 
     const user = req?.user;
-    const address = await Address.findById(user?.address);
+    const address = await Address.findById(user?.address).session(session);
     if (!address) throw new ApiError(500, "Address Not Found");
 
     // PDF Generation
@@ -310,19 +310,54 @@ export const addSale = asyncHandler(async (req, res) => {
     if (!sale) throw new ApiError(500, "Sale Creation Failed");
 
     // Items Sold Created
-    const itemsSoldDocs = await ItemsSold.insertMany(
-      // Item Info has _id, quantity, price which is of one piece entered by user
-      itemsInfo?.map((item_) => ({
-        item: item_?._id,
-        quantity: item_?.quantity,
-        price: item_?.price,
-        sale: sale?._id,
-      })),
-      { session }
-    );
-    if (!itemsSoldDocs) throw new ApiError(500, "Items Sold Creation Failed");
+    if (!(deliveryChallanId && itemsSoldIds)) {
+      const itemsSoldDocs = await ItemsSold.insertMany(
+        // Item Info has _id, quantity, price which is of one piece entered by user
+        itemsInfo?.map((item_) => ({
+          item: item_?._id,
+          quantity: item_?.quantity,
+          price: item_?.price,
+          sale: sale?._id,
+        })),
+        { session }
+      );
+      if (!itemsSoldDocs) throw new ApiError(500, "Items Sold Creation Failed");
 
-    const itemsSoldIds = itemsSoldDocs?.map((item_) => item_?._id);
+      itemsSoldIds = itemsSoldDocs?.map((item_) => item_?._id);
+    }
+
+    // Update Delivery Chalan
+    if (deliveryChallanId) {
+      const updateDeliveryChalan = await DeliveryChallan.findByIdAndUpdate(
+        deliveryChallanId,
+        {
+          $set: {
+            saleInvoice: sale?._id,
+          },
+        },
+        { session },
+        {
+          new: true,
+        }
+      );
+      if (!updateDeliveryChalan)
+        throw new ApiError(500, "Unable to Update Delivery Chalan");
+      // Quotation Updated
+      const updatedQuotation = await Quotation.findByIdAndUpdate(
+        quotationId,
+        {
+          $set: {
+            saleInvoice: sale?._id,
+          },
+        },
+        { session },
+        {
+          new: true,
+        }
+      );
+      if (!updatedQuotation)
+        throw new ApiError(500, "Unable to Created Updated Quotation");
+    }
 
     // Sale Updated
     const updatedSale = await Sale.findByIdAndUpdate(
