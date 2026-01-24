@@ -12,6 +12,7 @@ import { deleteFromCloudinary } from "../utils/cloudinary.js";
 import pkg from "number-to-words";
 import { generatePdf } from "./utils/pdf.util.js";
 import { getInvoiceNumber } from "./utils/invoiceNum.util.js";
+import { Customer } from "../models/customer.model.js";
 
 const { toWords } = pkg;
 
@@ -88,6 +89,56 @@ export const addSale = asyncHandler(async (req, res) => {
   session.startTransaction();
 
   try {
+    // Customer Manipulation
+    let customer = await Customer.findOneAndUpdate(
+      {
+        customerName,
+        owner: req?.user?._id,
+      },
+      {
+        $set: {
+          customerName,
+          customerStreet,
+          customerArea,
+          customerCity,
+          customerCountry,
+          customerGST,
+          customerNTN,
+          customerLandmark,
+        },
+      },
+      {
+        session,
+      },
+      {
+        new: true,
+      }
+    );
+    if (!customer) {
+      customer = (
+        await Customer.create(
+          [
+            {
+              customerName,
+              customerStreet,
+              customerArea,
+              customerCity,
+              customerCountry,
+              customerGST,
+              customerNTN,
+              customerLandmark,
+              owner: req?.user?._id,
+            },
+          ],
+          { session }
+        )
+      )[0];
+      if (!customer) throw new ApiError(500, "Customer Creation Failed");
+    }
+
+
+    // Item Manipulation and Total Calculation
+
     let subTotal = 0;
     await Promise.all(
       itemsInfo?.map(async (item) => {
@@ -177,6 +228,8 @@ export const addSale = asyncHandler(async (req, res) => {
     fileUrl = await generatePdf(inputObj, user?._id);
     if (!fileUrl) throw new ApiError(500, "Unable to Generate PDF");
 
+    // Invoice Generated
+
     const invoice = (
       await Invoice.create(
         [
@@ -190,6 +243,23 @@ export const addSale = asyncHandler(async (req, res) => {
     )[0];
     if (!invoice) throw new ApiError(500, "Unable to Create Invoice");
 
+
+    // Customer Updated
+    const updatedCustomer = await Customer.findByIdAndUpdate(
+      customer?._id,
+      {
+        $push: {
+          invoices: invoice?._id,
+        },
+      },
+      { session },
+      {
+        new: true,
+      }
+    );
+    if (!updatedCustomer) throw new ApiError(500, "Unable to Update Customer");
+
+    // Sale Created
     const sale = (
       await Sale.create(
         [
@@ -204,6 +274,7 @@ export const addSale = asyncHandler(async (req, res) => {
     )[0];
     if (!sale) throw new ApiError(500, "Sale Creation Failed");
 
+    // Items Sold Created
     const itemsSoldDocs = await ItemsSold.insertMany(
       // Item Info has _id, quantity, price which is of one piece entered by user
       itemsInfo?.map((item_) => ({
@@ -218,6 +289,7 @@ export const addSale = asyncHandler(async (req, res) => {
 
     const itemsSoldIds = itemsSoldDocs?.map((item_) => item_?._id);
 
+    // Sale Updated
     const updatedSale = await Sale.findByIdAndUpdate(
       sale?._id,
       {
@@ -234,6 +306,8 @@ export const addSale = asyncHandler(async (req, res) => {
     );
     if (!updatedSale) throw new ApiError(500, "Unable to Created Updated Sale");
 
+
+    // Invoice Updated
     const updateInv = await Invoice.findByIdAndUpdate(
       invoice?._id,
       {
@@ -248,6 +322,7 @@ export const addSale = asyncHandler(async (req, res) => {
     );
     if (!updateInv) throw new ApiError(500, "Invoice Not Updated");
 
+    // User Updated
     const updatedUser = await User.findByIdAndUpdate(
       req?.user?._id,
       {
