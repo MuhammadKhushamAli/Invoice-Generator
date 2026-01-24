@@ -43,14 +43,13 @@ export function QuotationForm({ onClick }) {
   const onSubmit = useCallback(() => {}, []);
 
   const onSelect = useCallback((value) => {
-    console.log(value);
     setValue("customerName", value?.value?.customerName);
     setValue("customerLandmark", value?.value?.customerLandmark);
     setValue("customerStreet", value?.value?.customerStreet);
     setValue("customerArea", value?.value?.customerArea);
     setValue("customerCity", value?.value?.customerCity);
     setValue("customerCountry", value?.value?.customerCountry);
-  }, [])
+  }, []);
 
   const customers = useMemo(() => {
     if (data) {
@@ -70,7 +69,7 @@ export function QuotationForm({ onClick }) {
     <div className="relative mx-auto w-full max-w-5xl rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-200/60 transition-all duration-300">
       {/* Error Toast */}
       {alert && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-md px-4">
+        <div className="mb-4 sm:mb-6 p-4 sm:p-6 pb-0 fixed">
           <Error message={alert} />
         </div>
       )}
@@ -105,14 +104,16 @@ export function QuotationForm({ onClick }) {
               </div>
             </div>
             {/* Optional Search Integration styling */}
-            <div className="mt-6 max-w-md">
-              <Select
-                options={customers}
-                className="ring-1 ring-slate-200 rounded-lg"
-                placeholder="Select Customers"
-                onChange={onSelect}
-              />
-            </div>
+            {customers && (
+              <div className="mt-6 max-w-md">
+                <Select
+                  options={customers}
+                  className="ring-1 ring-slate-200 rounded-lg"
+                  placeholder="Select Customers"
+                  onChange={onSelect}
+                />
+              </div>
+            )}
           </div>
 
           {/* ---------------- SECTION 1: QUOTATION DETAILS ---------------- */}
