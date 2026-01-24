@@ -263,39 +263,43 @@
             <thead>
                 <tr>
                     <th style="width: 5%;">Sr #</th>
-                    <th style="width: 35%;">Items</th>
-                    <th style="width: 15%;">Range</th>
-                    <th style="width: 15%;">Ref</th>
+                    <th style="width: 35%;">Descriptions</th>
+                    <th style="width: 12%;">Range</th>
+                    <th style="width: 13%;">Reference</th>
                     <th style="width: 15%;">Design</th>
-                    <th style="width: 15%;">Qty</th>
+                    <th style="width: 10%;">QTY</th>
                 </tr>
             </thead>
             <tbody>
                 <% items.forEach((item, index)=> { %>
                     <tr>
-                        <td>
+                        <td style="text-align: center;">
                             <%= index + 1 %>
                         </td>
-                        <td>
+                        <td style="text-align: left;">
                             <%= item.name %>
                         </td>
-                        <td>
-                            <%= item.range %>
+                        <td style="text-align: center;">
+                            <%= item.range || "Wooden" %>
                         </td>
-                        <td>
-                            <%= item.ref || "" %>
+                        <td style="text-align: center;">
+                            <%= item.ref || item.reference || "SS" %>
                         </td>
-                        <td>
+                        <td style="text-align: center;">
                             <%= item.design || "As Approved" %>
                         </td>
-                        <td>
+                        <td style="text-align: center; font-weight: bold;">
                             <%= item.quantity %>
                         </td>
                     </tr>
                     <% }); %>
+
                         <tr>
-                            <td colspan="5" style="text-align: right; font-weight: bold;">Total Pcs >>>>>></td>
-                            <td style="font-weight: bold;">
+                            <td colspan="5"
+                                style="text-align: right; font-weight: bold; border-right: none; padding-right: 15px;">
+                                Total Quantity:
+                            </td>
+                            <td style="text-align: center; font-weight: bold; border-left: 1px solid #000;">
                                 <%= total_qty %>
                             </td>
                         </tr>
