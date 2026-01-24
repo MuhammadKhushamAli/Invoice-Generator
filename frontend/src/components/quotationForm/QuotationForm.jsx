@@ -19,6 +19,10 @@ import {
   X,
 } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router";
+import { clearCart } from "../../features/itemCart/itemSlice.js";
+import { useMutation } from "@tanstack/react-query";
+
 
 export function QuotationForm({ onClick }) {
   const userData = useSelector((state) => state?.auth?.userData);
@@ -28,6 +32,7 @@ export function QuotationForm({ onClick }) {
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
   const clientQuery = useQueryClient();
+  const navigate = useNavigate();
 
   const customerFetch = useQuery({
     queryKey: ["customers", userData?._id],
@@ -74,7 +79,7 @@ export function QuotationForm({ onClick }) {
 
   const addQuotationMutate = useMutation({
     mutationFn: async (data) => {
-      const response = await axiosInstance.post("/api/v1/sales/add-sale", data);
+      const response = await axiosInstance.post("/api/v1/quotation/add-quotation", data);
       return response.data;
     },
     onSuccess: (newData) => {
@@ -91,10 +96,26 @@ export function QuotationForm({ onClick }) {
       clientQuery.invalidateQueries({
         queryKey: ["quotations", userData?._id],
       });
+      clientQuery.invalidateQueries({
+        queryKey: ["items", userData?._id],
+      });
     },
   });
 
-  const onSubmit = useCallback(() => {}, []);
+   const onSubmit = async (data) => {
+    if (!(cart?.length && isLoggedIn)) navigate("/login");
+
+    setAlert("");
+    setIsLoading(true);
+    try {
+      data.itemsInfo = cart;
+      await addQuotationMutate.mutateAsync(data);
+    } catch (error) {
+      setAlert(error?.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const onSelect = useCallback((value) => {
     setValue("customerName", value?.value?.customerName);
