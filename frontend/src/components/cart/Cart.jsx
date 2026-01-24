@@ -6,7 +6,7 @@ import { Error } from "../Error.jsx";
 import { Button } from "../Button.jsx";
 import { ShoppingCart, ArrowRight, PackageX, X } from "lucide-react";
 import { removeItem } from "../../features/itemCart/itemSlice.js";
-import { SaleForm } from "../saleForm/SaleForm.jsx";
+import { Selection } from "../selection/Selection.jsx";
 
 export function Cart({ onClick }) {
   const isLoggedIn = useSelector((state) => state?.auth?.loginStatus);
@@ -17,7 +17,7 @@ export function Cart({ onClick }) {
   const navigate = useNavigate();
 
   const [alert, setAlert] = useState("");
-  const [isSaleForm, setIsSaleForm] = useState(false);
+  const [isSelection, setIsSelection] = useState(false);
 
   useEffect(() => {
     if (!isLoggedIn) navigate("/login");
@@ -31,11 +31,11 @@ export function Cart({ onClick }) {
       setAlert("Unable to Delete Cart Item");
     }
   }, []);
-  if (isSaleForm) {
+  if (isSelection) {
     return (
       <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-900/20 backdrop-blur-sm px-3 sm:px-4 md:px-6 pt-20 sm:pt-20 md:pt-24 lg:pt-28 pb-4 sm:pb-6 md:pb-8 animate-[fadeIn_0.2s_ease-out]">
         <div className="w-full max-w-5xl">
-          <SaleForm onClick={() => setIsSaleForm(false)} />
+          <Selection onClick={() => setIsSelection(false)} />
         </div>
       </div>
     );
@@ -83,7 +83,7 @@ export function Cart({ onClick }) {
           {/* Footer / Submit Action */}
           <div className="border-t border-slate-100 bg-slate-50 p-6">
             <Button
-              onClick={() => setIsSaleForm(true)}
+              onClick={() => setIsSelection(true)}
               className="w-full justify-between group shadow-indigo-500/20"
               Icon={ArrowRight}
             >

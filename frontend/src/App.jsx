@@ -2,6 +2,7 @@ import { Container, NavBar } from "./components";
 import { Outlet } from "react-router-dom";
 
 function App() {
+  
   return (
     <div className="min-h-screen w-full bg-slate-50 font-sans text-slate-900 antialiased selection:bg-indigo-100 selection:text-indigo-700">
       <Container className="max-w-full! bg-transparent! p-0! shadow-none! border-none! relative flex flex-col">
