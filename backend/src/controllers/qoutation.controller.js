@@ -116,7 +116,7 @@ export const addQuotation = asyncHandler(async (req, res) => {
         const itemFound = await Item.findOne({
           _id: item?._id,
           owner: req?.user?._id,
-        });
+        }, { session });
         if (!itemFound) throw new ApiError(404, "Item Not Found");
         if (!itemFound?.isQuantityValid(item?.quantity))
           throw new ApiError(400, "Invalid Quantity");
@@ -129,7 +129,7 @@ export const addQuotation = asyncHandler(async (req, res) => {
     const totalPayableWithTaxes = subTotal + totalSaleTax;
 
     const user = req?.user;
-    const address = await Address.findById(user?.address);
+    const address = await Address.findById(user?.address).session(session);
     if (!address) throw new ApiError(500, "Address Not Found");
 
     // PDF Generation

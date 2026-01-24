@@ -184,7 +184,7 @@ export const addSale = asyncHandler(async (req, res) => {
         const itemFound = await Item.findOne({
           _id: item?._id,
           owner: req?.user?._id,
-        });
+        }, { session });
         if (!itemFound) throw new ApiError(404, "Item Not Found");
         if (!itemFound?.isQuantityValid(item?.quantity))
           throw new ApiError(400, "Invalid Quantity");
