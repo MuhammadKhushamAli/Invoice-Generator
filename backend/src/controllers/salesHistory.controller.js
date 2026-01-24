@@ -328,6 +328,24 @@ export const addSale = asyncHandler(async (req, res) => {
       if (!itemsSoldDocs) throw new ApiError(500, "Items Sold Creation Failed");
 
       itemsSoldIds = itemsSoldDocs?.map((item_) => item_?._id);
+    } else {
+      const itemSoldUpdated = await ItemsSold.updateMany(
+        {
+          _id: {
+            $in: itemsSoldIds,
+          },
+        },
+        {
+          $set: {
+            sale: sale?._id,
+          },
+        },
+        {
+          session,
+        }
+      );
+      if (!itemSoldUpdated)
+        throw new ApiError(500, "Unable to Update Items Sold");
     }
 
     // Update Delivery Chalan

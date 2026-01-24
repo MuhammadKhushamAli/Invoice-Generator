@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-import { useSelector } from "react-redux";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useDispatch, useSelector } from "react-redux";
 import { axiosInstance } from "../../axios/axios.js";
 import { Loading } from "../Loading.jsx";
 import { Input } from "../Input.jsx";
@@ -23,8 +23,13 @@ import { useForm } from "react-hook-form";
 export function QuotationForm({ onClick }) {
   const userData = useSelector((state) => state?.auth?.userData);
   const isLoggedIn = useSelector((state) => state?.auth?.loginStatus);
+  const cart = useSelector((state) => state?.itemsCart?.cart);
   const [alert, setAlert] = useState("");
-  const { data, isLoading, isError, error } = useQuery({
+  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useDispatch();
+  const clientQuery = useQueryClient();
+
+  const customerFetch = useQuery({
     queryKey: ["customers", userData?._id],
     queryFn: async () => {
       const response = await axiosInstance.get(
@@ -40,6 +45,55 @@ export function QuotationForm({ onClick }) {
 
   const { register, handleSubmit, setValue } = useForm();
 
+  const downloadInvoice = useCallback(
+    (url) => {
+      if (!url) {
+        setAlert("Invoice URL is not available for download.");
+        return;
+      }
+      if (url?.includes("cloudinary")) {
+        const decodedUrl = decodeURIComponent(url);
+        let fileNameWithExt = decodedUrl.split("/").pop();
+        fileNameWithExt = fileNameWithExt.replace(/\.[^/.]+$/, "");
+
+        url = url?.replace(
+          "/upload/",
+          `/upload/fl_attachment:${userData?.businessName}-${fileNameWithExt}/`,
+        );
+        const a = document.createElement("a");
+
+        a.href = url;
+
+        a.click();
+      } else {
+        window.open(url, "_blank");
+      }
+    },
+    [userData],
+  );
+
+  const addQuotationMutate = useMutation({
+    mutationFn: async (data) => {
+      const response = await axiosInstance.post("/api/v1/sales/add-sale", data);
+      return response.data;
+    },
+    onSuccess: (newData) => {
+      dispatch(clearCart());
+      setAlert("Delivery Challan Generated");
+      let url = newData?.inv_url?.replace("http://", "https://");
+      downloadInvoice(url);
+      onClick && onClick();
+    },
+    onError: (error) => {
+      setAlert(error?.message);
+    },
+    onSettled: () => {
+      clientQuery.invalidateQueries({
+        queryKey: ["quotations", userData?._id],
+      });
+    },
+  });
+
   const onSubmit = useCallback(() => {}, []);
 
   const onSelect = useCallback((value) => {
@@ -52,6 +106,7 @@ export function QuotationForm({ onClick }) {
   }, []);
 
   const customers = useMemo(() => {
+    const data = customerFetch?.data;
     if (data) {
       return data.map((customer) => {
         return {
@@ -61,16 +116,16 @@ export function QuotationForm({ onClick }) {
       });
     }
     return [];
-  }, [data]);
+  }, [customerFetch?.data]);
 
-  return isLoading ? (
+  return isLoading || customerFetch?.isLoading ? (
     <Loading />
   ) : (
     <div className="relative mx-auto w-full max-w-5xl rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-200/60 transition-all duration-300">
       {/* Error Toast */}
-      {alert && (
+      {(alert || customerFetch?.isError) && (
         <div className="mb-4 sm:mb-6 p-4 sm:p-6 pb-0 fixed">
-          <Error message={alert} />
+          <Error message={alert || customerFetch?.error?.message} />
         </div>
       )}
 
