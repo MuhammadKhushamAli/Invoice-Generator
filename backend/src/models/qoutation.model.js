@@ -33,14 +33,14 @@ const quotationsSchema = new mongoose.Schema(
 
 invoicesSchema.pre("save", async function (next) {
   if (this.isModified("name")) return next();
-  const invNum = await InvoiceNum.findOne({
+  const quotNum = await InvoiceNum.findOne({
     key: "Quotation",
     owner: this?.owner,
   });
-  if (!invNum) throw new ApiError(500, "Unable to find Invoice Num");
-  this.name = invNum.inv_num;
-  const updateInvNum = await InvoiceNum.findByIdAndUpdate(
-    invNum?._id,
+  if (!quotNum) throw new ApiError(500, "Unable to find Quotation Num");
+  this.name = quotNum.inv_num;
+  const updateQuotNum = await InvoiceNum.findByIdAndUpdate(
+    quotNum?._id,
     {
       $inc: {
         inv_num: 1,
@@ -50,8 +50,8 @@ invoicesSchema.pre("save", async function (next) {
       new: true,
     }
   );
-  if (!updateInvNum)
-    throw new ApiError(500, "Unable to Updated invoice Number");
+  if (!updateQuotNum)
+    throw new ApiError(500, "Unable to Updated Quotation Number");
 });
 
-export const Invoice = mongoose.model("Invoice", quotationsSchema);
+export const Invoice = mongoose.model("Quotation", quotationsSchema);
