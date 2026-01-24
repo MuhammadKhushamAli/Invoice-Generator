@@ -9,12 +9,16 @@ import { Register } from "./register/Register.jsx";
 import { Login } from "./login/Login.jsx";
 import { Loading } from "./Loading.jsx";
 import { Error } from "./Error.jsx";
+import { QuotationCard } from "./quotationCard/QuotationInvoiceCard.jsx";
+import { DeliveryInvoiceCard } from "./deliveryInvoiceCard/DeliveryInvoiceCard.jsx";
 
 export {
   Container,
   NavBar,
   InvoiceCredentials,
   InvoiceCard,
+  QuotationCard,
+  DeliveryInvoiceCard,
   InvoiceView,
   ItemCard,
   SaleLog,

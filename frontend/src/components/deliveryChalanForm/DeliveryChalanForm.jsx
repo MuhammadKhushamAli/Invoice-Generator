@@ -96,7 +96,7 @@ export function DeliveryChalanForm({ onClick }) {
     },
     onSettled: () => {
       clientQuery.invalidateQueries({
-        queryKey: ["deliveryChallan", userData?._id],
+        queryKey: ["deliveryChallans", userData?._id],
       });
       clientQuery.invalidateQueries({
         queryKey: ["items", userData?._id],

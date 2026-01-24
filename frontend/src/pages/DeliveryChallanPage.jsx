@@ -5,8 +5,8 @@ import { useNavigate } from "react-router";
 import {
   Container,
   Error,
-  QuotationCard,
   Loading,
+  DeliveryInvoiceCard,
 } from "../components/index.js";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
@@ -24,15 +24,15 @@ export function ItemPage() {
     isError,
     error,
   } = useInfiniteQuery({
-    queryKey: ["quotations", userData?._id],
+    queryKey: ["deliveryChallans", userData?._id],
     queryFn: async ({ pageParam = 1 }) => {
-      const quotationResponse = await axiosInstance.get(
-        "/api/v1/user/get-quotations",
+      const deliveryChallanResponse = await axiosInstance.get(
+        "/api/v1/user/get-delivery-challan",
         {
           params: { userId: userData?._id, page: pageParam },
         },
       );
-      return quotationResponse?.data;
+      return deliveryChallanResponse?.data;
     },
     getNextPageParam: (lastPage, pages) => {
       return lastPage.hasNextPage ? pages.length + 1 : undefined;
@@ -75,8 +75,9 @@ export function ItemPage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [fetchNextPage]);
 
-  const quotations = useMemo(
-    () => data?.pages?.flatMap((page) => page?.docs?.[0]?.quotations) || [],
+  const deliveryChallans = useMemo(
+    () =>
+      data?.pages?.flatMap((page) => page?.docs?.[0]?.deliveryChallans) || [],
     [data],
   );
 
@@ -87,16 +88,16 @@ export function ItemPage() {
       {/* Page Header */}
       <div className="mb-10 flex flex-col gap-6 border-b border-slate-100 pb-8 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-4">
-          {/* Icon Accent - Consistent with your cards */}
+          {/* Icon Accent - Consistent with Delivery Card tone */}
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 shadow-sm ring-1 ring-indigo-100">
-            <ClipboardList className="h-6 w-6" />
+            <Truck className="h-6 w-6" />
           </div>
           <div>
             <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
-              Quotation Records
+              Delivery Challans
             </h1>
             <p className="mt-1 text-sm font-medium text-slate-500">
-              Manage and view your generated quotation documents.
+              Manage and track your official shipment and delivery records.
             </p>
           </div>
         </div>
@@ -105,7 +106,7 @@ export function ItemPage() {
         <div className="flex items-center gap-2 rounded-xl bg-white px-4 py-2 shadow-sm ring-1 ring-slate-200">
           <div className="h-2 w-2 rounded-full bg-indigo-500 animate-pulse" />
           <span className="text-sm font-semibold text-slate-700">
-            {quotations?.length || 0} Documents Available
+            {deliveryChallans?.length || 0} Challans Available
           </span>
         </div>
       </div>
@@ -119,8 +120,11 @@ export function ItemPage() {
 
       {/* Product Grid Layout */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {quotations?.map((quotation) => (
-          <QuotationCard key={quotation?._id} quotation={quotation} />
+        {deliveryChallans?.map((deliveryChallan) => (
+          <DeliveryInvoiceCard
+            key={deliveryChallan?._id}
+            quotation={deliveryChallan}
+          />
         ))}
 
         {/* Loading State for Pagination */}
@@ -136,16 +140,16 @@ export function ItemPage() {
         )}
 
         {/* Empty State */}
-        {quotations?.length === 0 && (
+        {deliveryChallans?.length === 0 && (
           <div className="col-span-full flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200 py-24 text-center">
             <div className="mb-4 rounded-full bg-slate-50 p-4 text-slate-300">
-              <FileText size={48} strokeWidth={1.5} />
+              <Truck size={48} strokeWidth={1.5} />
             </div>
             <h3 className="text-lg font-semibold text-slate-900">
-              No records found
+              No Challans Found
             </h3>
             <p className="mt-1 text-sm text-slate-500 max-w-xs">
-              There are no quotation documents available in the inventory at
+              There are no delivery challan documents available to display at
               this time.
             </p>
           </div>
