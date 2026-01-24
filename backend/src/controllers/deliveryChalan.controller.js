@@ -26,7 +26,7 @@ export const addDeliveryChalan = asyncHandler(async (req, res) => {
     poDate,
   } = req?.body;
 
-  const { quotationId } = req?.params;
+  const { quotationId } = req?.query;
 
   customerName = customerName?.trim();
   customerLandmark = customerLandmark?.trim();
@@ -57,12 +57,12 @@ export const addDeliveryChalan = asyncHandler(async (req, res) => {
         const itemRecoded = await ItemsSold.findById(item).select("-sale");
         if (!itemRecoded) throw new ApiError(404, "Item Not Found");
 
-        const item = await Item.findById(itemRecoded?.item);
-        if (!item) throw new ApiError(404, "Item Not Found");
+        const itemFound = await Item.findById(itemRecoded?.item);
+        if (!itemFound) throw new ApiError(404, "Item Not Found");
 
-        item.quantity = itemRecoded?.quantity;
-        item.price = itemRecoded?.price;
-        return item;
+        itemFound.quantity = itemRecoded?.quantity;
+        itemFound.price = itemRecoded?.price;
+        return itemFound;
       }))
     );
   }

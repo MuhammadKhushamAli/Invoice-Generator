@@ -14,7 +14,6 @@ import { generatePdf } from "./utils/pdf.util.js";
 import { getInvoiceNumber } from "./utils/invoiceNum.util.js";
 import { Customer } from "../models/customer.model.js";
 import {
-  DeliveryChalan,
   DeliveryChallan,
 } from "../models/deliveryChalan.model.js";
 
@@ -40,7 +39,7 @@ export const addSale = asyncHandler(async (req, res) => {
     po,
   } = req?.body;
 
-  const { deliveryChallanId } = req?.params;
+  const { deliveryChallanId } = req?.query;
 
   hsCode = hsCode?.trim();
   AttnTo = AttnTo?.trim();
@@ -76,7 +75,7 @@ export const addSale = asyncHandler(async (req, res) => {
     if (!isValidObjectId(deliveryChallanId))
       throw new ApiError(400, "Invalid Quotation Id");
 
-    const deliveryChalan = await DeliveryChalan.findOne({
+    const deliveryChalan = await DeliveryChallan.findOne({
       _id: deliveryChallanId,
       owner: req?.user?._id,
     }).select("itemSold");
@@ -91,12 +90,12 @@ export const addSale = asyncHandler(async (req, res) => {
         const itemRecoded = await ItemsSold.findById(item).select("-sale");
         if (!itemRecoded) throw new ApiError(404, "Item Not Found");
 
-        const item = await Item.findById(itemRecoded?.item);
-        if (!item) throw new ApiError(404, "Item Not Found");
+        const itemFound = await Item.findById(itemRecoded?.item);
+        if (!itemFound) throw new ApiError(404, "Item Not Found");
 
-        item.quantity = itemRecoded?.quantity;
-        item.price = itemRecoded?.price;
-        return item;
+        itemFound.quantity = itemRecoded?.quantity;
+        itemFound.price = itemRecoded?.price;
+        return itemFound;
       }))
     );
   }

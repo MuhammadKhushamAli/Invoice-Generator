@@ -8,7 +8,7 @@ import { authentication } from "../middlewares/auth.middleware.js";
 const router = Router();
 
 router
-  .route("/add-delivery-chalan/:quotationId?")
+  .route("/add-delivery-chalan")
   .post(authentication, addDeliveryChalan);
 router
   .route("/view-delivery-chalan/:deliveryChalanId")
