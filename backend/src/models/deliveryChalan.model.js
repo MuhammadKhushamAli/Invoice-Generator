@@ -18,10 +18,21 @@ const deliveryChalanSchema = new mongoose.Schema(
       ref: "User",
       required: [true, "Invoice Owner is required"],
     },
+    itemSold: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "ItemsSold",
+        required: [true, "Item Sold is required"],
+      },
+    ],
     quotation: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Quotation",
     },
+    saleInvoice:{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Invoice",
+    }
   },
   {
     timestamps: true,
@@ -51,7 +62,7 @@ deliveryChalanSchema.pre("save", async function (next) {
     throw new ApiError(500, "Unable to Updated Delivery Chalan Number");
 });
 
-export const DeliveryChalan = mongoose.model(
+export const DeliveryChallan = mongoose.model(
   "DeliveryChalan",
   deliveryChalanSchema
 );

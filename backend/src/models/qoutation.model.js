@@ -29,6 +29,10 @@ const quotationsSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "DeliveryChalan",
     },
+    saleInvoice:{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Invoice",
+    }
   },
   {
     timestamps: true,

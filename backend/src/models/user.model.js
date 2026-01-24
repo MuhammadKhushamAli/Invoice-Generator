@@ -73,6 +73,12 @@ const userSchema = new mongoose.Schema(
         ref: "Quotation",
       }
     ],
+    deliveryChallan: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "DeliveryChalan",
+      }
+    ],
     invoiceLogo: {
       type: String,
       trim: true,

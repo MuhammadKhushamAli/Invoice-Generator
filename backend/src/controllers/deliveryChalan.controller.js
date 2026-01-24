@@ -11,6 +11,7 @@ import { generatePdf } from "./utils/pdf.util.js";
 import { getInvoiceNumber } from "./utils/invoiceNum.util.js";
 import { Customer } from "../models/customer.model.js";
 import { Quotation } from "../models/qoutation.model.js";
+import { DeliveryChallan } from "../models/deliveryChalan.model.js";
 
 export const addDeliveryChalan = asyncHandler(async (req, res) => {
   let {
@@ -33,9 +34,10 @@ export const addDeliveryChalan = asyncHandler(async (req, res) => {
   customerArea = customerArea?.trim();
   customerCity = customerCity?.trim();
   customerCountry = customerCountry?.trim();
-  salesTaxRate = salesTaxRate?.trim();
   poNo = poNo?.trim();
   poDate = poDate?.trim();
+
+  let itemsSoldIds = null;
 
   if (quotationId?.trim()) {
     if (!isValidObjectId(quotationId))
@@ -46,9 +48,12 @@ export const addDeliveryChalan = asyncHandler(async (req, res) => {
       owner: req?.user?._id,
     }).select("itemSold");
     if (!quotation) throw new ApiError(404, "Quotation Not Found");
+    itemsSoldIds = quotation?.itemSold;
+    if (!itemsSoldIds?.length)
+      throw new ApiError(404, "No Items Found in Quotation");
 
     await Promise.all(
-      (itemsInfo = quotation?.itemSold?.map(async (item) => {
+      (itemsInfo = itemsSoldIds?.map(async (item) => {
         const itemRecoded = await ItemsSold.findById(item).select("-sale");
         if (!itemRecoded) throw new ApiError(404, "Item Not Found");
 
@@ -179,40 +184,37 @@ export const addDeliveryChalan = asyncHandler(async (req, res) => {
     fileUrl = await generatePdf(inputObj, user?._id, "dc.ejs");
     if (!fileUrl) throw new ApiError(500, "Unable to Generate PDF");
 
-    // Quotation Generated
-    const quotation = (
-      await Quotation.create(
-        [
-          {
-            url: fileUrl,
-            owner: req?.user?._id,
-          },
-        ],
-        { session }
-      )
-    )[0];
-    if (!quotation) throw new ApiError(500, "Unable to Create Invoice");
+    const deliveryChallan = await DeliveryChalan.create([
+      {
+        url: fileUrl,
+        owner: req?.user?._id,
+      },
+    ])[0];
+    if (!deliveryChallan)
+      throw new ApiError(500, "Delivery Chalan Creation Failed");
 
     // Items Sold Created
-    const itemsSoldDocs = await ItemsSold.insertMany(
-      // Item Info has _id, quantity, price which is of one piece entered by user
-      itemsInfo?.map((item_) => ({
-        item: item_?._id,
-        quantity: item_?.quantity,
-        price: item_?.price,
-      })),
-      { session }
-    );
-    if (!itemsSoldDocs) throw new ApiError(500, "Items Sold Creation Failed");
+    if (!(quotationId && itemsSoldIds)) {
+      const itemsSoldDocs = await ItemsSold.insertMany(
+        // Item Info has _id, quantity, price which is of one piece entered by user
+        itemsInfo?.map((item_) => ({
+          item: item_?._id,
+          quantity: item_?.quantity,
+          price: item_?.price,
+        })),
+        { session }
+      );
+      if (!itemsSoldDocs) throw new ApiError(500, "Items Sold Creation Failed");
 
-    const itemsSoldIds = itemsSoldDocs?.map((item_) => item_?._id);
+      itemsSoldIds = itemsSoldDocs?.map((item_) => item_?._id);
+    }
 
     // Customer Updated
     const updatedCustomer = await Customer.findByIdAndUpdate(
       customer?._id,
       {
         $push: {
-          quotations: quotation?._id,
+          deliveryChalan: deliveryChallan?._id,
         },
       },
       { session },
@@ -222,9 +224,9 @@ export const addDeliveryChalan = asyncHandler(async (req, res) => {
     );
     if (!updatedCustomer) throw new ApiError(500, "Unable to Update Customer");
 
-    // Quotation Updated
-    const updatedQuotation = await Quotation.findByIdAndUpdate(
-      quotation?._id,
+    // DeliveryChallan Updated
+    const updatedDeliveryChallan = await DeliveryChallan.findByIdAndUpdate(
+      deliveryChallan?._id,
       {
         $push: {
           itemSold: {
@@ -237,15 +239,26 @@ export const addDeliveryChalan = asyncHandler(async (req, res) => {
         new: true,
       }
     );
-    if (!updatedQuotation)
+    if (!updatedDeliveryChallan)
       throw new ApiError(500, "Unable to Created Updated Quotation");
+
+    // Quotation Updated
+    if (quotationId) {
+      const updatedQuotation = await Quotation.findByIdAndUpdate(quotationId, {
+        $set: {
+          deliveryChalan: deliveryChallan?._id,
+        },
+      });
+      if (!updatedQuotation)
+        throw new ApiError(500, "Unable to Update Quotation");
+    }
 
     // User Updated
     const updatedUser = await User.findByIdAndUpdate(
       req?.user?._id,
       {
         $push: {
-          quotations: quotation?._id,
+          deliveryChallan: deliveryChallan?._id,
         },
       },
       {
@@ -265,7 +278,7 @@ export const addDeliveryChalan = asyncHandler(async (req, res) => {
 
     return res.status(200).json(
       new ApiResponse(200, "Quotation Created Successfully", {
-        quotation: updatedQuotation,
+        quotation: updatedDeliveryChallan,
         inv_url: fileUrl,
       })
     );

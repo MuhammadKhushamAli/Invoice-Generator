@@ -13,6 +13,7 @@ import pkg from "number-to-words";
 import { generatePdf } from "./utils/pdf.util.js";
 import { getInvoiceNumber } from "./utils/invoiceNum.util.js";
 import { Customer } from "../models/customer.model.js";
+import { DeliveryChalan } from "../models/deliveryChalan.model.js";
 
 const { toWords } = pkg;
 
@@ -35,6 +36,8 @@ export const addSale = asyncHandler(async (req, res) => {
     freightOtherCharges,
     po,
   } = req?.body;
+
+  const { deliveryChallanId } = req?.params;
 
   hsCode = hsCode?.trim();
   AttnTo = AttnTo?.trim();
@@ -64,6 +67,40 @@ export const addSale = asyncHandler(async (req, res) => {
     freightOtherCharges < 0
   )
     throw new ApiError(400, "All Taxes fields are required");
+
+
+ if (deliveryChallanId?.trim()) {
+    if (!isValidObjectId(deliveryChallanId))
+      throw new ApiError(400, "Invalid Quotation Id");
+
+    const deliveryChallan = await DeliveryChalan.findOne({
+      _id: deliveryChallanId,
+      owner: req?.user?._id,
+    }).select()
+
+    const quotation = await Quotation.findOne({
+      _id: quotationId,
+      owner: req?.user?._id,
+    }).select("itemSold");
+    if (!quotation) throw new ApiError(404, "Quotation Not Found");
+
+    await Promise.all(
+      (itemsInfo = quotation?.itemSold?.map(async (item) => {
+        const itemRecoded = await ItemsSold.findById(item).select("-sale");
+        if (!itemRecoded) throw new ApiError(404, "Item Not Found");
+
+        const item = await Item.findById(itemRecoded?.item);
+        if (!item) throw new ApiError(404, "Item Not Found");
+
+        item.quantity = itemRecoded?.quantity;
+        item.price = itemRecoded?.price;
+        return item;
+      }))
+    );
+  }
+
+
+
   if (
     !(
       Array.isArray(itemsInfo) &&
