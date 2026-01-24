@@ -660,8 +660,6 @@ export const getQuotations = asyncHandler(async (req, res) => {
             $project: {
               name: 1,
               url: 1,
-              deliveryChalan: 1,
-              saleInvoice: 1,
               createdAt: 1,
             },
           },
@@ -718,8 +716,6 @@ export const getDeliveryChalans = asyncHandler(async (req, res) => {
             $project: {
               name: 1,
               url: 1,
-              quotation: 1,
-              saleInvoice: 1,
               createdAt: 1,
             },
           },
