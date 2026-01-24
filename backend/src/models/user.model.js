@@ -67,6 +67,12 @@ const userSchema = new mongoose.Schema(
         ref: "Sales",
       },
     ],
+    quotations: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Quotation",
+      }
+    ],
     invoiceLogo: {
       type: String,
       trim: true,
