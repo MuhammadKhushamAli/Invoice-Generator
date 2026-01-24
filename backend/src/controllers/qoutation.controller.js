@@ -116,7 +116,7 @@ export const addQuotation = asyncHandler(async (req, res) => {
         const itemFound = await Item.findOne({
           _id: item?._id,
           owner: req?.user?._id,
-        }, { session });
+        }).session(session);
         if (!itemFound) throw new ApiError(404, "Item Not Found");
         if (!itemFound?.isQuantityValid(item?.quantity))
           throw new ApiError(400, "Invalid Quantity");
@@ -273,7 +273,8 @@ export const quotationView = asyncHandler(async (req, res) => {
   quotationId = quotationId?.trim();
 
   if (!quotationId) throw new ApiError(400, "Quotation ID Required");
-  if (!isValidObjectId(quotationId)) throw new ApiError(400, "Invalid Quotation ID");
+  if (!isValidObjectId(quotationId))
+    throw new ApiError(400, "Invalid Quotation ID");
 
   const quotation = await Quotation.findOne({
     $and: [{ _id: quotationId }, { owner: req?.user?._id }],

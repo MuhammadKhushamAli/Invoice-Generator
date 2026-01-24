@@ -143,7 +143,7 @@ export const addDeliveryChalan = asyncHandler(async (req, res) => {
         const itemFound = await Item.findOne({
           _id: item?._id,
           owner: req?.user?._id,
-        }, { session });
+        }).session(session);
         if (!itemFound) throw new ApiError(404, "Item Not Found");
         if (!itemFound?.isQuantityValid(item?.quantity))
           throw new ApiError(400, "Invalid Quantity");
@@ -181,7 +181,12 @@ export const addDeliveryChalan = asyncHandler(async (req, res) => {
       po_date: poDate,
     };
 
-    fileUrl = await generatePdf(inputObj, user?._id, "dc.ejs", "DeliveryChalan");
+    fileUrl = await generatePdf(
+      inputObj,
+      user?._id,
+      "dc.ejs",
+      "DeliveryChalan"
+    );
     if (!fileUrl) throw new ApiError(500, "Unable to Generate PDF");
 
     const deliveryChallan = await DeliveryChallan.create([
@@ -292,13 +297,13 @@ export const addDeliveryChalan = asyncHandler(async (req, res) => {
   }
 });
 
-
 export const deliveryChalanView = asyncHandler(async (req, res) => {
   let { deliveryChalanId } = req?.params;
   deliveryChalanId = deliveryChalanId?.trim();
 
   if (!deliveryChalanId) throw new ApiError(400, "Delivery Chalan ID Required");
-  if (!isValidObjectId(deliveryChalanId)) throw new ApiError(400, "Invalid Delivery Chalan ID");
+  if (!isValidObjectId(deliveryChalanId))
+    throw new ApiError(400, "Invalid Delivery Chalan ID");
 
   const deliveryChalan = await DeliveryChallan.findOne({
     $and: [{ _id: deliveryChalanId }, { owner: req?.user?._id }],
@@ -307,5 +312,7 @@ export const deliveryChalanView = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, "Successfully Fetch Delivery Chalan", deliveryChalan));
+    .json(
+      new ApiResponse(200, "Successfully Fetch Delivery Chalan", deliveryChalan)
+    );
 });

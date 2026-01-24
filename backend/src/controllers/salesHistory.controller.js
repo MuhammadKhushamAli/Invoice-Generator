@@ -13,9 +13,7 @@ import pkg from "number-to-words";
 import { generatePdf } from "./utils/pdf.util.js";
 import { getInvoiceNumber } from "./utils/invoiceNum.util.js";
 import { Customer } from "../models/customer.model.js";
-import {
-  DeliveryChallan,
-} from "../models/deliveryChalan.model.js";
+import { DeliveryChallan } from "../models/deliveryChalan.model.js";
 
 const { toWords } = pkg;
 
@@ -180,13 +178,10 @@ export const addSale = asyncHandler(async (req, res) => {
           throw new ApiError(400, "Invalid Quantity or Price");
         if (!isValidObjectId(item._id))
           throw new ApiError(400, "Invalid Item Id");
-        const itemFound = await Item.findOne(
-          {
-            _id: item?._id,
-            owner: req?.user?._id,
-          },
-          { session }
-        );
+        const itemFound = await Item.findOne({
+          _id: item?._id,
+          owner: req?.user?._id,
+        }).session(session);
         if (!itemFound) throw new ApiError(404, "Item Not Found");
         if (!itemFound?.isQuantityValid(item?.quantity))
           throw new ApiError(400, "Invalid Quantity");
@@ -264,7 +259,12 @@ export const addSale = asyncHandler(async (req, res) => {
       amount_in_words: toWords(totalPayableWithTaxes),
     };
 
-    fileUrl = await generatePdf(inputObj, user?._id, "invoice_template.ejs", "Invoice");
+    fileUrl = await generatePdf(
+      inputObj,
+      user?._id,
+      "invoice_template.ejs",
+      "Invoice"
+    );
     if (!fileUrl) throw new ApiError(500, "Unable to Generate PDF");
 
     // Invoice Generated

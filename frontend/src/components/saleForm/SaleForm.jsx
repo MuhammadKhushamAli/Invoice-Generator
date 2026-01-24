@@ -148,12 +148,12 @@ export function SaleForm({ onClick }) {
   ) : (
     <div className="relative mx-auto w-full max-w-5xl rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-200/60 transition-all duration-300">
       {/* Error Toast - Reverted to original inline layout */}
-      {alert ||
-        (customerFetch?.isError && (
+      {(alert ||
+        customerFetch?.isError) && (
           <div className="mb-4 sm:mb-6 p-4 sm:p-6 pb-0 fixed">
             <Error message={alert || customerFetch?.error?.message} />
           </div>
-        ))}
+        )}
 
       {/* Close Button */}
       {onClick && (
