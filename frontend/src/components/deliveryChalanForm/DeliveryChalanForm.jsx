@@ -92,7 +92,7 @@ export function DeliveryChalanForm({ onClick, quotationId = null }) {
       setAlert("Delivery Challan Generated");
       let url = newData?.inv_url?.replace("http://", "https://");
       downloadInvoice(url);
-      onClick && onClick();
+
       clientQuery.invalidateQueries({
         queryKey: ["deliveryChallans", userData?._id],
         refetchType: "active",
@@ -105,6 +105,7 @@ export function DeliveryChalanForm({ onClick, quotationId = null }) {
           refetchType: "active",
         });
       }
+      onClick && onClick();
 
     },
     onError: (error) => {

@@ -92,7 +92,7 @@ export function SaleForm({ onClick, deliveryChallanId = null }) {
 
       if (deliveryChallanId) {
         clientQuery.invalidateQueries({
-          queryKey: ["delivery-challan", deliveryChallanId],
+          queryKey: ["view-deliveryChallan", deliveryChallanId],
           refetchType: "active",
         });
       }
