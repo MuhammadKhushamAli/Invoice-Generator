@@ -87,20 +87,28 @@ export function DeliveryChalanForm({ onClick, quotationId = null }) {
       );
       return response.data;
     },
-    onSuccess: (newData) => {
+    onSuccess: (newData, {quotationId}) => {
       dispatch(clearCart());
       setAlert("Delivery Challan Generated");
       let url = newData?.inv_url?.replace("http://", "https://");
       downloadInvoice(url);
       onClick && onClick();
+      clientQuery.invalidateQueries({
+        queryKey: ["deliveryChallans", userData?._id],
+      });
+
+      if(quotationId)
+      {
+        clientQuery.invalidateQueries({
+          queryKey: ["view-quotation", quotationId],
+        });
+      }
+
     },
     onError: (error) => {
       setAlert(error?.message);
     },
     onSettled: () => {
-      clientQuery.invalidateQueries({
-        queryKey: ["deliveryChallans", userData?._id],
-      });
       clientQuery.invalidateQueries({
         queryKey: ["items", userData?._id],
       });
