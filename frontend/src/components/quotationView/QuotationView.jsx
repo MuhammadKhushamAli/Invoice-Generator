@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router";
 import { axiosInstance } from "../../axios/axios.js";
@@ -8,6 +8,8 @@ import { Error } from "../Error.jsx";
 import { Download, ClipboardList } from "lucide-react";
 import { Document, Page, pdfjs } from "react-pdf";
 import { useQuery } from "@tanstack/react-query";
+import { DeliveryChalanForm } from "../deliveryChalanForm/DeliveryChalanForm.jsx";
+import { Truck } from "lucide-react";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -25,8 +27,15 @@ export function QuotationView() {
   const userData = useSelector((state) => state?.auth?.userData);
   const navigate = useNavigate();
   const pdfWraperRef = useRef(null);
+  const [isDCFormed, setIsDCFormed] = useState(false);
 
-  const { data, isLoading, isError, error, isFetching } = useQuery({
+  const {
+    data: quotation,
+    isLoading,
+    isError,
+    error,
+    isFetching,
+  } = useQuery({
     queryKey: ["view-quotation", quotationId],
     queryFn: async () => {
       const quotationResponse = await axiosInstance.get(
@@ -43,7 +52,6 @@ export function QuotationView() {
     cacheTime: 15 * 60 * 1000,
     refetchOnMount: true,
   });
-  const quotation = useMemo(() => data, [data]);
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -90,11 +98,30 @@ export function QuotationView() {
     }
   };
 
+  const onDCFormation = useCallback(() => {
+    if (!quotation?.deliveryChalan) {
+      setIsDCFormed(true);
+    } else {
+      navigate(`/delivery-challan/${quotation?.deliveryChalan}`);
+    }
+  }, [quotation?.deliveryChalan]);
+
   return isLoading || isFetching ? (
     <Loading />
   ) : (
-    /* 1. Added 'max-w-5xl' here to stop the container from getting too wide on huge screens */
-    <div className="mx-auto w-full max-w-5xl rounded-2xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/50 md:p-8">
+    <div className="relative mx-auto w-full max-w-5xl rounded-2xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/50 md:p-8">
+      {/* Delivery Challan Form Modal - Restyled with Backdrop Blur */}
+      {isDCFormed && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-900/20 backdrop-blur-sm px-3 sm:px-4 md:px-6 pt-20 sm:pt-20 md:pt-24 lg:pt-28 pb-4 sm:pb-6 md:pb-8 animate-[fadeIn_0.2s_ease-out]">
+          <div className="w-full max-w-5xl">
+            <DeliveryChalanForm
+              onClick={() => setIsDCFormed(false)}
+              quotaionId={quotation?._id}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Error Toast */}
       {isError && (
         <div className="mb-6">
@@ -117,8 +144,16 @@ export function QuotationView() {
           </h4>
         </div>
 
-        {/* Desktop Placeholder for alignment */}
-        <div className="hidden md:block"></div>
+        {/* Button moved to the right using flex-1 and justify-end on md screens */}
+        <div className="flex w-full md:w-auto md:flex-1 md:justify-end">
+          <Button
+            onClick={onDCFormation}
+            Icon={Truck}
+            className="bg-white! text-indigo-600! border border-indigo-200 hover:bg-indigo-50! shadow-sm transition-all duration-200 w-full md:w-auto"
+          >
+            Go For Delivery Challan
+          </Button>
+        </div>
       </div>
 
       {/* PDF Document Container */}
@@ -127,14 +162,12 @@ export function QuotationView() {
           <Document
             file={quotation?.url}
             options={pdfOptions}
-            /* 2. Added 'items-center' here. This forces the PDF pages to center horizontally */
             className="flex flex-col gap-8 items-center"
             onLoadSuccess={({ numPages }) => {
               setPages(numPages);
             }}
           >
             {Array.from({ length: pages }, (_, index) => (
-              /* Page Wrapper */
               <div
                 key={index}
                 className="overflow-hidden rounded-lg shadow-lg shadow-slate-400/20 ring-1 ring-slate-900/5 transition-transform duration-300 hover:scale-[1.005]"

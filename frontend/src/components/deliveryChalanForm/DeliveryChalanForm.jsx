@@ -23,7 +23,7 @@ import { useNavigate } from "react-router";
 import { clearCart } from "../../features/itemCart/itemSlice.js";
 import { useMutation } from "@tanstack/react-query";
 
-export function DeliveryChalanForm({ onClick }) {
+export function DeliveryChalanForm({ onClick, quotaionId = null }) {
   const userData = useSelector((state) => state?.auth?.userData);
   const isLoggedIn = useSelector((state) => state?.auth?.loginStatus);
   const cart = useSelector((state) => state?.itemsCart?.cart);

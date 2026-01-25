@@ -28,10 +28,12 @@ const quotationsSchema = new mongoose.Schema(
     deliveryChalan: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "DeliveryChalan",
+      default: null
     },
     saleInvoice:{
       type: mongoose.Schema.Types.ObjectId,
       ref: "Invoice",
+      default: null
     }
   },
   {
