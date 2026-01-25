@@ -25,7 +25,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useQuery } from "@tanstack/react-query";
 import Select from "react-select";
 
-export function SaleForm({ onClick }) {
+export function SaleForm({ onClick, deliveryChallanId = null }) {
   const clientQuery = useQueryClient();
   const isLoggedIn = useSelector((state) => state?.auth?.loginStatus);
   const userData = useSelector((state) => state?.auth?.userData);
@@ -66,23 +66,48 @@ export function SaleForm({ onClick }) {
   );
 
   const addInvoiceMutate = useMutation({
-    mutationFn: async (data) => {
-      const response = await axiosInstance.post("/api/v1/sales/add-sale", data);
+    mutationFn: async ({ data, deliveryChallanId }) => {
+      const response = await axiosInstance.post(
+        "/api/v1/sales/add-sale",
+        data,
+        {
+          params: deliveryChallanId ? { deliveryChallanId } : {},
+        },
+      );
       return response.data;
     },
-    onSuccess: (newData) => {
+    onSuccess: (newData, { deliveryChallanId }) => {
       dispatch(clearCart());
       setAlert("Invoice Generated");
       let url = newData?.inv_url?.replace("http://", "https://");
       downloadInvoice(url);
+      clientQuery.invalidateQueries({
+        queryKey: ["invoices", userData?._id],
+        refetchType: "active",
+      });
+      clientQuery.invalidateQueries({
+        queryKey: ["sales", userData?._id],
+        refetchType: "active",
+      });
+
+      if (deliveryChallanId) {
+        clientQuery.invalidateQueries({
+          queryKey: ["delivery-challan", deliveryChallanId],
+          refetchType: "active",
+        });
+      }
       onClick && onClick();
     },
     onError: (error) => {
       setAlert(error?.message);
     },
-    onSettled: () => {
-      clientQuery.invalidateQueries({ queryKey: ["invoices", userData?._id] });
-      clientQuery.invalidateQueries({ queryKey: ["sales", userData?._id] });
+    onSettled: ({ deliveryChallanId }) => {
+      if (!deliveryChallanId) {
+        clientQuery.invalidateQueries({
+          queryKey: ["items", userData?._id],
+          refetchType: "active",
+        });
+      }
     },
   });
 
@@ -91,13 +116,15 @@ export function SaleForm({ onClick }) {
   }, []);
 
   const onSubmit = async (data) => {
-    if (!(cart?.length && isLoggedIn)) navigate("/login");
+    if (!isLoggedIn) navigate("/login");
 
     setAlert("");
     setIsLoading(true);
     try {
-      data.itemsInfo = cart;
-      await addInvoiceMutate.mutateAsync(data);
+      if (!deliveryChallanId) {
+        data.itemsInfo = cart;
+      }
+      await addInvoiceMutate.mutateAsync({ data, deliveryChallanId });
     } catch (error) {
       setAlert(error?.message);
     } finally {
@@ -148,12 +175,11 @@ export function SaleForm({ onClick }) {
   ) : (
     <div className="relative mx-auto w-full max-w-5xl rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-200/60 transition-all duration-300">
       {/* Error Toast - Reverted to original inline layout */}
-      {(alert ||
-        customerFetch?.isError) && (
-          <div className="mb-4 sm:mb-6 p-4 sm:p-6 pb-0 fixed">
-            <Error message={alert || customerFetch?.error?.message} />
-          </div>
-        )}
+      {(alert || customerFetch?.isError) && (
+        <div className="mb-4 sm:mb-6 p-4 sm:p-6 pb-0 fixed">
+          <Error message={alert || customerFetch?.error?.message} />
+        </div>
+      )}
 
       {/* Close Button */}
       {onClick && (

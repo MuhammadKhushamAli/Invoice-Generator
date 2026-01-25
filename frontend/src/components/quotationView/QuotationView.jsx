@@ -144,7 +144,7 @@ export function QuotationView() {
           </h4>
         </div>
 
-        {/* Button moved to the right using flex-1 and justify-end on md screens */}
+        {/* Button For DC */}
         <div className="flex w-full md:w-auto md:flex-1 md:justify-end">
           <Button
             onClick={onDCFormation}
