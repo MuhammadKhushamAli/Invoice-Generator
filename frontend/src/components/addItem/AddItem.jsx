@@ -70,13 +70,14 @@ export function AddItem({ onClick, item = null }) {
           return oldData;
         },
       );
+      clientQuery.invalidateQueries({
+        queryKey: ["items", userData?._id],
+        refetchType: "active",
+      });
       onClick();
     },
     onError: (error) => {
       setAlert(error?.message);
-    },
-    onSettled: () => {
-      clientQuery.invalidateQueries({ queryKey: ["items", userData?._id] });
     },
   });
 
@@ -118,13 +119,14 @@ export function AddItem({ onClick, item = null }) {
           return oldData;
         },
       );
+      clientQuery.invalidateQueries({
+        queryKey: ["items", userData?._id],
+        refetchType: "active",
+      });
       onClick();
     },
     onError: (error) => {
       setAlert(error?.message);
-    },
-    onSettled: () => {
-      clientQuery.invalidateQueries({ queryKey: ["items", userData?._id] });
     },
   });
 
@@ -165,13 +167,14 @@ export function AddItem({ onClick, item = null }) {
           return oldData;
         },
       );
+      clientQuery.invalidateQueries({
+        queryKey: ["items", userData?._id],
+        refetchType: "active",
+      });
       onClick();
     },
     onError: (error) => {
       setAlert(error?.message);
-    },
-    onSettled: () => {
-      clientQuery.invalidateQueries({ queryKey: ["items", userData?._id] });
     },
   });
 
