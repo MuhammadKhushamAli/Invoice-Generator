@@ -14,6 +14,7 @@ import { generatePdf } from "./utils/pdf.util.js";
 import { getInvoiceNumber } from "./utils/invoiceNum.util.js";
 import { Customer } from "../models/customer.model.js";
 import { DeliveryChallan } from "../models/deliveryChalan.model.js";
+import { Quotation } from "../models/qoutation.model.js";
 
 const { toWords } = pkg;
 
@@ -143,8 +144,6 @@ export const addSale = asyncHandler(async (req, res) => {
       },
       {
         session,
-      },
-      {
         new: true,
       }
     );
@@ -291,10 +290,7 @@ export const addSale = asyncHandler(async (req, res) => {
           invoices: invoice?._id,
         },
       },
-      { session },
-      {
-        new: true,
-      }
+      { session, new: true }
     );
     if (!updatedCustomer) throw new ApiError(500, "Unable to Update Customer");
 
@@ -359,30 +355,24 @@ export const addSale = asyncHandler(async (req, res) => {
             saleInvoice: sale?._id,
           },
         },
-        { session },
-        {
-          new: true,
-        }
+        { session, new: true }
       );
       if (!updateDeliveryChalan)
         throw new ApiError(500, "Unable to Update Delivery Chalan");
       // Quotation Updated
-      updatedQuotation = await Quotation.findByIdAndUpdate(
-        quotationId,
+      updatedQuotation = await Quotation.findOneAndUpdate(
+        {
+          deliveryChalan: deliveryChallanId,
+        },
         {
           $set: {
             saleInvoice: sale?._id,
           },
         },
-        { session },
-        {
-          new: true,
-        }
+        { session, new: true }
       );
-      if (!updatedQuotation)
-        throw new ApiError(500, "Unable to Created Updated Quotation");
     }
-
+    console.log(updatedQuotation);
     // Sale Updated
     const updatedSale = await Sale.findByIdAndUpdate(
       sale?._id,
@@ -393,10 +383,7 @@ export const addSale = asyncHandler(async (req, res) => {
           },
         },
       },
-      { session },
-      {
-        new: true,
-      }
+      { session, new: true }
     );
     if (!updatedSale) throw new ApiError(500, "Unable to Created Updated Sale");
 
@@ -410,10 +397,7 @@ export const addSale = asyncHandler(async (req, res) => {
           quotation: updatedQuotation?._id,
         },
       },
-      { session },
-      {
-        new: true,
-      }
+      { session, new: true }
     );
     if (!updateInv) throw new ApiError(500, "Invoice Not Updated");
 
@@ -431,10 +415,7 @@ export const addSale = asyncHandler(async (req, res) => {
           customers: customer?._id,
         },
       },
-      { session },
-      {
-        new: true,
-      }
+      { session, new: true }
     );
     if (!updatedUser) throw new ApiError(500, "Unable to update the user");
 

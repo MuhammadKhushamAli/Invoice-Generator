@@ -107,8 +107,6 @@ export const addDeliveryChalan = asyncHandler(async (req, res) => {
       },
       {
         session,
-      },
-      {
         new: true,
       }
     );
@@ -159,7 +157,7 @@ export const addDeliveryChalan = asyncHandler(async (req, res) => {
           }
         );
         if (!updateItem) throw new ApiError(500, "Item Update Failed");
-        totalQty+=parseInt(item?.quantity);
+        totalQty += parseInt(item?.quantity);
       })
     );
 
@@ -240,10 +238,7 @@ export const addDeliveryChalan = asyncHandler(async (req, res) => {
           deliveryChalan: deliveryChallan?._id,
         },
       },
-      { session },
-      {
-        new: true,
-      }
+      { session, new: true }
     );
     if (!updatedCustomer) throw new ApiError(500, "Unable to Update Customer");
 
@@ -257,21 +252,22 @@ export const addDeliveryChalan = asyncHandler(async (req, res) => {
           },
         },
       },
-      { session },
-      {
-        new: true,
-      }
+      { session, new: true }
     );
     if (!updatedDeliveryChallan)
       throw new ApiError(500, "Unable to Created Updated Quotation");
 
     // Quotation Updated
     if (quotationId) {
-      const updatedQuotation = await Quotation.findByIdAndUpdate(quotationId, {
-        $set: {
-          deliveryChalan: deliveryChallan?._id,
+      const updatedQuotation = await Quotation.findByIdAndUpdate(
+        quotationId,
+        {
+          $set: {
+            deliveryChalan: deliveryChallan?._id,
+          },
         },
-      });
+        { session, new: true }
+      );
       if (!updatedQuotation)
         throw new ApiError(500, "Unable to Update Quotation");
     }
@@ -289,10 +285,7 @@ export const addDeliveryChalan = asyncHandler(async (req, res) => {
           customers: customer?._id,
         },
       },
-      { session },
-      {
-        new: true,
-      }
+      { session, new: true }
     );
     if (!updatedUser) throw new ApiError(500, "Unable to update the user");
 

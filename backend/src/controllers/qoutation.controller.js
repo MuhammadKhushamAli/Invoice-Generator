@@ -80,10 +80,8 @@ export const addQuotation = asyncHandler(async (req, res) => {
       },
       {
         session,
-      },
-      {
         new: true,
-      }
+      },
     );
     if (!customer) {
       customer = (
@@ -206,10 +204,7 @@ export const addQuotation = asyncHandler(async (req, res) => {
           quotations: quotation?._id,
         },
       },
-      { session },
-      {
-        new: true,
-      }
+      { session, new: true},
     );
     if (!updatedCustomer) throw new ApiError(500, "Unable to Update Customer");
 
@@ -223,10 +218,7 @@ export const addQuotation = asyncHandler(async (req, res) => {
           },
         },
       },
-      { session },
-      {
-        new: true,
-      }
+      { session, new: true},
     );
     if (!updatedQuotation)
       throw new ApiError(500, "Unable to Created Updated Quotation");
@@ -244,10 +236,7 @@ export const addQuotation = asyncHandler(async (req, res) => {
           customers: customer?._id,
         },
       },
-      { session },
-      {
-        new: true,
-      }
+      { session, new: true},
     );
     if (!updatedUser) throw new ApiError(500, "Unable to update the user");
 
