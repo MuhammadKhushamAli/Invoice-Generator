@@ -37,11 +37,6 @@ export function NavBar() {
         isVisible: isLoggedIn,
       },
       {
-        name: "Invoices",
-        path: "/invoices",
-        isVisible: isLoggedIn,
-      },
-      {
         name: "Quotation",
         path: "/quotations",
         isVisible: isLoggedIn,
@@ -49,6 +44,11 @@ export function NavBar() {
       {
         name: "Delivery Challan",
         path: "/delivery-challans",
+        isVisible: isLoggedIn,
+      },
+      {
+        name: "Invoices",
+        path: "/invoices",
         isVisible: isLoggedIn,
       },
       {
