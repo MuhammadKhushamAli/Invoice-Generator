@@ -22,7 +22,8 @@ export function CartItem({ item, onDelete }) {
           </h3>
           <div className="mt-1 flex items-center gap-3 text-sm text-slate-500">
             <h5 className="font-medium text-slate-700">
-              ${item?.price}{" / Item "}
+              ${item?.price}
+              {" / Item "}
               {/* Added $ for formatting, remove if handled in data */}
             </h5>
             <span className="h-1 w-1 rounded-full bg-slate-300"></span>{" "}
@@ -36,10 +37,9 @@ export function CartItem({ item, onDelete }) {
       <div>
         <Button
           onClick={() => onDelete(item)}
-          className="bg-white! p-2! text-red-500 shadow-none ring-1 ring-slate-200 hover:bg-red-50! hover:text-red-600 hover:ring-red-200"
-        >
-          <Trash2 className="h-5 w-5" />
-        </Button>
+          className="h-9 w-9 rounded-full! bg-white/90! p-0! text-slate-500! shadow-sm backdrop-blur hover:bg-indigo-50! hover:text-indigo-600! flex items-center justify-center! [&_svg]:mr-0!"
+          Icon={Trash2}
+        />
       </div>
     </div>
   );

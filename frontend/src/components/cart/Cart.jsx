@@ -7,9 +7,12 @@ import { Button } from "../Button.jsx";
 import { ShoppingCart, ArrowRight, PackageX, X } from "lucide-react";
 import { removeItem } from "../../features/itemCart/itemSlice.js";
 import { Selection } from "../selection/Selection.jsx";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function Cart({ onClick }) {
+  const clientQuery = useQueryClient();
   const isLoggedIn = useSelector((state) => state?.auth?.loginStatus);
+  const userData = useSelector((state) => state?.auth?.userData);
 
   const cart = useSelector((state) => state?.itemsCart?.cart);
   const dispatch = useDispatch();

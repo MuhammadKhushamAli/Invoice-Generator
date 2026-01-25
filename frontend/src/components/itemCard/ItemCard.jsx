@@ -21,6 +21,12 @@ export function ItemCard({ item }) {
   const dispatch = useDispatch();
   const [isAddToCart, setIsAddToCart] = useState(false);
   const [quantity, setQuantity] = useState(0);
+  const remainingQuantity = useSelector((state) => {
+    const itemInCart = state?.itemsCart?.cart?.find(
+      (cartItem) => cartItem?._id === item?._id,
+    );
+    return itemInCart ? item?.quantity - itemInCart?.quantity : item?.quantity;
+  });
   const { register, handleSubmit, reset } = useForm();
   const [alert, setAlert] = useState("");
   const navigate = useNavigate();
@@ -30,22 +36,18 @@ export function ItemCard({ item }) {
     if (!isLoggedIn) {
       navigate("/login");
     } else {
-      setQuantity(item?.quantity);
+      setQuantity(remainingQuantity);
     }
-  }, []);
+  }, [item?.quantity, isLoggedIn, navigate, remainingQuantity]);
 
   const onSubmit = useCallback(
     (data) => {
       setIsAddToCart(false);
       reset();
-      if (isLoggedIn && data?.quantity <= item?.quantity) {
+      if (isLoggedIn && data?.quantity <= remainingQuantity) {
         const itemToBeAdded = { ...item };
         itemToBeAdded.quantity = data?.quantity;
         itemToBeAdded.price = data?.price;
-        let itemToBeAddedQuantity = parseInt(data?.quantity);
-        let orignalItemsQuantity = parseInt(item?.quantity);
-        orignalItemsQuantity -= itemToBeAddedQuantity;
-        item.quantity = orignalItemsQuantity;
         dispatch(addItem({ item: itemToBeAdded }));
       } else if (!isLoggedIn) {
         setAlert("Login Required");
@@ -53,7 +55,7 @@ export function ItemCard({ item }) {
         setAlert("Desired Quantity is not Available");
       }
     },
-    [dispatch],
+    [dispatch, item, isLoggedIn, reset, remainingQuantity],
   );
 
   return (
@@ -80,11 +82,10 @@ export function ItemCard({ item }) {
       <div className="absolute top-3 right-3 z-10 transition-opacity duration-200 group-hover:opacity-100">
         <Button
           onClick={() => setIsEdit(true)}
-          className="h-8 w-8 rounded-full bg-white/90 p-0 pl-2 text-slate-500 shadow-sm backdrop-blur hover:bg-indigo-50 hover:text-indigo-600"
+          className="h-9 w-9 rounded-full! bg-white/90! p-0! text-slate-500! shadow-sm backdrop-blur hover:bg-indigo-50! hover:text-indigo-600! flex items-center justify-center! [&_svg]:mr-0!"
           title="Edit Item"
           Icon={Edit2}
-        >
-        </Button>
+        />
       </div>
 
       {/* Image Section */}
@@ -133,15 +134,17 @@ export function ItemCard({ item }) {
                     placeholder="1"
                     autoFocus
                     min={0}
-                    max={item?.quantity}
+                    max={quantity}
+                    disabled={remainingQuantity <= 0}
                     className="bg-white h-9 text-sm focus:ring-indigo-500/20 focus:border-indigo-500"
                     {...register("quantity", {
                       required: true,
                       validate: (value) =>
-                        (value >= 0 && value <= item?.quantity) || "Invalid",
+                        (value >= 0 && value <= remainingQuantity) ||
+                        "Invalid Quantity",
                       onChange: (e) => {
                         const val = parseInt(e.target.value) || 0;
-                        let remaining = item?.quantity - val;
+                        let remaining = remainingQuantity - val;
                         if (remaining < 0) remaining = 0;
                         setQuantity(remaining);
                       },
@@ -156,11 +159,11 @@ export function ItemCard({ item }) {
                     type="number"
                     placeholder={item?.price}
                     min={0}
-                    disabled={quantity < 0}
+                    disabled={remainingQuantity <= 0}
                     className="bg-white h-9 text-sm focus:ring-indigo-500/20 focus:border-indigo-500"
                     {...register("price", {
                       required: true,
-                      validate: (value) => value >= 0 || "Invalid",
+                      validate: (value) => value >= 0 || "Invalid Price",
                     })}
                   />
                 </div>
@@ -179,19 +182,21 @@ export function ItemCard({ item }) {
         )}
 
         {/* Toggle Action Button */}
-        <div className="mt-auto pt-2">
-          <Button
-            onClick={() => setIsAddToCart((prev) => !prev)}
-            className={`h-10 w-full justify-center text-sm font-medium transition-colors ${
-              isAddToCart
-                ? "border border-red-100 bg-white text-red-600 hover:bg-red-50 hover:border-red-200"
-                : "bg-indigo-50 text-indigo-700 hover:bg-indigo-100 hover:text-indigo-800"
-            }`}
-            Icon={isAddToCart ? X : ShoppingCart}
-          >
-            {isAddToCart ? "Cancel" : "Add to Cart"}
-          </Button>
-        </div>
+        {remainingQuantity > 0 ? (
+          <div className="mt-auto pt-2">
+            <Button
+              onClick={() => setIsAddToCart((prev) => !prev)}
+              className={`h-10 w-full justify-center text-sm font-medium transition-colors ${
+                isAddToCart
+                  ? "border border-red-100 bg-white text-red-600 hover:bg-red-50 hover:border-red-200"
+                  : "bg-indigo-50 text-indigo-700 hover:bg-indigo-100 hover:text-indigo-800"
+              }`}
+              Icon={isAddToCart ? X : ShoppingCart}
+            >
+              {isAddToCart ? "Cancel" : "Add to Cart"}
+            </Button>
+          </div>
+        ) : null}
       </div>
     </div>
   );

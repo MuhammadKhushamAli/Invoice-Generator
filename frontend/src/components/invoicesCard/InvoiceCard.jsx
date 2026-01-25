@@ -22,9 +22,14 @@ export function InvoiceCard({ invoice }) {
           </div>
 
           {/* Invoice Name */}
+          <div className="flex flex-col">
           <h3 className="text-base font-semibold text-slate-900 line-clamp-2">
             {invoice?.name}
           </h3>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-500 mt-0.5">
+            Sale Tax Invoice
+          </span>
+          </div>
         </div>
 
         {/* Footer Section: Date */}
