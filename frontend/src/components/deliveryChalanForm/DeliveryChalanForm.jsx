@@ -23,7 +23,7 @@ import { useNavigate } from "react-router";
 import { clearCart } from "../../features/itemCart/itemSlice.js";
 import { useMutation } from "@tanstack/react-query";
 
-export function DeliveryChalanForm({ onClick, quotaionId = null }) {
+export function DeliveryChalanForm({ onClick, quotationId = null }) {
   const userData = useSelector((state) => state?.auth?.userData);
   const isLoggedIn = useSelector((state) => state?.auth?.loginStatus);
   const cart = useSelector((state) => state?.itemsCart?.cart);
@@ -77,10 +77,13 @@ export function DeliveryChalanForm({ onClick, quotaionId = null }) {
   );
 
   const addDeliveryChallanMutate = useMutation({
-    mutationFn: async (data) => {
+    mutationFn: async ({ data, quotationId }) => {
       const response = await axiosInstance.post(
         "/api/v1/deliveryChalan/add-delivery-chalan",
         data,
+        {
+          params: quotationId ? { quotationId } : {},
+        },
       );
       return response.data;
     },
@@ -105,13 +108,15 @@ export function DeliveryChalanForm({ onClick, quotaionId = null }) {
   });
 
   const onSubmit = async (data) => {
-    if (!(cart?.length && isLoggedIn)) navigate("/login");
+    if (!isLoggedIn) navigate("/login");
 
     setAlert("");
     setIsLoading(true);
     try {
-      data.itemsInfo = cart;
-      await addDeliveryChallanMutate.mutateAsync(data);
+      if (!quotationId) {
+        data.itemsInfo = cart;
+      }
+      await addDeliveryChallanMutate.mutateAsync({ data, quotationId });
     } catch (error) {
       setAlert(error?.message);
     } finally {

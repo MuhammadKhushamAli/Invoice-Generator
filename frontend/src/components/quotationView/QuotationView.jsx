@@ -116,7 +116,7 @@ export function QuotationView() {
           <div className="w-full max-w-5xl">
             <DeliveryChalanForm
               onClick={() => setIsDCFormed(false)}
-              quotaionId={quotation?._id}
+              quotationId={quotation?._id}
             />
           </div>
         </div>

@@ -134,7 +134,7 @@ export function ItemCard({ item }) {
                     placeholder="1"
                     autoFocus
                     min={0}
-                    max={quantity}
+                    max={remainingQuantity}
                     disabled={remainingQuantity <= 0}
                     className="bg-white h-9 text-sm focus:ring-indigo-500/20 focus:border-indigo-500"
                     {...register("quantity", {
