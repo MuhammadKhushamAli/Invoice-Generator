@@ -316,7 +316,7 @@ export const deliveryChalanView = asyncHandler(async (req, res) => {
 
   const deliveryChalan = await DeliveryChallan.findOne({
     $and: [{ _id: deliveryChalanId }, { owner: req?.user?._id }],
-  }).select("-owner -itemSold");
+  }).select("-owner -itemSold -quotation");
   if (!deliveryChalan) throw new ApiError(404, "Delivery Chalan not Found");
 
   return res

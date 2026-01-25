@@ -267,7 +267,7 @@ export const quotationView = asyncHandler(async (req, res) => {
 
   const quotation = await Quotation.findOne({
     $and: [{ _id: quotationId }, { owner: req?.user?._id }],
-  }).select("-owner -itemSold");
+  }).select("-owner -itemSold -saleInvoice");
   if (!quotation) throw new ApiError(404, "Quotation not Found");
 
   return res
