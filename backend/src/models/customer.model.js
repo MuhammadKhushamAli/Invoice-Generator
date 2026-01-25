@@ -5,8 +5,6 @@ const customerSchema = new mongoose.Schema({
     type: String,
     required: [true, "Customer Name is required"],
     trim: true,
-    index: true,
-    unique: [true, "Customer Name Must be Unique"],
   },
   customerLandmark: {
     type: String,
@@ -66,5 +64,10 @@ const customerSchema = new mongoose.Schema({
     },
   ],
 });
+
+customerSchema.index(
+  { customerName: 1, owner: 1 },
+  { unique: true }
+);
 
 export const Customer = mongoose.model("Customer", customerSchema);

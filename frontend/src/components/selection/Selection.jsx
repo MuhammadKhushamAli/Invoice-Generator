@@ -4,11 +4,22 @@ import { QuotationForm } from "../quotationForm/QuotationForm.jsx";
 import { SaleForm } from "../saleForm/SaleForm.jsx";
 import { useState } from "react";
 import { FileText, Truck, ClipboardList, X } from "lucide-react";
+import { useSelector } from "react-redux";
+import { useEffect } from "react";
+import { useNavigate } from "react-router";
 
 export function Selection({ onClick }) {
   const [isSaleForm, setIsSaleForm] = useState(false);
   const [isDeliveryForm, setIsDeliveryForm] = useState(false);
   const [isQuotationForm, setIsQuotationForm] = useState(false);
+  const cart = useSelector((state) => state?.itemsCart?.cart);
+  const isLoggedIn = useSelector((state) => state?.auth?.loginStatus);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isLoggedIn) navigate("/login");
+    if (cart.length === 0) onClick();
+  }, [isLoggedIn, cart]);
 
   if (isSaleForm) {
     return <SaleForm onClick={() => setIsSaleForm(false)} />;
