@@ -9,8 +9,9 @@ import {
   DeliveryInvoiceCard,
 } from "../components/index.js";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { Truck } from "lucide-react";
 
-export function ItemPage() {
+export function DeliveryChallanPage() {
   const isLoggedIn = useSelector((state) => state?.auth?.loginStatus);
   const userData = useSelector((state) => state?.auth?.userData);
   const navigate = useNavigate();
@@ -75,6 +76,7 @@ export function ItemPage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [fetchNextPage]);
 
+  console.log(data);
   const deliveryChallans = useMemo(
     () =>
       data?.pages?.flatMap((page) => page?.docs?.[0]?.deliveryChallans) || [],
@@ -123,7 +125,7 @@ export function ItemPage() {
         {deliveryChallans?.map((deliveryChallan) => (
           <DeliveryInvoiceCard
             key={deliveryChallan?._id}
-            quotation={deliveryChallan}
+            delviveryChallan={deliveryChallan}
           />
         ))}
 

@@ -5,7 +5,7 @@ import { axiosInstance } from "../../axios/axios.js";
 import { Button } from "../Button.jsx";
 import { Loading } from "../Loading.jsx";
 import { Error } from "../Error.jsx";
-import { Download } from "lucide-react";
+import { Download, Truck } from "lucide-react";
 
 import { Document, Page, pdfjs } from "react-pdf";
 import { useQuery } from "@tanstack/react-query";
@@ -18,7 +18,7 @@ const pdfOptions = {
   standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts/`,
 };
 
-export function InvoiceView() {
+export function DeliveryChallanView() {
   const { deliveryChallanId } = useParams();
   const [pages, setPages] = useState(0);
   const [pdfWidth, setPdfWidth] = useState(null);

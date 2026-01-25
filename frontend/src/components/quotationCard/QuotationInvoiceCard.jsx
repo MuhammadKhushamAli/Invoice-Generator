@@ -1,16 +1,15 @@
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router";
-import { Truck, Calendar } from "lucide-react";
+import { ClipboardList, Calendar } from "lucide-react";
 
-export function DeliveryInvoiceCard({ quotationInvoice }) {
+export function QuotationInvoiceCard({ quotationInvoice }) {
   const navigate = useNavigate();
   const isLoggedIn = useSelector((state) => state?.auth?.loginStatus);
 
   useEffect(() => {
     if (!isLoggedIn) navigate("/login");
   });
-
   return (
     <Link to={`/quotation/${quotationInvoice?._id}`}>
       <div className="group flex cursor-pointer flex-col justify-between rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-indigo-300 hover:shadow-md hover:shadow-indigo-500/10">

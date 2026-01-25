@@ -5,7 +5,7 @@ import { axiosInstance } from "../../axios/axios.js";
 import { Button } from "../Button.jsx";
 import { Loading } from "../Loading.jsx";
 import { Error } from "../Error.jsx";
-import { Download } from "lucide-react";
+import { Download, ClipboardList } from "lucide-react";
 import { Document, Page, pdfjs } from "react-pdf";
 import { useQuery } from "@tanstack/react-query";
 
@@ -17,7 +17,7 @@ const pdfOptions = {
   standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts/`,
 };
 
-export function InvoiceView() {
+export function QuotationView() {
   const { quotationId } = useParams();
   const [pages, setPages] = useState(0);
   const [pdfWidth, setPdfWidth] = useState(null);
@@ -30,7 +30,7 @@ export function InvoiceView() {
     queryKey: ["view-quotation", quotationId],
     queryFn: async () => {
       const quotationResponse = await axiosInstance.get(
-        `/api/v1/quotation/add-quotation/${quotationId}`,
+        `/api/v1/quotation/view-quotation/${quotationId}`,
       );
       return quotationResponse?.data;
     },
@@ -74,7 +74,7 @@ export function InvoiceView() {
 
       return;
     }
-    if (deliveryChallan?.url.includes("cloudinary")) {
+    if (quotation?.url.includes("cloudinary")) {
       const url = quotation?.url?.replace(
         "/upload/",
         `/upload/fl_attachment:${userData?.businessName}-${quotation?.name}/`,

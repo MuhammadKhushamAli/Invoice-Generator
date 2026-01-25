@@ -707,7 +707,7 @@ export const getDeliveryChalans = asyncHandler(async (req, res) => {
     },
     {
       $lookup: {
-        from: "DeliveryChalan",
+        from: "deliverychalans",
         localField: "deliveryChallan",
         foreignField: "_id",
         as: "deliveryChallans",

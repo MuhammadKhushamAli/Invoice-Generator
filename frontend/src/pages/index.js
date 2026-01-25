@@ -5,6 +5,10 @@ import { ItemPage } from "./ItemPage.jsx";
 import { LoginPage } from "./LoginPage.jsx";
 import { RegisterPage } from "./RegisterPage.jsx";
 import { SalesPage } from "./SalesPage.jsx";
+import { DeliveryChallanPage } from "./DeliveryChallanPage.jsx";
+import { DeliveryChallanViewPage } from "./DeliveryChallanViewPage.jsx";
+import { QuotationViewPage } from "./QuotationViewPage.jsx";
+import { QuotationPage } from "./QuotationPage.jsx";
 
 export {
   HomePage,
@@ -14,4 +18,8 @@ export {
   LoginPage,
   RegisterPage,
   SalesPage,
+  DeliveryChallanPage,
+  DeliveryChallanViewPage,
+  QuotationViewPage,
+  QuotationPage,
 };

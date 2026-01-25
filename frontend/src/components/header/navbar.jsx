@@ -42,6 +42,16 @@ export function NavBar() {
         isVisible: isLoggedIn,
       },
       {
+        name: "Quotation",
+        path: "/quotations",
+        isVisible: isLoggedIn,
+      },
+      {
+        name: "Delivery Challan",
+        path: "/delivery-challans",
+        isVisible: isLoggedIn,
+      },
+      {
         name: "Register",
         path: "/register",
         isVisible: !isLoggedIn,

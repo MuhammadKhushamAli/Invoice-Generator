@@ -14,11 +14,12 @@ import {
   ItemPage,
   SalesPage,
   InvoiceViewPage,
+  DeliveryChallanViewPage,
+  DeliveryChallanPage,
+  QuotationPage,
+  QuotationViewPage,
 } from "./pages";
-import {
-  QueryClient,
-  QueryClientProvider,
-} from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const router = createBrowserRouter([
   {
@@ -74,10 +75,42 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: "/delivery-challans",
+        element: (
+          <AuthLayout isAuthRequired={true}>
+            <DeliveryChallanPage />
+          </AuthLayout>
+        ),
+      },
+      {
+        path: "/quotations",
+        element: (
+          <AuthLayout isAuthRequired={true}>
+            <QuotationPage />
+          </AuthLayout>
+        ),
+      },
+      {
         path: "/invoice/:invoiceId",
         element: (
           <AuthLayout isAuthRequired={true}>
             <InvoiceViewPage />
+          </AuthLayout>
+        ),
+      },
+      {
+        path: "/delivery-challan/:deliveryChallanId",
+        element: (
+          <AuthLayout isAuthRequired={true}>
+            <DeliveryChallanViewPage />
+          </AuthLayout>
+        ),
+      },
+      {
+        path: "/quotation/:quotationId",
+        element: (
+          <AuthLayout isAuthRequired={true}>
+            <QuotationViewPage />
           </AuthLayout>
         ),
       },

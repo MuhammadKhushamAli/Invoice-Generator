@@ -9,15 +9,18 @@ import { Register } from "./register/Register.jsx";
 import { Login } from "./login/Login.jsx";
 import { Loading } from "./Loading.jsx";
 import { Error } from "./Error.jsx";
-import { QuotationCard } from "./quotationCard/QuotationInvoiceCard.jsx";
+import { QuotationInvoiceCard } from "./quotationCard/QuotationInvoiceCard.jsx";
 import { DeliveryInvoiceCard } from "./deliveryInvoiceCard/DeliveryInvoiceCard.jsx";
+import { QuotationView } from "./quotationView/QuotationView.jsx";
+import { DeliveryChallanView } from "./deliveryChallanView/DeliveryChallanView.jsx";
+
 
 export {
   Container,
   NavBar,
   InvoiceCredentials,
   InvoiceCard,
-  QuotationCard,
+  QuotationInvoiceCard,
   DeliveryInvoiceCard,
   InvoiceView,
   ItemCard,
@@ -26,4 +29,6 @@ export {
   Login,
   Loading,
   Error,
+  QuotationView,
+  DeliveryChallanView
 };

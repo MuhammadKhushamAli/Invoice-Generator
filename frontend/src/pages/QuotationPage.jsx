@@ -5,12 +5,13 @@ import { useNavigate } from "react-router";
 import {
   Container,
   Error,
-  QuotationCard,
+  QuotationInvoiceCard,
   Loading,
 } from "../components/index.js";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { ClipboardList, FileText } from "lucide-react";
 
-export function ItemPage() {
+export function QuotationPage() {
   const isLoggedIn = useSelector((state) => state?.auth?.loginStatus);
   const userData = useSelector((state) => state?.auth?.userData);
   const navigate = useNavigate();
@@ -79,7 +80,6 @@ export function ItemPage() {
     () => data?.pages?.flatMap((page) => page?.docs?.[0]?.quotations) || [],
     [data],
   );
-
   return isLoading ? (
     <Loading />
   ) : (
@@ -120,7 +120,7 @@ export function ItemPage() {
       {/* Product Grid Layout */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {quotations?.map((quotation) => (
-          <QuotationCard key={quotation?._id} quotation={quotation} />
+          <QuotationInvoiceCard key={quotation?._id} quotationInvoice={quotation} />
         ))}
 
         {/* Loading State for Pagination */}
