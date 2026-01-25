@@ -249,7 +249,7 @@ export const login = asyncHandler(async (req, res) => {
   const options = {
     httpOnly: true,
     secure: true,
-    sameSite: "Lax",
+    sameSite: "None",
   };
 
   return res
@@ -296,7 +296,7 @@ export const refreshTokens = asyncHandler(async (req, res) => {
   const options = {
     httpOnly: true,
     secure: true,
-    sameSite: "Lax",
+    sameSite: "None",
   };
   res
     .status(200)
@@ -324,7 +324,7 @@ export const logout = asyncHandler(async (req, res) => {
   const options = {
     httpOnly: true,
     secure: true,
-    sameSite: "Lax",
+    sameSite: "None",
   };
   res
     .status(200)
