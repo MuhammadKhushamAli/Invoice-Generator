@@ -83,8 +83,8 @@ export const addSale = asyncHandler(async (req, res) => {
     if (!itemsSoldIds?.length)
       throw new ApiError(404, "No Items Found in DeliveryChallan");
 
-    await Promise.all(
-      (itemsInfo = itemsSoldIds?.map(async (item) => {
+    itemsInfo = await Promise.all(
+      itemsSoldIds?.map(async (item) => {
         const itemRecoded = await ItemsSold.findById(item).select("-sale");
         if (!itemRecoded) throw new ApiError(404, "Item Not Found");
 
@@ -94,7 +94,7 @@ export const addSale = asyncHandler(async (req, res) => {
         itemFound.quantity = itemRecoded?.quantity;
         itemFound.price = itemRecoded?.price;
         return itemFound;
-      }))
+      })
     );
   }
 
