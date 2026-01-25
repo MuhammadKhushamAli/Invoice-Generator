@@ -8,7 +8,6 @@ const userSchema = new mongoose.Schema(
     userName: {
       type: String,
       required: [true, "User Name is required"],
-      index: true,
       unique: [true, "User Name Must be Unique"],
       trim: true,
       lowercase: true,
@@ -36,6 +35,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Email is required"],
       unique: [true, "Email Must be Unique"],
+      index: true,
       trim: true,
       lowercase: [true, "Email Must be Lowercase"],
     },
