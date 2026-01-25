@@ -95,12 +95,14 @@ export function DeliveryChalanForm({ onClick, quotationId = null }) {
       onClick && onClick();
       clientQuery.invalidateQueries({
         queryKey: ["deliveryChallans", userData?._id],
+        refetchType: "active",
       });
 
       if(quotationId)
       {
         clientQuery.invalidateQueries({
           queryKey: ["view-quotation", quotationId],
+          refetchType: "active",
         });
       }
 
@@ -111,6 +113,7 @@ export function DeliveryChalanForm({ onClick, quotationId = null }) {
     onSettled: () => {
       clientQuery.invalidateQueries({
         queryKey: ["items", userData?._id],
+        refetchType: "active",
       });
     },
   });
