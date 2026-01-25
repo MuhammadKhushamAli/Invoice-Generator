@@ -102,7 +102,7 @@ export function DeliveryChallanView() {
       if (!deliveryChallan?.saleInvoice) {
         setIsSaleFormed(true);
       } else {
-        navigate(`/delivery-challan/${deliveryChallan?.saleInvoice}`);
+        navigate(`/invoice/${deliveryChallan?.saleInvoice}`);
       }
     }, [deliveryChallan?.saleInvoice]);
 

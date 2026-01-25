@@ -89,6 +89,10 @@ export function SaleForm({ onClick, deliveryChallanId = null }) {
         queryKey: ["sales", userData?._id],
         refetchType: "active",
       });
+      clientQuery.invalidateQueries({
+        queryKey: ["customers", userData?._id],
+        refetchType: "active",
+      });
 
       if (deliveryChallanId) {
         clientQuery.invalidateQueries({

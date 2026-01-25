@@ -188,7 +188,7 @@ export function ItemCard({ item }) {
               onClick={() => setIsAddToCart((prev) => !prev)}
               className={`h-10 w-full justify-center text-sm font-medium transition-colors ${
                 isAddToCart
-                  ? "border border-red-100 bg-white text-red-600 hover:bg-red-50 hover:border-red-200"
+                  ? "border border-red-100 bg-red-600 text-white hover:bg-red-500 hover:border-red-200"
                   : "bg-indigo-50 text-indigo-700 hover:bg-indigo-100 hover:text-indigo-800"
               }`}
               Icon={isAddToCart ? X : ShoppingCart}

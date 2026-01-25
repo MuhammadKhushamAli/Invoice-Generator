@@ -23,7 +23,6 @@ import { useNavigate } from "react-router";
 import { clearCart } from "../../features/itemCart/itemSlice.js";
 import { useMutation } from "@tanstack/react-query";
 
-
 export function QuotationForm({ onClick }) {
   const userData = useSelector((state) => state?.auth?.userData);
   const isLoggedIn = useSelector((state) => state?.auth?.loginStatus);
@@ -79,7 +78,10 @@ export function QuotationForm({ onClick }) {
 
   const addQuotationMutate = useMutation({
     mutationFn: async (data) => {
-      const response = await axiosInstance.post("/api/v1/quotation/add-quotation", data);
+      const response = await axiosInstance.post(
+        "/api/v1/quotation/add-quotation",
+        data,
+      );
       return response.data;
     },
     onSuccess: (newData) => {
@@ -87,6 +89,16 @@ export function QuotationForm({ onClick }) {
       setAlert("Delivery Challan Generated");
       let url = newData?.inv_url?.replace("http://", "https://");
       downloadInvoice(url);
+
+      clientQuery.invalidateQueries({
+        queryKey: ["quotations", userData?._id],
+        refetchType: "active",
+      });
+      clientQuery.invalidateQueries({
+        queryKey: ["customers", userData?._id],
+        refetchType: "active",
+      });
+
       onClick && onClick();
     },
     onError: (error) => {
@@ -94,15 +106,13 @@ export function QuotationForm({ onClick }) {
     },
     onSettled: () => {
       clientQuery.invalidateQueries({
-        queryKey: ["quotations", userData?._id],
-      });
-      clientQuery.invalidateQueries({
         queryKey: ["items", userData?._id],
+        refetchType: "active",
       });
     },
   });
 
-   const onSubmit = async (data) => {
+  const onSubmit = async (data) => {
     if (!(cart?.length && isLoggedIn)) navigate("/login");
 
     setAlert("");

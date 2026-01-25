@@ -97,6 +97,11 @@ export function DeliveryChalanForm({ onClick, quotationId = null }) {
         queryKey: ["deliveryChallans", userData?._id],
         refetchType: "active",
       });
+      
+      clientQuery.invalidateQueries({
+        queryKey: ["customers", userData?._id],
+        refetchType: "active",
+      });
 
       if(quotationId)
       {

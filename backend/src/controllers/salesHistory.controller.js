@@ -352,7 +352,7 @@ export const addSale = asyncHandler(async (req, res) => {
         deliveryChallanId,
         {
           $set: {
-            saleInvoice: sale?._id,
+            saleInvoice: invoice?._id,
           },
         },
         { session, new: true }
@@ -372,7 +372,6 @@ export const addSale = asyncHandler(async (req, res) => {
         { session, new: true }
       );
     }
-    console.log(updatedQuotation);
     // Sale Updated
     const updatedSale = await Sale.findByIdAndUpdate(
       sale?._id,
