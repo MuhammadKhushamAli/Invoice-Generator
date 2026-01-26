@@ -111,6 +111,7 @@ export function AddItem({ onClick, item = null }) {
                     item.range = newData?.range;
                     item.design = newData?.design;
                     item.image = newData?.image;
+                    item.reference = newData?.reference;
                   }
                   return item;
                 }),
@@ -159,6 +160,7 @@ export function AddItem({ onClick, item = null }) {
                     item.quantity = newData?.quantity;
                     item.range = newData?.range;
                     item.design = newData?.design;
+                    item.reference = newData?.reference;
                   }
                   return item;
                 }),
@@ -185,6 +187,7 @@ export function AddItem({ onClick, item = null }) {
       quantity: item ? item?.quantity : "",
       range: item ? item?.range : "",
       design: item ? item?.design : "",
+      reference: item ? item?.reference : "",
     },
   });
 
