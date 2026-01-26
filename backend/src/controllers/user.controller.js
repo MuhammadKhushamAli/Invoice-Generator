@@ -503,6 +503,7 @@ export const getItems = asyncHandler(async (req, res) => {
               image: 1,
               range: 1,
               design: 1,
+              reference: 1,
             },
           },
         ],

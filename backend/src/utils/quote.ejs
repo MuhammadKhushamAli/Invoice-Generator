@@ -294,7 +294,7 @@
                             <%= invoice_no %>
                         </span></div>
                     <div class="info-row"><span class="info-label">Customer ID:</span> <span>
-                            <%= customer_id || "N/A" %>
+                            <%= customer_id || "" %>
                         </span></div>
                 </div>
                 <div class="info-column">
@@ -345,10 +345,10 @@
                             <%= item.name %>
                         </td>
                         <td>
-                            <%= item.range || "Wooden" %>
+                            <%= item.range || "" %>
                         </td>
                         <td>
-                            <%= item.reference || "SS" %>
+                            <%= item.reference || "" %>
                         </td>
                         <td>
                             <%= item.quantity %>
