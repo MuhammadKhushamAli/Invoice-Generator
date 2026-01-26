@@ -336,7 +336,7 @@ export function AddItem({ onClick, item = null }) {
 
           <Input
             type="number"
-            label="Price:"
+            label="Price (Expected To Sale):"
             placeholder="123"
             disabled={
               addItemMutate.isLoading ||
