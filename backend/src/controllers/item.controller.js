@@ -11,11 +11,11 @@ import { User } from "../models/user.model.js";
 import mongoose from "mongoose";
 
 export const addItem = asyncHandler(async (req, res) => {
-  let { name, price, quantity, range, design } = req?.body;
+  let { name, price, quantity, range, design, reference } = req?.body;
   const image = req?.file?.path;
 
   if (
-    [name, price, quantity, image, range, design].some(
+    [name, price, quantity, image, range, design, reference].some(
       (field) => !field || field?.trim() === ""
     )
   )
@@ -25,6 +25,7 @@ export const addItem = asyncHandler(async (req, res) => {
     name = name?.trim();
     range = range?.trim();
     design = design?.trim();
+    reference = reference?.trim();
     price = parseInt(price);
     quantity = parseInt(quantity);
     
@@ -53,6 +54,7 @@ export const addItem = asyncHandler(async (req, res) => {
             quantity,
             range,
             design,
+            reference,
             image: imageUrl?.url,
             owner: req?.user?._id,
           },
@@ -98,11 +100,11 @@ export const addItem = asyncHandler(async (req, res) => {
 });
 
 export const updateItem = asyncHandler(async (req, res) => {
-  let { name, price, quantity, range, design, url } = req?.body;
+  let { name, price, quantity, range, design, reference, url } = req?.body;
   const image = req?.file?.path;
   const { itemId } = req?.params;
   if (
-    [name, range, design, itemId].some(
+    [name, range, design,reference, itemId].some(
       (field) => !field || field?.trim() === ""
     )
   )
@@ -113,6 +115,7 @@ export const updateItem = asyncHandler(async (req, res) => {
   name = name?.trim();
   range = range?.trim();
   design = design?.trim();
+  reference = reference?.trim();
   price = parseInt(price);
   quantity = parseInt(quantity);
   url = url?.trim();
@@ -140,6 +143,7 @@ export const updateItem = asyncHandler(async (req, res) => {
           quantity,
           range,
           design,
+          reference,
           ...(imageUrl && { image: imageUrl?.url }),
         },
       }

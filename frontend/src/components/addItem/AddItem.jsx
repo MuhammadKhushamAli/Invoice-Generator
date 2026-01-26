@@ -390,6 +390,19 @@ export function AddItem({ onClick, item = null }) {
             Icon={Palette}
             {...register("design", { required: true })}
           />
+
+          <Input
+            type="text"
+            label="Reference:"
+            placeholder="XYZ"
+            disabled={
+              addItemMutate.isLoading ||
+              updateItemWithImageMutate.isLoading ||
+              updateItemWithoutImageMutate.isLoading
+            }
+            Icon={Palette}
+            {...register("reference", { required: true })}
+          />
         </div>
 
         {/* Image Processing Section */}
