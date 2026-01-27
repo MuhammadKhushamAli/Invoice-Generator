@@ -267,9 +267,9 @@
                 <tr>
                     <th style="width: 5%;">Sr #</th>
                     <th style="width: 35%;">Descriptions</th>
-                    <th style="width: 12%;">Range</th>
                     <th style="width: 13%;">Reference</th>
                     <th style="width: 15%;">Design</th>
+                    <th style="width: 12%;">Unit</th>
                     <th style="width: 10%;">QTY</th>
                 </tr>
             </thead>
@@ -283,13 +283,13 @@
                             <%= item.name %>
                         </td>
                         <td style="text-align: center;">
-                            <%= item.range || "Wooden" %>
-                        </td>
-                        <td style="text-align: center;">
                             <%= item.ref || item.reference || "" %>
                         </td>
                         <td style="text-align: center;">
-                            <%= item.design || "As Approved" %>
+                            <%= item.design || "" %>
+                        </td>
+                        <td style="text-align: center;">
+                            <%= item.unit || "" %>
                         </td>
                         <td style="text-align: center; font-weight: bold;">
                             <%= item.quantity %>

@@ -504,6 +504,7 @@ export const getItems = asyncHandler(async (req, res) => {
               range: 1,
               design: 1,
               reference: 1,
+              unit: 1,
             },
           },
         ],
@@ -687,7 +688,11 @@ export const getQuotations = asyncHandler(async (req, res) => {
   res
     .status(200)
     .json(
-      new ApiResponse(200, "Successfully Fetched Quotations", paginatedQuotations)
+      new ApiResponse(
+        200,
+        "Successfully Fetched Quotations",
+        paginatedQuotations
+      )
     );
 });
 
@@ -729,20 +734,28 @@ export const getDeliveryChalans = asyncHandler(async (req, res) => {
       },
     },
   ]);
-  if (!deliveryChallans) throw new ApiError(500, "Unable to Fetch Delivery Challans");
+  if (!deliveryChallans)
+    throw new ApiError(500, "Unable to Fetch Delivery Challans");
 
   const options = {
     page,
     limit: 10,
   };
 
-  const paginatedDeliveryChallans = await User.aggregatePaginate(deliveryChallans, options);
+  const paginatedDeliveryChallans = await User.aggregatePaginate(
+    deliveryChallans,
+    options
+  );
   if (!paginatedDeliveryChallans)
     throw new ApiError(500, "Unable to Paginate Delivery Challans");
 
   res
     .status(200)
     .json(
-      new ApiResponse(200, "Successfully Fetched Delivery Challans", paginatedDeliveryChallans)
+      new ApiResponse(
+        200,
+        "Successfully Fetched Delivery Challans",
+        paginatedDeliveryChallans
+      )
     );
 });

@@ -11,11 +11,11 @@ import { User } from "../models/user.model.js";
 import mongoose from "mongoose";
 
 export const addItem = asyncHandler(async (req, res) => {
-  let { name, price, quantity, range, design, reference } = req?.body;
+  let { name, price, quantity, range, design, reference, unit } = req?.body;
   const image = req?.file?.path;
 
   if (
-    [name, price, quantity, image, range, design, reference].some(
+    [name, price, quantity, image, range, design, reference, unit].some(
       (field) => !field || field?.trim() === ""
     )
   )
@@ -28,6 +28,7 @@ export const addItem = asyncHandler(async (req, res) => {
     reference = reference?.trim();
     price = parseInt(price);
     quantity = parseInt(quantity);
+    unit = unit?.trim();
     
   if (price <= 0 || quantity <= 0)
     throw new ApiError(400, "Price and Quantity Must be Greater than Zero");
@@ -55,6 +56,7 @@ export const addItem = asyncHandler(async (req, res) => {
             range,
             design,
             reference,
+            unit,
             image: imageUrl?.url,
             owner: req?.user?._id,
           },
@@ -100,7 +102,7 @@ export const addItem = asyncHandler(async (req, res) => {
 });
 
 export const updateItem = asyncHandler(async (req, res) => {
-  let { name, price, quantity, range, design, reference, url } = req?.body;
+  let { name, price, quantity, range, design, reference, unit, url } = req?.body;
   const image = req?.file?.path;
   const { itemId } = req?.params;
   if (
@@ -116,6 +118,7 @@ export const updateItem = asyncHandler(async (req, res) => {
   range = range?.trim();
   design = design?.trim();
   reference = reference?.trim();
+  unit = unit?.trim();
   price = parseInt(price);
   quantity = parseInt(quantity);
   url = url?.trim();
@@ -144,6 +147,7 @@ export const updateItem = asyncHandler(async (req, res) => {
           range,
           design,
           reference,
+          unit,
           ...(imageUrl && { image: imageUrl?.url }),
         },
       }

@@ -22,17 +22,22 @@ const itemSchema = new mongoose.Schema({
   range: {
     type: String,
     trim: true,
-    required: [true, "Range is Required"]
+    required: [true, "Range is Required"],
   },
   design: {
     type: String,
     trim: true,
-    required: [true, "Design is Required"]
+    required: [true, "Design is Required"],
   },
   reference: {
     type: String,
     trim: true,
-    required: [true, "Reference is Required"]
+    required: [true, "Reference is Required"],
+  },
+  unit: {
+    type: String,
+    trim: true,
+    required: [true, "Unit is Required"],
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
