@@ -88,6 +88,7 @@ export const addSale = asyncHandler(async (req, res) => {
       itemsSoldIds?.map(async (item) => {
         const itemRecoded = await ItemsSold.findById(item).select("-sale");
         if (!itemRecoded) throw new ApiError(404, "Item Not Found");
+        
 
         const itemFound = await Item.findById(itemRecoded?.item);
         if (!itemFound) throw new ApiError(404, "Item Not Found");
@@ -182,6 +183,13 @@ export const addSale = asyncHandler(async (req, res) => {
           owner: req?.user?._id,
         }).session(session);
         if (!itemFound) throw new ApiError(404, "Item Not Found");
+
+        item.name = itemFound?.name;
+        item.range = itemFound?.range;
+        item.design = itemFound?.design;
+        item.reference = itemFound?.reference;
+        item.unit = itemFound?.unit;
+
         if (!(deliveryChallanId && itemsSoldIds)) {
           if (!itemFound?.isQuantityValid(item?.quantity))
             throw new ApiError(400, "Invalid Quantity");

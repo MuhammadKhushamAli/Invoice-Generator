@@ -143,6 +143,12 @@ export const addDeliveryChalan = asyncHandler(async (req, res) => {
           owner: req?.user?._id,
         }).session(session);
         if (!itemFound) throw new ApiError(404, "Item Not Found");
+
+        item.name = itemFound?.name;
+        item.range = itemFound?.range;
+        item.design = itemFound?.design;
+        item.reference = itemFound?.reference;
+        item.unit = itemFound?.unit;
         if (!itemFound?.isQuantityValid(item?.quantity))
           throw new ApiError(400, "Invalid Quantity");
         const updateItem = await Item.findByIdAndUpdate(
