@@ -188,6 +188,7 @@ export function AddItem({ onClick, item = null }) {
       range: item ? item?.range : "",
       design: item ? item?.design : "",
       reference: item ? item?.reference : "",
+      unit: item ? item?.unit : "",
     },
   });
 
