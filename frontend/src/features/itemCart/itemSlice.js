@@ -11,16 +11,16 @@ const itemSlice = createSlice({
     addItem: (state, action) => {
       const itemToBeAdded = action?.payload?.item;
       const index = state?.cart?.findIndex(
-        (item) => item?._id === itemToBeAdded?._id
+        (item) => item?._id === itemToBeAdded?._id,
       );
       if (index === -1) {
         state?.cart?.push(itemToBeAdded);
       } else {
         if (state.cart[index].price === itemToBeAdded?.price) {
           const incomingQuantity = parseInt(itemToBeAdded?.quantity);
-          console.log(incomingQuantity)
+          console.log(incomingQuantity);
           const orignalQuantity = parseInt(state.cart[index].quantity);
-          console.log(orignalQuantity)
+          console.log(orignalQuantity);
           state.cart[index].quantity = incomingQuantity + orignalQuantity;
         } else {
           state.cart.push(itemToBeAdded);
@@ -28,10 +28,17 @@ const itemSlice = createSlice({
       }
     },
     removeItem: (state, action) => {
-      const itemToBeAdded = action?.payload?.item;
-      state.cart = state?.cart?.filter(
-        (item) => item?._id !== itemToBeAdded?._id
-      );
+      const itemToBeRemoved = action?.payload?.item;
+      console.log(itemToBeRemoved);
+      state.cart = state?.cart?.filter((item) => {
+        if (item?._id === itemToBeRemoved?._id)
+          if (
+            item?.price === itemToBeRemoved?.price &&
+            item?.quantity === itemToBeRemoved?.quantity
+          )
+            return false;
+        return true;
+      });
     },
     clearCart: (state) => {
       state.cart = [];
