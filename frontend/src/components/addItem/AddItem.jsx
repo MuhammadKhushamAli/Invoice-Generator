@@ -295,10 +295,10 @@ export function AddItem({ onClick, item = null }) {
       {/* Header */}
       <div className="mb-6 border-b border-slate-200 pb-4">
         <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-          Add New Item
+          {item ? "Edit Item" : "Add New Item"}
         </h1>
         <p className="mt-1 text-sm text-slate-500">
-          Enter product details and upload an image.
+          {item ? "Enter product details or upload an image." : "Enter product details and upload an image."}
         </p>
       </div>
 
