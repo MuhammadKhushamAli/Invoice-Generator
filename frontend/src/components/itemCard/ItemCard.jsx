@@ -6,14 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import { addItem } from "../../features/itemCart/itemSlice.js";
 import { Error } from "../Error.jsx";
 import { useNavigate } from "react-router";
-import {
-  DollarSign,
-  Package,
-  X,
-  ShoppingCart,
-  Plus,
-  Edit2,
-} from "lucide-react";
+import { Banknote, Package, X, ShoppingCart, Plus, Edit2 } from "lucide-react";
 import { AddItem } from "../addItem/AddItem.jsx";
 
 export function ItemCard({ item }) {
@@ -117,8 +110,8 @@ export function ItemCard({ item }) {
 
         {/* Price & Quantity Info */}
         <div className="mb-4 flex items-center justify-between">
-          <p className="flex items-center gap-1 text-lg font-bold text-slate-900">
-            <DollarSign className="h-4 w-4 text-indigo-600" />
+          <p className="flex items-center gap-2 text-lg font-bold text-slate-900">
+            <Banknote className="h-4 w-4 text-indigo-600" />
             {item?.price}
           </p>
           <div className="flex items-center gap-1.5 rounded-full bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-500">
