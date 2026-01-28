@@ -71,7 +71,6 @@ export function InvoiceCredentials({ onClick = null }) {
           formData
         );
         if (response?.status === 200) {
-          console.log(response);
           dispatch(login({ userData: response?.data }));
           setAlert(response?.message);
           onClick ? onClick() : navigate("/");

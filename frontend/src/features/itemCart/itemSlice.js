@@ -18,9 +18,7 @@ const itemSlice = createSlice({
       } else {
         if (state.cart[index].price === itemToBeAdded?.price) {
           const incomingQuantity = parseInt(itemToBeAdded?.quantity);
-          console.log(incomingQuantity);
           const orignalQuantity = parseInt(state.cart[index].quantity);
-          console.log(orignalQuantity);
           state.cart[index].quantity = incomingQuantity + orignalQuantity;
         } else {
           state.cart.push(itemToBeAdded);
@@ -29,7 +27,6 @@ const itemSlice = createSlice({
     },
     removeItem: (state, action) => {
       const itemToBeRemoved = action?.payload?.item;
-      console.log(itemToBeRemoved);
       state.cart = state?.cart?.filter((item) => {
         if (item?._id === itemToBeRemoved?._id)
           if (

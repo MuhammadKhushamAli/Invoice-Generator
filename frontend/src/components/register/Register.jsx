@@ -60,7 +60,6 @@ export function Register() {
           "/api/v1/user/register-user",
           data,
         );
-        console.log(response);
         if (response.status === 200) {
           const logInResponse = await axiosInstance.patch(
             "/api/v1/user/login",
