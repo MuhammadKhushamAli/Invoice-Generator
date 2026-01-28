@@ -11,7 +11,7 @@ export function SaleLog({ sale }) {
             Total Amount
           </p>
           <div className="mt-1 flex flex-row items-center text-xl font-bold text-slate-900">
-            <Banknote className="mr-2 h-5 w-5 text-indigo-600" />
+            <Banknote className="mr-2 h-5 w-5 text-indigo-600 translate-y-px" />
             {sale?.price}
           </div>
         </div>

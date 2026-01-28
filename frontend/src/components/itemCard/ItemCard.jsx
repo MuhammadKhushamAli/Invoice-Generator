@@ -111,7 +111,7 @@ export function ItemCard({ item }) {
         {/* Price & Quantity Info */}
         <div className="mb-4 flex items-center justify-between">
           <p className="flex items-center gap-2 text-lg font-bold text-slate-900">
-            <Banknote className="h-4 w-4 text-indigo-600" />
+            <Banknote className="h-5 w-5 text-indigo-600 translate-y-px" />
             {item?.price}
           </p>
           <div className="flex items-center gap-1.5 rounded-full bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-500">
