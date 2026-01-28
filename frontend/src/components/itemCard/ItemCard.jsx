@@ -22,10 +22,17 @@ export function ItemCard({ item }) {
   const [isAddToCart, setIsAddToCart] = useState(false);
   const [quantity, setQuantity] = useState(0);
   const remainingQuantity = useSelector((state) => {
-    const itemInCart = state?.itemsCart?.cart?.find(
-      (cartItem) => cartItem?._id === item?._id,
-    );
-    return itemInCart ? item?.quantity - itemInCart?.quantity : item?.quantity;
+    const commutativeSum = state?.itemsCart?.cart.reduce(
+      (commutativeSumOfEach, itemInCart) => {
+        if (itemInCart?._id === item?._id) {
+          return parseInt(commutativeSumOfEach) + parseInt(itemInCart?.quantity);
+        }
+        return parseInt(commutativeSumOfEach);
+      }, 0
+    ) ?? 0;
+    return commutativeSum > 0
+      ? item?.quantity - commutativeSum
+      : item?.quantity;
   });
   const { register, handleSubmit, reset } = useForm();
   const [alert, setAlert] = useState("");
