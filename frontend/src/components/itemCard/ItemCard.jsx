@@ -20,16 +20,17 @@ export function ItemCard({ item }) {
   const isLoggedIn = useSelector((state) => state?.auth?.loginStatus);
   const dispatch = useDispatch();
   const [isAddToCart, setIsAddToCart] = useState(false);
-  const [quantity, setQuantity] = useState(0);
+  const [remainingCurrentQuantity, setRemainingCurrentQuantity] = useState(0);
   const remainingQuantity = useSelector((state) => {
-    const commutativeSum = state?.itemsCart?.cart.reduce(
-      (commutativeSumOfEach, itemInCart) => {
+    const commutativeSum =
+      state?.itemsCart?.cart.reduce((commutativeSumOfEach, itemInCart) => {
         if (itemInCart?._id === item?._id) {
-          return parseInt(commutativeSumOfEach) + parseInt(itemInCart?.quantity);
+          return (
+            parseInt(commutativeSumOfEach) + parseInt(itemInCart?.quantity)
+          );
         }
         return parseInt(commutativeSumOfEach);
-      }, 0
-    ) ?? 0;
+      }, 0) ?? 0;
     return commutativeSum > 0
       ? item?.quantity - commutativeSum
       : item?.quantity;
@@ -43,7 +44,7 @@ export function ItemCard({ item }) {
     if (!isLoggedIn) {
       navigate("/login");
     } else {
-      setQuantity(remainingQuantity);
+      setRemainingCurrentQuantity(remainingQuantity);
     }
   }, [item?.quantity, isLoggedIn, navigate, remainingQuantity]);
 
@@ -122,7 +123,7 @@ export function ItemCard({ item }) {
           </p>
           <div className="flex items-center gap-1.5 rounded-full bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-500">
             <Package className="h-3.5 w-3.5" />
-            <span>Qty: {quantity}</span>
+            <span>Qty: {remainingCurrentQuantity}</span>
           </div>
         </div>
 
@@ -140,7 +141,7 @@ export function ItemCard({ item }) {
                     type="number"
                     placeholder="1"
                     autoFocus
-                    min={0}
+                    min={1}
                     max={remainingQuantity}
                     disabled={remainingQuantity <= 0}
                     className="bg-white h-9 text-sm focus:ring-indigo-500/20 focus:border-indigo-500"
@@ -151,9 +152,7 @@ export function ItemCard({ item }) {
                         "Invalid Quantity",
                       onChange: (e) => {
                         const val = parseInt(e.target.value) || 0;
-                        let remaining = remainingQuantity - val;
-                        if (remaining < 0) remaining = 0;
-                        setQuantity(remaining);
+                        setRemainingCurrentQuantity(remainingQuantity - val);
                       },
                     })}
                   />
@@ -166,7 +165,7 @@ export function ItemCard({ item }) {
                     type="number"
                     placeholder={item?.price}
                     min={0}
-                    disabled={remainingQuantity <= 0}
+                    disabled={remainingCurrentQuantity < 0}
                     className="bg-white h-9 text-sm focus:ring-indigo-500/20 focus:border-indigo-500"
                     {...register("price", {
                       required: true,
