@@ -61,7 +61,7 @@ export function Register() {
           data,
         );
         if (response.status === 200) {
-          const logInResponse = await axiosInstance.patch(
+          const logInResponse = await axiosInstance.post(
             "/api/v1/user/login",
             {
               email: data.email,
