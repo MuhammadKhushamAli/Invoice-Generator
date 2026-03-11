@@ -24,6 +24,7 @@ export const addDeliveryChalan = asyncHandler(async (req, res) => {
     customerCountry,
     poNo,
     poDate,
+    challanDate,
   } = req?.body;
 
   const { quotationId } = req?.query;
@@ -36,6 +37,7 @@ export const addDeliveryChalan = asyncHandler(async (req, res) => {
   customerCountry = customerCountry?.trim();
   poNo = poNo?.trim();
   poDate = poDate?.trim();
+  challanDate = challanDate?.trim();
 
   let itemsSoldIds = null;
 
@@ -66,7 +68,6 @@ export const addDeliveryChalan = asyncHandler(async (req, res) => {
       })
     );
   }
-
   if (
     !(
       Array.isArray(itemsInfo) &&
@@ -79,6 +80,7 @@ export const addDeliveryChalan = asyncHandler(async (req, res) => {
         customerCountry,
         poNo,
         poDate,
+        challanDate,
       ].some((field) => !field || field?.trim() === "")
     )
   )
@@ -184,7 +186,6 @@ export const addDeliveryChalan = asyncHandler(async (req, res) => {
       tele_no: user?.phone_no,
       website: user?.website,
       challan_no: await getInvoiceNumber(user?._id, "DeliveryChalan"),
-      challan_date: new Date().toLocaleDateString("en-us"),
       customer_name: customerName,
       customer_landmark: customerLandmark,
       customer_street: customerStreet,
@@ -195,6 +196,7 @@ export const addDeliveryChalan = asyncHandler(async (req, res) => {
       total_qty: totalQty || 0,
       po_no: poNo,
       po_date: new Date(poDate).toLocaleDateString("en-us"),
+      challan_date: new Date(challanDate).toLocaleDateString("en-us"),
     };
 
     fileUrl = await generatePdf(

@@ -314,6 +314,16 @@ export function DeliveryChalanForm({ onClick, quotationId = null }) {
                 })}
               />
             </div>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 items-end">
+              <Input
+                type="date"
+                label="Challan Date"
+                Icon={Calendar}
+                {...register("challanDate", {
+                  required: true,
+                })}
+              />
+            </div>
           </section>
 
           {/* ---------------- FOOTER ACTION ---------------- */}

@@ -36,6 +36,7 @@ export const addSale = asyncHandler(async (req, res) => {
     discount,
     freightOtherCharges,
     po,
+    challanDate,
   } = req?.body;
 
   const { deliveryChallanId } = req?.query;
@@ -55,6 +56,7 @@ export const addSale = asyncHandler(async (req, res) => {
   discount = discount?.trim();
   freightOtherCharges = freightOtherCharges?.trim();
   po = po?.trim();
+  challanDate = challanDate?.trim();
 
   salesTaxRate = parseFloat(salesTaxRate);
   specialExciseRate = parseFloat(specialExciseRate);
@@ -115,6 +117,7 @@ export const addSale = asyncHandler(async (req, res) => {
         customerGST,
         customerNTN,
         po,
+        challanDate,
       ].some((field) => !field || field?.trim() === "")
     )
   )
@@ -244,7 +247,7 @@ export const addSale = asyncHandler(async (req, res) => {
       your_NTN: user?.ntn_no,
       website: user?.website,
       invoice_no: await getInvoiceNumber(user?._id, "Invoice"),
-      date: new Date().toLocaleDateString("en-us"),
+      date: new Date(challanDate).toLocaleDateString("en-us"),
       hs_code: hsCode,
       Attn_to: AttnTo,
       customer_name: customerName,

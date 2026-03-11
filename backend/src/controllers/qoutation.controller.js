@@ -26,6 +26,7 @@ export const addQuotation = asyncHandler(async (req, res) => {
     customerCountry,
     salesTaxRate,
     validUntil,
+    quotationDate,
   } = req?.body;
 
   customerName = customerName?.trim();
@@ -36,6 +37,8 @@ export const addQuotation = asyncHandler(async (req, res) => {
   customerCountry = customerCountry?.trim();
   salesTaxRate = salesTaxRate?.trim();
   validUntil = validUntil?.trim();
+  quotationDate = quotationDate?.trim();
+
 
   salesTaxRate = parseInt(salesTaxRate);
 
@@ -52,6 +55,7 @@ export const addQuotation = asyncHandler(async (req, res) => {
         customerCity,
         customerCountry,
         validUntil,
+        quotationDate,
       ].some((field) => !field || field?.trim() === "")
     )
   )
@@ -154,7 +158,7 @@ export const addQuotation = asyncHandler(async (req, res) => {
       tele_no: user?.phone_no,
       website: user?.website,
       invoice_no: await getInvoiceNumber(user?._id, "Quotation"),
-      date: new Date().toLocaleDateString("en-us"),
+      date: new Date(quotationDate).toLocaleDateString("en-us"),
       valid_until_date: new Date(validUntil).toLocaleDateString("en-us"),
       customer_id: customer?._id.toString(),
       customer_name: customerName,

@@ -19,6 +19,7 @@ import {
   CheckCircle,
   X,
   Scissors,
+  Calendar,
 } from "lucide-react";
 import { clearCart } from "../../features/itemCart/itemSlice.js";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -407,6 +408,26 @@ export function SaleForm({ onClick, deliveryChallanId = null }) {
                 {...register("freightOtherCharges", {
                   required: true,
                   validate: (value) => /^\d+$/.test(value) || "Must be Numbers",
+                })}
+              />
+            </div>
+          </section>
+          {/* ---------------- SECTION 4: CHALLAN DETAILS ---------------- */}
+          <section className="space-y-6">
+            <div className="flex items-center gap-2 text-indigo-600">
+              <Calendar className="h-5 w-5" />
+              <h3 className="text-lg font-bold text-slate-800">
+                Challan Dates
+              </h3>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 items-end">
+              <Input
+                type="date"
+                label="Challan Date"
+                Icon={Calendar}
+                {...register("challanDate", {
+                  required: true,
                 })}
               />
             </div>

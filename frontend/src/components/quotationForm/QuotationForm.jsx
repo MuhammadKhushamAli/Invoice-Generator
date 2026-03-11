@@ -306,12 +306,19 @@ export function QuotationForm({ onClick }) {
 
               <Input
                 type="date"
+                label="Challan Date"
+                Icon={Calendar} // Ensure Calendar is imported from lucide-react
+                {...register("quotationDate", {
+                  required: true,
+                })}
+              />
+
+              <Input
+                type="date"
                 label="Valid Until"
                 Icon={Calendar} // Ensure Calendar is imported from lucide-react
                 {...register("validUntil", {
                   required: true,
-                  validate: (value) =>
-                    new Date(value).getTime() >= Date.now() || "Invalid Date",
                 })}
               />
             </div>
