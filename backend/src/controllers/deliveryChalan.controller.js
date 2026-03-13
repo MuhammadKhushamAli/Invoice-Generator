@@ -195,8 +195,8 @@ export const addDeliveryChalan = asyncHandler(async (req, res) => {
       items: itemsInfo,
       total_qty: totalQty || 0,
       po_no: poNo,
-      po_date: new Date(poDate).toLocaleDateString("en-us"),
-      challan_date: new Date(challanDate).toLocaleDateString("en-us"),
+      po_date: new Date(poDate).toLocaleDateString("en-GB"),
+      challan_date: new Date(challanDate).toLocaleDateString("en-GB"),
     };
 
     fileUrl = await generatePdf(

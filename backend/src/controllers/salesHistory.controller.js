@@ -247,7 +247,7 @@ export const addSale = asyncHandler(async (req, res) => {
       your_NTN: user?.ntn_no,
       website: user?.website,
       invoice_no: await getInvoiceNumber(user?._id, "Invoice"),
-      date: new Date(challanDate).toLocaleDateString("en-us"),
+      date: new Date(challanDate).toLocaleDateString("en-GB"),
       hs_code: hsCode,
       Attn_to: AttnTo,
       customer_name: customerName,
