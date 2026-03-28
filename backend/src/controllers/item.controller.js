@@ -26,7 +26,7 @@ export const addItem = asyncHandler(async (req, res) => {
     range = range?.trim();
     design = design?.trim();
     reference = reference?.trim();
-    price = parseInt(price);
+    price = parseFloat(price);
     quantity = parseInt(quantity);
     unit = unit?.trim();
     
@@ -119,7 +119,7 @@ export const updateItem = asyncHandler(async (req, res) => {
   design = design?.trim();
   reference = reference?.trim();
   unit = unit?.trim();
-  price = parseInt(price);
+  price = parseFloat(price);
   quantity = parseInt(quantity);
   url = url?.trim();
 

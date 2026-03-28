@@ -158,6 +158,7 @@ export function ItemCard({ item }) {
                     type="number"
                     placeholder={item?.price}
                     min={0}
+                    step="any"
                     disabled={remainingCurrentQuantity < 0}
                     className="bg-white h-9 text-sm focus:ring-indigo-500/20 focus:border-indigo-500"
                     {...register("price", {

@@ -339,6 +339,7 @@ export function AddItem({ onClick, item = null }) {
             type="number"
             label="Price (Expected To Sale):"
             placeholder="123"
+            step="any"
             disabled={
               addItemMutate.isLoading ||
               updateItemWithImageMutate.isLoading ||

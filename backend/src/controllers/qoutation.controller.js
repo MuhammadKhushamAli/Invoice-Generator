@@ -40,7 +40,7 @@ export const addQuotation = asyncHandler(async (req, res) => {
   quotationDate = quotationDate?.trim();
 
 
-  salesTaxRate = parseInt(salesTaxRate);
+  salesTaxRate = parseFloat(salesTaxRate);
 
   if (salesTaxRate < 0)
     throw new ApiError(400, "Sales Taxes fields are required");

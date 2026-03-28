@@ -290,13 +290,12 @@ export function QuotationForm({ onClick }) {
                 <Input
                   type="number"
                   label="Sales Tax Rate"
+                  step="any"
                   placeholder="0"
                   Icon={Percent}
                   min={0}
                   {...register("salesTaxRate", {
                     required: true,
-                    validate: (value) =>
-                      /^\d+$/.test(value) || "Must be Numbers",
                   })}
                 />
                 <span className="absolute right-4 bottom-2.75 text-sm font-bold text-slate-400">

@@ -356,12 +356,11 @@ export function SaleForm({ onClick, deliveryChallanId = null }) {
                   type="number"
                   label="Sales Tax Rate"
                   placeholder="0"
+                  step="any"
                   Icon={Percent}
                   min={0}
                   {...register("salesTaxRate", {
                     required: true,
-                    validate: (value) =>
-                      /^\d+$/.test(value) || "Must be Numbers",
                   })}
                 />
                 <span className="absolute right-4 bottom-2.75 text-sm font-bold text-slate-400">
@@ -374,12 +373,11 @@ export function SaleForm({ onClick, deliveryChallanId = null }) {
                   type="number"
                   label="Special Excise Rate"
                   placeholder="0"
+                  step="any"
                   Icon={Percent}
                   min={0}
                   {...register("specialExciseRate", {
                     required: true,
-                    validate: (value) =>
-                      /^\d+$/.test(value) || "Must be Numbers",
                   })}
                 />
                 <span className="absolute right-4 bottom-2.75 text-sm font-bold text-slate-400">
@@ -391,11 +389,11 @@ export function SaleForm({ onClick, deliveryChallanId = null }) {
                 type="number"
                 label="Discount"
                 placeholder="0"
+                step="any"
                 Icon={Scissors}
                 min={0}
                 {...register("discount", {
                   required: true,
-                  validate: (value) => /^\d+$/.test(value) || "Must be Numbers",
                 })}
               />
 
@@ -403,11 +401,11 @@ export function SaleForm({ onClick, deliveryChallanId = null }) {
                 type="number"
                 label="Freight Charges"
                 placeholder="0"
+                step="any"
                 min={0}
                 Icon={Truck}
                 {...register("freightOtherCharges", {
                   required: true,
-                  validate: (value) => /^\d+$/.test(value) || "Must be Numbers",
                 })}
               />
             </div>
