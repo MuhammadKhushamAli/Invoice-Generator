@@ -10,7 +10,9 @@ export function SaleLog({ sale }) {
           <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
             Total Amount
           </p>
-          <div className="mt-1 flex flex-row items-center text-xl font-bold text-slate-900">
+          <div
+            className={`mt-1 flex flex-row items-center text-xl font-bold text-slate-900 ${sale?.cancelled && "line-through"}`}
+          >
             <Banknote className="mr-2 h-5 w-5 text-indigo-600 translate-y-px" />
             {sale?.price}
           </div>
