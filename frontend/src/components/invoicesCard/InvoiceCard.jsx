@@ -27,11 +27,17 @@ export function InvoiceCard({ invoice }) {
       );
       return response.data;
     },
-    onSuccess: () => {
-      clientQuery.invalidateQueries({
-        queryKey: ["invoices", userData?._id],
-        refetchType: "active",
-      });
+    onSuccess: async () => {
+      await Promise.all([
+        clientQuery.invalidateQueries({
+          queryKey: ["invoices", userData?._id],
+          refetchType: "active",
+        }),
+        clientQuery.invalidateQueries({
+          queryKey: ["view-invoice", invoice?._id],
+          refetchType: "active",
+        }),
+      ]);
     },
   });
 
