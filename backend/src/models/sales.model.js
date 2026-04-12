@@ -18,6 +18,10 @@ const salesSchema = new mongoose.Schema(
       ref: "Invoice",
       required: [true, "Invoice is required"],
     },
+    cancelled: {
+      type: Boolean,
+      default: false,
+    },
     owner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
