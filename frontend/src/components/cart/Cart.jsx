@@ -25,7 +25,6 @@ export function Cart({ onClick }) {
 
   const onDelete = useCallback((item) => {
     try {
-      cart.filter((cartItem) => cartItem?._id !== item?._id);
       dispatch(removeItem({ item }));
     } catch (error) {
       setAlert("Unable to Delete Cart Item");
