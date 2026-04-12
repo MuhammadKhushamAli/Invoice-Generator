@@ -1,19 +1,62 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router";
-import { FileText, Calendar } from "lucide-react";
+import { FileText, Calendar, Trash2 } from "lucide-react";
+import { axiosInstance } from "../../axios/axios.js";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Button } from "../Button.jsx";
+import { Error } from "../Error.jsx";
 
 export function InvoiceCard({ invoice }) {
   const navigate = useNavigate();
+  const [alert, setAlert] = useState("");
   const isLoggedIn = useSelector((state) => state?.auth?.loginStatus);
+  const userData = useSelector((state) => state?.auth?.userData);
+  const clientQuery = useQueryClient();
 
   useEffect(() => {
     if (!isLoggedIn) navigate("/login");
   });
 
+  const onDeleteHandler = useMutation({
+    mutationFn: async (id) => {
+      const response = await axiosInstance.delete(
+        `/api/v1/user/delete-invoice/${id}`,
+      );
+      return response.data;
+    },
+    onSuccess: () => {
+      clientQuery.invalidateQueries({
+        queryKey: ["invoices", userData?._id],
+        refetchType: "active",
+      });
+    },
+  });
+
+  const onDelClickHandler = async (e) => {
+    e.preventDefault();
+    try {
+      await onDeleteHandler.mutateAsync(invoice?._id);
+    } catch (error) {
+      setAlert("Error in Deleting Invoice");
+    }
+  };
   return (
     <Link to={`/invoice/${invoice?._id}`}>
-      <div className="group flex cursor-pointer flex-col justify-between rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-indigo-300 hover:shadow-md hover:shadow-indigo-500/10">
+      {alert && (
+        <div className="absolute inset-x-0 top-0 z-50 bg-red-50 px-4 py-2 text-center text-xs font-medium text-red-600">
+          <Error message={alert} />
+        </div>
+      )}
+      <div className="group flex cursor-pointer flex-col justify-between rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-indigo-300 hover:shadow-md hover:shadow-indigo-500/10 relative">
+        {/* Trash Icon */}
+        <div>
+          <Button
+            onClick={onDelClickHandler}
+            className="h-9 w-9 rounded-full! bg-white/90! p-0! text-slate-500! shadow-sm backdrop-blur hover:bg-indigo-50! hover:text-indigo-600! flex items-center justify-center! [&_svg]:mr-0! absolute right-0 top-0 mt-1.5 mr-1.5"
+            Icon={Trash2}
+          />
+        </div>
         {/* Header Section: Icon & Name */}
         <div className="flex items-start gap-4">
           {/* Icon Box */}
@@ -23,12 +66,12 @@ export function InvoiceCard({ invoice }) {
 
           {/* Invoice Name */}
           <div className="flex flex-col">
-          <h3 className="text-base font-semibold text-slate-900 line-clamp-2">
-            {invoice?.name}
-          </h3>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-500 mt-0.5">
-            Sale Tax Invoice
-          </span>
+            <h3 className="text-base font-semibold text-slate-900 line-clamp-2">
+              {invoice?.name}
+            </h3>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-500 mt-0.5">
+              Sale Tax Invoice
+            </span>
           </div>
         </div>
 
